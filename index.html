@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>העברות מלגזנים</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+      margin: 0;
+    }
+    .logo {
+      width: 160px;
+      margin-top: 10px;
+    }
+    .hidden {
+      display: none;
+    }
+    button {
+      padding: 15px 25px;
+      font-size: 18px;
+      margin-top: 10px;
+    }
+    input {
+      padding: 10px;
+      font-size: 18px;
+      width: 200px;
+    }
+    footer {
+      position: fixed;
+      bottom: 8px;
+      width: 100%;
+      text-align: center;
+      font-size: 13px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- לוגו -->
+  <img src="logo.jpeg" alt="לוגו גילרו" class="logo">
+
+  <!-- מסך זיהוי -->
+  <div id="login-screen">
+    <h2>העברות מלגזנים</h2>
+    <p>הזן מספר טלפון כדי להיכנס:</p>
+    <input id="phoneInput" type="tel" placeholder="05XXXXXXXX">
+    <br><br>
+    <button onclick="login()">כניסה</button>
+    <p id="loginError" style="color:red;"></p>
+  </div>
+
+  <!-- מסך צילום -->
+  <div id="camera-screen" class="hidden">
+    <h2>צילום דו"חות</h2>
+    <p>לחץ על האייקון כדי לצלם</p>
+    <input id="cameraInput" type="file" accept="image/*" capture="environment" class="hidden">
+    <button onclick="openCamera()">📷</button>
+  </div>
+
+  <!-- מסך אישור -->
+  <div id="success-screen" class="hidden">
+    <h2>הועלה בהצלחה ✔</h2>
+    <button onclick="backToCamera()">צלם שוב</button>
+  </div>
+
+  <!-- זכויות יוצרים -->
+  <footer>
+    © כל הזכויות שמורות לניסים אלביליה
+  </footer>
+
+<script>
+  function login() {
+    // כאן נוסיף את בדיקת מספר הטלפון מול Google Sheet
+  }
+
+  function openCamera() {
+    document.getElementById("cameraInput").click();
+  }
+
+  function backToCamera() {
+    document.getElementById("success-screen").classList.add("hidden");
+    document.getElementById("camera-screen").classList.remove("hidden");
+  }
+</script>
+
+</body>
+</html>
