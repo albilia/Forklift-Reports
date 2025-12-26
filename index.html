@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>דוח העברות</title>
+    <title>דווחים</title>
 
     <!-- אייקון למסך הבית של האייפון -->
     <link rel="apple-touch-icon" href="logo.jpg">
@@ -35,7 +35,7 @@
         }
 
         .sub-title {
-            font-size: 20px; /* מוקטן מעט */
+            font-size: 20px;
             margin-bottom: 20px;
             color: #333;
         }
@@ -112,22 +112,27 @@
 
             document.getElementById("loader").style.display = "block";
 
-            // כאן תכניס את ה-API שלך
-            const API_URL = "https://example.com/login";
+            const API_URL = "https://script.google.com/macros/s/AKfycbwpSiWW38hQIemtLPojndms6mNld5N-k_0rVhAOxtatpo-DCPM_dZxVJJicsnNlZLBS/exec";
 
             fetch(API_URL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ phone })
+                body: JSON.stringify({
+                    action: "login",
+                    phone: phone
+                })
             })
             .then(res => res.json())
             .then(data => {
                 document.getElementById("loader").style.display = "none";
 
-                if (data.success) {
+                if (data.status === "OK") {
+                    localStorage.setItem("driverName", data.name);
                     window.location.href = "dashboard.html";
-                } else {
+                } else if (data.status === "DENIED") {
                     alert("מספר לא מזוהה");
+                } else {
+                    alert("שגיאה בשרת");
                 }
             })
             .catch(err => {
