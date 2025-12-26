@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>העברות מלגזנים</title>
 
-  <!-- התאמה למובייל ואפליקציה -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -31,7 +30,7 @@
       margin-top: 10px;
       cursor: pointer;
     }
-    input, select {
+    input {
       padding: 10px;
       font-size: 18px;
       width: 220px;
@@ -46,14 +45,45 @@
       color: #444;
       font-weight: bold;
     }
+
+    /* מסך טעינה */
+    #loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-size: 22px;
+      z-index: 9999;
+    }
+
+    .spinner {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #3498db;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
 
-  <!-- לוגו -->
   <img src="logo.jpg" alt="לוגו גילרו" class="logo">
 
-  <!-- מסך זיהוי -->
+  <!-- מסך לוגין -->
   <div id="login-screen">
     <h2>העברות מלגזנים</h2>
     <p>הזן מספר טלפון כדי להיכנס:</p>
@@ -65,44 +95,46 @@
 
   <!-- מסך צילום -->
   <div id="camera-screen" class="hidden">
-    <h2>צילום דו"חות</h2>
+    <h2>צילום דווח</h2>
     <p>לחץ על האייקון כדי לצלם</p>
 
-    <!-- מצלמה -->
     <input id="cameraInput" type="file" accept="image/*" capture="environment" class="hidden">
     <button onclick="openCamera()">📷</button>
 
-    <!-- בחירת מחסן -->
-    <h3>בחר מחסן:</h3>
-    <select id="warehouseSelect">
-      <option value="מחסן 1">מחסן 1</option>
-      <option value="מחסן 2">מחסן 2</option>
-      <option value="מחסן 3">מחסן 3</option>
-    </select>
-
-    <!-- שם מלגזן -->
     <h3>שם מלגזן:</h3>
     <input id="forkliftName" type="text" placeholder="הכנס שם">
   </div>
 
-  <!-- מסך אישור -->
+  <!-- מסך הצלחה -->
   <div id="success-screen" class="hidden">
     <h2>הועלה בהצלחה ✔</h2>
     <button onclick="backToCamera()">צלם שוב</button>
   </div>
 
-  <!-- זכויות יוצרים -->
+  <!-- מסך טעינה -->
+  <div id="loading-screen" class="hidden">
+    <div class="spinner"></div>
+    מבצע פעולה...
+  </div>
+
   <footer>
     <strong>פותח על ידי ניסים אלביליה © כל הזכויות שמורות</strong>
   </footer>
 
 <script>
 
-  // === 1. כתובת ה־API שלך ===
   const API_URL = "https://script.google.com/macros/s/AKfycbzDz9ktQAUhRbg5cF5Kfhh909CjGJW8A5fKKIG-HCZtCP5YRzAV3tInbg6kJJYn-pqr/exec";
 
-  // === 2. כניסה ===
-  function login() {
+  // === טעינת שם מלגזן מהפעם הקודמת ===
+  window.onload = function() {
+    const savedName = localStorage.getItem("forkliftName");
+    if (savedName) {
+      document.getElementById("forkliftName").value = savedName;
+    }
+  };
+
+  // === לוגין עם מסך טעינה ===
+  async function login() {
     const phone = document.getElementById("phoneInput").value.trim();
 
     if (phone.length < 9) {
@@ -110,37 +142,62 @@
       return;
     }
 
-    document.getElementById("login-screen").classList.add("hidden");
-    document.getElementById("camera-screen").classList.remove("hidden");
+    // הצגת טעינה
+    document.getElementById("loading-screen").classList.remove("hidden");
+
+    try {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "login", phone }),
+        headers: { "Content-Type": "application/json" }
+      });
+
+      const result = await response.text();
+
+      // הסתרת טעינה
+      document.getElementById("loading-screen").classList.add("hidden");
+
+      if (result === "OK") {
+        document.getElementById("login-screen").classList.add("hidden");
+        document.getElementById("camera-screen").classList.remove("hidden");
+      } else {
+        document.getElementById("loginError").innerText = "אין הרשאה למספר זה";
+      }
+
+    } catch (err) {
+      document.getElementById("loading-screen").classList.add("hidden");
+      document.getElementById("loginError").innerText = "שגיאה בחיבור לשרת";
+    }
   }
 
-  // === 3. פתיחת מצלמה ===
   function openCamera() {
     document.getElementById("cameraInput").click();
   }
 
-  // === 4. טיפול בתמונה שנבחרה ===
+  // === שליחת תמונה ===
   document.getElementById("cameraInput").addEventListener("change", async function(event) {
     const file = event.target.files[0];
     if (!file) return;
 
     const forkliftName = document.getElementById("forkliftName").value.trim();
-    const warehouse = document.getElementById("warehouseSelect").value;
 
     if (!forkliftName) {
       alert("יש להזין שם מלגזן");
       return;
     }
 
-    // המרת תמונה ל־Base64
+    // שמירת שם מלגזן לשימוש הבא
+    localStorage.setItem("forkliftName", forkliftName);
+
+    document.getElementById("loading-screen").classList.remove("hidden");
+
     const reader = new FileReader();
     reader.onload = async function() {
       const base64Image = reader.result.split(",")[1];
 
       const payload = {
         image: base64Image,
-        name: forkliftName,
-        warehouse: warehouse
+        name: forkliftName
       };
 
       try {
@@ -150,11 +207,12 @@
           headers: { "Content-Type": "application/json" }
         });
 
-        // מעבר למסך הצלחה
+        document.getElementById("loading-screen").classList.add("hidden");
         document.getElementById("camera-screen").classList.add("hidden");
         document.getElementById("success-screen").classList.remove("hidden");
 
       } catch (err) {
+        document.getElementById("loading-screen").classList.add("hidden");
         alert("שגיאה בשליחה: " + err);
       }
     };
@@ -162,7 +220,6 @@
     reader.readAsDataURL(file);
   });
 
-  // === 5. חזרה לצילום נוסף ===
   function backToCamera() {
     document.getElementById("success-screen").classList.add("hidden");
     document.getElementById("camera-screen").classList.remove("hidden");
