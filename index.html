@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>גיללה - כניסה</title>
+    <title>דוח העברות</title>
 
     <!-- אייקון למסך הבית של האייפון -->
     <link rel="apple-touch-icon" href="logo.jpg">
@@ -26,6 +26,18 @@
         .logo {
             width: 120px;
             margin-bottom: 20px;
+        }
+
+        .main-title {
+            font-size: 26px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .sub-title {
+            font-size: 20px; /* מוקטן מעט */
+            margin-bottom: 20px;
+            color: #333;
         }
 
         input {
@@ -73,7 +85,8 @@
     <div class="container">
         <img src="logo.jpg" class="logo" alt="לוגו">
 
-        <h2>הזן מספר טלפון כדי להיכנס</h2>
+        <div class="main-title">העברת דווחים</div>
+        <div class="sub-title">הזן מספר טלפון כדי להיכנס</div>
 
         <input id="phone" type="tel" placeholder="05XXXXXXXX">
 
