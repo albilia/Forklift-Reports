@@ -1,239 +1,113 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>העברות מלגזנים</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>גיללה - כניסה</title>
 
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- תגית META חדשה שמכריחה את GitHub לרענן גרסה -->
-  <meta name="update-version" content="v43">
-
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <link rel="apple-touch-icon" href="gilro-logo.png">
-  <link rel="manifest" href="manifest.json">
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
-      margin: 0;
-    }
-    .logo {
-      width: 160px;
-      margin-top: 10px;
-    }
-    .hidden {
-      display: none;
-    }
-    button {
-      padding: 15px 25px;
-      font-size: 18px;
-      margin-top: 10px;
-      cursor: pointer;
-    }
-    input {
-      padding: 10px;
-      font-size: 18px;
-      width: 220px;
-      margin-top: 10px;
-    }
-    footer {
-      position: fixed;
-      bottom: 25px;
-      width: 100%;
-      text-align: center;
-      font-size: 15px;
-      color: #444;
-      font-weight: bold;
-    }
-
-    /* מסך טעינה */
-    #loading-screen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.6);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      color: white;
-      font-size: 22px;
-      z-index: 9999;
-    }
-
-    .spinner {
-      border: 6px solid #f3f3f3;
-      border-top: 6px solid #3498db;
-      border-radius: 50%;
-      width: 60px;
-      height: 60px;
-      animation: spin 1s linear infinite;
-      margin-bottom: 20px;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  </style>
-</head>
-<body>
-
-  <img src="logo.jpg" alt="לוגו גילרו" class="logo">
-
-  <!-- מסך לוגין -->
-  <div id="login-screen">
-    <h2>העברות מלגזנים</h2>
-    <p>הזן מספר טלפון כדי להיכנס:</p>
-    <input id="phoneInput" type="tel" placeholder="05XXXXXXXX">
-    <br><br>
-    <button onclick="login()">כניסה</button>
-    <p id="loginError" style="color:red;"></p>
-  </div>
-
-  <!-- מסך צילום -->
-  <div id="camera-screen" class="hidden">
-    <h2>צילום דווח</h2>
-    <p>לחץ על האייקון כדי לצלם</p>
-
-    <input id="cameraInput" type="file" accept="image/*" capture="environment" class="hidden">
-    <button onclick="openCamera()">📷</button>
-
-    <h3>שם מלגזן:</h3>
-    <input id="forkliftName" type="text" placeholder="הכנס שם">
-  </div>
-
-  <!-- מסך הצלחה -->
-  <div id="success-screen" class="hidden">
-    <h2>הועלה בהצלחה ✔</h2>
-    <button onclick="backToCamera()">צלם שוב</button>
-  </div>
-
-  <!-- מסך טעינה -->
-  <div id="loading-screen" class="hidden">
-    <div class="spinner"></div>
-    מבצע פעולה...
-  </div>
-
-  <footer>
-    <strong>פותח על ידי ניסים אלביליה © כל הזכויות שמורות</strong>
-  </footer>
-
-<script>
-
-  const API_URL = "https://script.google.com/macros/s/AKfycbwpSiWW38hQIemtLPojndms6mNld5N-k_0rVhAOxtatpo-DCPM_dZxVJJicsnNlZLBS/exec";
-
-  // === טעינת שם מלגזן מהפעם הקודמת ===
-  window.onload = function() {
-    const savedName = localStorage.getItem("forkliftName");
-    if (savedName) {
-      document.getElementById("forkliftName").value = savedName;
-    }
-  };
-
-  // === לוגין עם מסך טעינה ===
-  async function login() {
-    const phone = document.getElementById("phoneInput").value.trim();
-
-    if (phone.length < 9) {
-      document.getElementById("loginError").innerText = "מספר לא תקין";
-      return;
-    }
-
-    document.getElementById("loading-screen").classList.remove("hidden");
-
-    try {
-      const response = await fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify({ action: "login", phone }),
-        headers: { "Content-Type": "application/json" }
-      });
-
-      const result = await response.json(); // ← חשוב!
-
-      document.getElementById("loading-screen").classList.add("hidden");
-
-      if (result.status === "OK") {
-
-        if (result.name) {
-          document.getElementById("forkliftName").value = result.name;
-          localStorage.setItem("forkliftName", result.name);
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            text-align: center;
         }
 
-        document.getElementById("login-screen").classList.add("hidden");
-        document.getElementById("camera-screen").classList.remove("hidden");
+        .container {
+            margin-top: 60px;
+        }
 
-      } else {
-        document.getElementById("loginError").innerText = "אין הרשאה למספר זה";
-      }
+        .logo {
+            width: 120px;
+            margin-bottom: 20px;
+        }
 
-    } catch (err) {
-      document.getElementById("loading-screen").classList.add("hidden");
-      document.getElementById("loginError").innerText = "שגיאה בחיבור לשרת";
-    }
-  }
+        input {
+            width: 220px;
+            padding: 12px;
+            font-size: 18px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            margin-bottom: 15px;
+            text-align: center;
+        }
 
-  function openCamera() {
-    document.getElementById("cameraInput").click();
-  }
+        button {
+            width: 240px;
+            padding: 12px;
+            font-size: 18px;
+            background: #d32f2f;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
 
-  // === שליחת תמונה ===
-  document.getElementById("cameraInput").addEventListener("change", async function(event) {
-    const file = event.target.files[0];
-    if (!file) return;
+        button:hover {
+            background: #b71c1c;
+        }
 
-    const forkliftName = document.getElementById("forkliftName").value.trim();
+        #loader {
+            display: none;
+            margin-top: 20px;
+            font-size: 18px;
+            color: #444;
+        }
+    </style>
+</head>
 
-    if (!forkliftName) {
-      alert("יש להזין שם מלגזן");
-      return;
-    }
+<body>
 
-    localStorage.setItem("forkliftName", forkliftName);
+    <div class="container">
+        <img src="logo.jpg" class="logo" alt="לוגו">
 
-    document.getElementById("loading-screen").classList.remove("hidden");
+        <h2>הזן מספר טלפון כדי להיכנס</h2>
 
-    const reader = new FileReader();
-    reader.onload = async function() {
-      const base64Image = reader.result.split(",")[1];
+        <input id="phone" type="tel" placeholder="05XXXXXXXX">
 
-      const payload = {
-        image: base64Image,
-        name: forkliftName
-      };
+        <br>
 
-      try {
-        await fetch(API_URL, {
-          method: "POST",
-          body: JSON.stringify(payload),
-          headers: { "Content-Type": "application/json" }
-        });
+        <button onclick="login()">כניסה</button>
 
-        document.getElementById("loading-screen").classList.add("hidden");
-        document.getElementById("camera-screen").classList.add("hidden");
-        document.getElementById("success-screen").classList.remove("hidden");
+        <div id="loader">מבצע פעולה...</div>
+    </div>
 
-      } catch (err) {
-        document.getElementById("loading-screen").classList.add("hidden");
-        alert("שגיאה בשליחה: " + err);
-      }
-    };
+    <script>
+        function login() {
+            const phone = document.getElementById("phone").value.trim();
 
-    reader.readAsDataURL(file);
-  });
+            if (!phone || phone.length < 9) {
+                alert("נא להזין מספר טלפון תקין");
+                return;
+            }
 
-  function backToCamera() {
-    document.getElementById("success-screen").classList.add("hidden");
-    document.getElementById("camera-screen").classList.remove("hidden");
-  }
+            document.getElementById("loader").style.display = "block";
 
-</script>
+            // כאן תכניס את ה-API שלך
+            const API_URL = "https://example.com/login";
+
+            fetch(API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ phone })
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("loader").style.display = "none";
+
+                if (data.success) {
+                    window.location.href = "dashboard.html";
+                } else {
+                    alert("מספר לא מזוהה");
+                }
+            })
+            .catch(err => {
+                document.getElementById("loader").style.display = "none";
+                alert("שגיאה בחיבור לשרת");
+                console.error(err);
+            });
+        }
+    </script>
 
 </body>
 </html>
