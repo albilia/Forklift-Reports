@@ -142,7 +142,6 @@
       return;
     }
 
-    // הצגת טעינה
     document.getElementById("loading-screen").classList.remove("hidden");
 
     try {
@@ -152,14 +151,21 @@
         headers: { "Content-Type": "application/json" }
       });
 
-      const result = await response.text();
+      const result = await response.json(); // ← חשוב!
 
-      // הסתרת טעינה
       document.getElementById("loading-screen").classList.add("hidden");
 
-      if (result === "OK") {
+      if (result.status === "OK") {
+
+        // הכנסת שם מלגזן אוטומטית
+        if (result.name) {
+          document.getElementById("forkliftName").value = result.name;
+          localStorage.setItem("forkliftName", result.name);
+        }
+
         document.getElementById("login-screen").classList.add("hidden");
         document.getElementById("camera-screen").classList.remove("hidden");
+
       } else {
         document.getElementById("loginError").innerText = "אין הרשאה למספר זה";
       }
@@ -186,7 +192,6 @@
       return;
     }
 
-    // שמירת שם מלגזן לשימוש הבא
     localStorage.setItem("forkliftName", forkliftName);
 
     document.getElementById("loading-screen").classList.remove("hidden");
