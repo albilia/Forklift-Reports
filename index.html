@@ -5,6 +5,10 @@
   <title>העברות מלגזנים</title>
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- תגית META חדשה שמכריחה את GitHub לרענן גרסה -->
+  <meta name="update-version" content="v43">
+
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="apple-touch-icon" href="gilro-logo.png">
@@ -157,7 +161,6 @@
 
       if (result.status === "OK") {
 
-        // הכנסת שם מלגזן אוטומטית
         if (result.name) {
           document.getElementById("forkliftName").value = result.name;
           localStorage.setItem("forkliftName", result.name);
