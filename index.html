@@ -1,10 +1,108 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>העברות מלגזנים</title>
+
+  <!-- התאמה למובייל ואפליקציה -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="apple-touch-icon" href="gilro-logo.png">
+  <link rel="manifest" href="manifest.json">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+      margin: 0;
+    }
+    .logo {
+      width: 160px;
+      margin-top: 10px;
+    }
+    .hidden {
+      display: none;
+    }
+    button {
+      padding: 15px 25px;
+      font-size: 18px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    input, select {
+      padding: 10px;
+      font-size: 18px;
+      width: 220px;
+      margin-top: 10px;
+    }
+    footer {
+      position: fixed;
+      bottom: 25px;
+      width: 100%;
+      text-align: center;
+      font-size: 15px;
+      color: #444;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- לוגו -->
+  <img src="logo.jpg" alt="לוגו גילרו" class="logo">
+
+  <!-- מסך זיהוי -->
+  <div id="login-screen">
+    <h2>העברות מלגזנים</h2>
+    <p>הזן מספר טלפון כדי להיכנס:</p>
+    <input id="phoneInput" type="tel" placeholder="05XXXXXXXX">
+    <br><br>
+    <button onclick="login()">כניסה</button>
+    <p id="loginError" style="color:red;"></p>
+  </div>
+
+  <!-- מסך צילום -->
+  <div id="camera-screen" class="hidden">
+    <h2>צילום דו"חות</h2>
+    <p>לחץ על האייקון כדי לצלם</p>
+
+    <!-- מצלמה -->
+    <input id="cameraInput" type="file" accept="image/*" capture="environment" class="hidden">
+    <button onclick="openCamera()">📷</button>
+
+    <!-- בחירת מחסן -->
+    <h3>בחר מחסן:</h3>
+    <select id="warehouseSelect">
+      <option value="מחסן 1">מחסן 1</option>
+      <option value="מחסן 2">מחסן 2</option>
+      <option value="מחסן 3">מחסן 3</option>
+    </select>
+
+    <!-- שם מלגזן -->
+    <h3>שם מלגזן:</h3>
+    <input id="forkliftName" type="text" placeholder="הכנס שם">
+  </div>
+
+  <!-- מסך אישור -->
+  <div id="success-screen" class="hidden">
+    <h2>הועלה בהצלחה ✔</h2>
+    <button onclick="backToCamera()">צלם שוב</button>
+  </div>
+
+  <!-- זכויות יוצרים -->
+  <footer>
+    <strong>פותח על ידי ניסים אלביליה © כל הזכויות שמורות</strong>
+  </footer>
+
 <script>
 
-  // === כתובת ה־API ===
+  // === 1. כתובת ה־API שלך ===
   const API_URL = "https://script.google.com/macros/s/AKfycbzDz9ktQAUhRbg5cF5Kfhh909CjGJW8A5fKKIG-HCZtCP5YRzAV3tInbg6kJJYn-pqr/exec";
 
-  // === כניסה עם אימות אמיתי ===
-  async function login() {
+  // === 2. כניסה ===
+  function login() {
     const phone = document.getElementById("phoneInput").value.trim();
 
     if (phone.length < 9) {
@@ -12,51 +110,37 @@
       return;
     }
 
-    try {
-      const response = await fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify({ action: "login", phone }),
-        headers: { "Content-Type": "application/json" }
-      });
-
-      const result = await response.text();
-
-      if (result === "OK") {
-        document.getElementById("login-screen").classList.add("hidden");
-        document.getElementById("camera-screen").classList.remove("hidden");
-      } else {
-        document.getElementById("loginError").innerText = "אין הרשאה למספר זה";
-      }
-
-    } catch (err) {
-      document.getElementById("loginError").innerText = "שגיאה בחיבור לשרת";
-    }
+    document.getElementById("login-screen").classList.add("hidden");
+    document.getElementById("camera-screen").classList.remove("hidden");
   }
 
-  // === פתיחת מצלמה ===
+  // === 3. פתיחת מצלמה ===
   function openCamera() {
     document.getElementById("cameraInput").click();
   }
 
-  // === טיפול בתמונה ===
+  // === 4. טיפול בתמונה שנבחרה ===
   document.getElementById("cameraInput").addEventListener("change", async function(event) {
     const file = event.target.files[0];
     if (!file) return;
 
     const forkliftName = document.getElementById("forkliftName").value.trim();
+    const warehouse = document.getElementById("warehouseSelect").value;
 
     if (!forkliftName) {
       alert("יש להזין שם מלגזן");
       return;
     }
 
+    // המרת תמונה ל־Base64
     const reader = new FileReader();
     reader.onload = async function() {
       const base64Image = reader.result.split(",")[1];
 
       const payload = {
         image: base64Image,
-        name: forkliftName
+        name: forkliftName,
+        warehouse: warehouse
       };
 
       try {
@@ -66,6 +150,7 @@
           headers: { "Content-Type": "application/json" }
         });
 
+        // מעבר למסך הצלחה
         document.getElementById("camera-screen").classList.add("hidden");
         document.getElementById("success-screen").classList.remove("hidden");
 
@@ -77,10 +162,13 @@
     reader.readAsDataURL(file);
   });
 
-  // === חזרה לצילום נוסף ===
+  // === 5. חזרה לצילום נוסף ===
   function backToCamera() {
     document.getElementById("success-screen").classList.add("hidden");
     document.getElementById("camera-screen").classList.remove("hidden");
   }
 
 </script>
+
+</body>
+</html>
