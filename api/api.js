@@ -11,7 +11,7 @@ export default async function handler(req, res) {
 
   // שולח את הבקשה ל-Apps Script
   const response = await fetch(
-    "https://script.google.com/macros/s/AKfycbzJlHa2S9PRs12Wb3hJ-er95_mbaa5njzzeEVMT1_BWfB1bRYi9fmtL95Sx_83_klwO/exec",
+    "https://script.google.com/macros/s/AKfycbyjwKgWklA3EtxamxbyobakhnlKLKpgxejm7_Fnq2FUdAdj_gcCbuG3SgbcJwsMfJBu/exec",
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
