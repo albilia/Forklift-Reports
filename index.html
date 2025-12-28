@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>דווחים</title>
 
-    <!-- אייקון למסך הבית של האייפון (PWA) -->
+    <!-- אייקון למסך הבית של האייפון -->
     <link rel="apple-touch-icon" href="gilro-logo-v2.png">
     <link rel="icon" type="image/png" href="gilro-logo-v2.png">
 
@@ -79,13 +79,59 @@
             color: #777;
             font-size: 14px;
         }
+
+        /* כפתור תפריט */
+        .menu-button {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            font-size: 28px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        /* תפריט צד נפתח */
+        .side-menu {
+            position: fixed;
+            top: 0;
+            right: -220px;
+            width: 220px;
+            height: 100%;
+            background: white;
+            box-shadow: -3px 0 8px rgba(0,0,0,0.2);
+            transition: 0.3s;
+            padding-top: 60px;
+            z-index: 999;
+        }
+
+        /* פריטי תפריט */
+        .menu-item {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            font-size: 18px;
+            cursor: pointer;
+            text-align: right;
+        }
+
+        .menu-item:hover {
+            background: #f0f0f0;
+        }
     </style>
 </head>
 
 <body>
 
+    <!-- כפתור תפריט עליון -->
+    <div class="menu-button" onclick="toggleMenu()">☰</div>
+
+    <!-- תפריט צד נפתח -->
+    <div id="sideMenu" class="side-menu">
+        <div class="menu-item" onclick="openAbout()">אודות</div>
+        <div class="menu-item" onclick="contactDev()">פניה למפתח</div>
+        <div class="menu-item" onclick="openGithub()">פתיחת טיקט בגיטהאב</div>
+    </div>
+
     <div class="container">
-        <!-- לוגו בתוך הדף (לא משפיע על מסך הבית) -->
         <img src="logo.jpg" class="logo" alt="לוגו">
 
         <div class="main-title">העברת דווחים</div>
@@ -105,6 +151,23 @@
     </footer>
 
     <script>
+        function toggleMenu() {
+            const menu = document.getElementById("sideMenu");
+            menu.style.right = (menu.style.right === "0px") ? "-220px" : "0px";
+        }
+
+        function openAbout() {
+            alert("כאן יופיע טקסט האודות כשתהיה מוכן");
+        }
+
+        function contactDev() {
+            window.location.href = "mailto:your-email@example.com";
+        }
+
+        function openGithub() {
+            window.open("https://github.com/your-repo/issues");
+        }
+
         function login() {
             const phone = document.getElementById("phone").value.trim();
 
