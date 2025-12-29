@@ -127,8 +127,8 @@
     <!-- תפריט צד נפתח -->
     <div id="sideMenu" class="side-menu">
         <div class="menu-item" onclick="openAbout()">אודות</div>
-        <div class="menu-item" onclick="contactDev()">פניה למפתח</div>
-        <div class="menu-item" onclick="openGithub()">פתיחת טיקט בגיטהאב</div>
+        <div class="menu-item" onclick="openSteps()">שלבים</div>
+        <div class="menu-item" onclick="openGithub()">פתיחת טיקט 🐙</div>
     </div>
 
     <div class="container">
@@ -156,24 +156,43 @@
             menu.style.right = (menu.style.right === "0px") ? "-220px" : "0px";
         }
 
+        /* --- אודות --- */
         function openAbout() {
             alert(
                 "אודות:\n" +
-                "אפליקציית 'העברת דווחים' נועדה לתת מענה לצורך תיעוד הדווחים ע\"י המלגזנים בצורה שוטפת וקלה.\n\n" +
-                "שלבים:\n\n" +
-                "א. המלגזן/מחסנאי/עובד נכנס לדף הנחיתה שבו יוצג לו מסך עם הזנת מספר הנייד האישי שלו לצורך אימות מול השרת. לאחר אימות השרת וזיהוי המספר הנייד המאושר במערכת העובד יהיה רשאי להמשך דווח.\n" +
-                "ב. הדווח יעשה על ידי לחיצה על אייקון המצלמה שתפתח את המצלמה האחורית בנייד של העובד, צילום הדווח שעל המשטח, בחירת מחסן להעברה ושליחה.\n\n" +
-                "הבהרה:\n" +
-                "רק עובדים מורשים במערכת יהיו רשאים להמשיך מדף הנחיתה אל השלב בו הם מדווחים לשרת ומעלים תמונה/דווח. וזאת במטרה למנוע ממשתמשים לא מורשים לדווח אל המערכת."
+                "אפליקציית 'העברת דווחים' נועדה לתת מענה לצורך תיעוד דווחי המשטחים, תוך כדי סנכרון והעברת הנתונים " +
+                "לטבלה שתומר ע\"י OCR API של גוגל למסמך Google Sheet."
             );
         }
 
-        function contactDev() {
-            window.location.href = "mailto:albilia@gmail.com";
+        /* --- שלבים --- */
+        function openSteps() {
+            alert(
+                "שלבים:\n\n" +
+                "א. העובד נכנס לדף הנחיתה שבו יוצג לו מסך עם הזנת מספר הנייד האישי שלו לצורך אימות מול השרת. " +
+                "לאחר אימות השרת וזיהוי המספר הנייד המאושר במערכת העובד יהיה רשאי להמשך דווח.\n\n" +
+                "ב. הדווח יעשה על ידי לחיצה על אייקון המצלמה שתפתח את המצלמה האחורית בנייד של העובד > " +
+                "צילום הדווח שעל המשטח > בחירת מחסן להעברה > שליחה."
+            );
         }
 
+        /* --- פתיחת טיקט --- */
         function openGithub() {
+            alert(
+                "פתיחת טיקט:\n\n" +
+                "במידה וקיים כשל באפליקציה מכל סיבה שהיא ניתן לפתוח פניה (issue) בגיטהאב עם השארת הפרטים הבאים:\n" +
+                "1. שם העובד.\n" +
+                "2. הסבר על אופי התקלה.\n" +
+                "3. סוג מכשיר הנייד (אייפון/אנדרואיד).\n\n" +
+                "⚠️ את הפניה יש לפתוח ב־ 'פתיחת טיקט'."
+            );
+
             window.open("https://github.com/albilia/Forklift-Reports/issues");
+        }
+
+        /* --- פניה למפתח (נשארת בתפריט אם תרצה להחזיר) --- */
+        function contactDev() {
+            window.location.href = "mailto:albilia@gmail.com";
         }
 
         function login() {
