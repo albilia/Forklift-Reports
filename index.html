@@ -128,7 +128,7 @@
     <div id="sideMenu" class="side-menu">
         <div class="menu-item" onclick="openAbout()">אודות</div>
         <div class="menu-item" onclick="openSteps()">שלבים</div>
-        <div class="menu-item" onclick="openGithub()">פתיחת טיקט 🐙</div>
+        <div class="menu-item" onclick="openGithub()">פתיחת טיקט 🐱‍💻</div>
     </div>
 
     <div class="container">
@@ -165,34 +165,28 @@
             );
         }
 
-        /* --- שלבים --- */
+        /* --- שלבים + הסבר פתיחת טיקט --- */
         function openSteps() {
             alert(
                 "שלבים:\n\n" +
                 "א. העובד נכנס לדף הנחיתה שבו יוצג לו מסך עם הזנת מספר הנייד האישי שלו לצורך אימות מול השרת. " +
                 "לאחר אימות השרת וזיהוי המספר הנייד המאושר במערכת העובד יהיה רשאי להמשך דווח.\n\n" +
                 "ב. הדווח יעשה על ידי לחיצה על אייקון המצלמה שתפתח את המצלמה האחורית בנייד של העובד > " +
-                "צילום הדווח שעל המשטח > בחירת מחסן להעברה > שליחה."
-            );
-        }
-
-        /* --- פתיחת טיקט --- */
-        function openGithub() {
-            alert(
-                "פתיחת טיקט:\n\n" +
+                "צילום הדווח שעל המשטח > בחירת מחסן להעברה > שליחה.\n\n" +
                 "במידה וקיים כשל באפליקציה מכל סיבה שהיא ניתן לפתוח פניה (issue) בגיטהאב עם השארת הפרטים הבאים:\n" +
                 "1. שם העובד.\n" +
                 "2. הסבר על אופי התקלה.\n" +
                 "3. סוג מכשיר הנייד (אייפון/אנדרואיד).\n\n" +
+                "בצידו הימני של החלון שיפתח יש ללחוץ על ה +\n" +
+                "ב־Title יש לרשום בקצרה את הנושא (למשל: 'מצלמה לא נפתחת', 'אין חיבור לשרת').\n" +
+                "בשורה Leave a comment יש לרשום את מהות התקלה עם הסבר פרטני.\n\n" +
                 "⚠️ את הפניה יש לפתוח ב־ 'פתיחת טיקט'."
             );
-
-            window.open("https://github.com/albilia/Forklift-Reports/issues");
         }
 
-        /* --- פניה למפתח (נשארת בתפריט אם תרצה להחזיר) --- */
-        function contactDev() {
-            window.location.href = "mailto:albilia@gmail.com";
+        /* --- פתיחת טיקט — מעבר ישיר לגיטהאב --- */
+        function openGithub() {
+            window.open("https://github.com/albilia/Forklift-Reports/issues");
         }
 
         function login() {
