@@ -165,8 +165,7 @@
             alert(
                 "שלבים:\n\n" +
                 "1. הזנת מספר טלפון.\n" +
-                "2. קבלת קוד OTP.\n" +
-                "3. הזנת הקוד והמשך לדיווח."
+                "2. כניסה למערכת ללא OTP (זמני)."
             );
         }
 
@@ -175,7 +174,7 @@
         }
 
         /* -----------------------------
-           שלב 1: שליחת OTP
+           כניסה ללא OTP
         ------------------------------ */
         function login() {
             const phone = document.getElementById("phone").value.trim();
@@ -190,53 +189,9 @@
             fetch(API_URL, {
                 method: "POST",
                 body: JSON.stringify({
-                    action: "sendOTP",
-                    phone: phone
-                })
-            })
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById("loader").style.display = "none";
-
-                if (data.success) {
-                    askForOTP(phone);
-                } else {
-                    alert("שגיאה בשליחת קוד");
-                }
-            })
-            .catch(err => {
-                document.getElementById("loader").style.display = "none";
-                alert("שגיאה בחיבור לשרת");
-                console.error(err);
-            });
-        }
-
-        /* -----------------------------
-           שלב 2: פופאפ להזנת OTP
-        ------------------------------ */
-        function askForOTP(phone) {
-            const otp = prompt("הזן את הקוד שנשלח אליך:");
-
-            if (!otp) {
-                alert("לא הוזן קוד");
-                return;
-            }
-
-            verifyOTP(phone, otp);
-        }
-
-        /* -----------------------------
-           שלב 3: אימות OTP
-        ------------------------------ */
-        function verifyOTP(phone, otp) {
-            document.getElementById("loader").style.display = "block";
-
-            fetch(API_URL, {
-                method: "POST",
-                body: JSON.stringify({
                     action: "verifyOTP",
                     phone: phone,
-                    otp: otp
+                    otp: "0000" // לא רלוונטי — השרת מתעלם
                 })
             })
             .then(res => res.json())
@@ -244,7 +199,7 @@
                 document.getElementById("loader").style.display = "none";
 
                 if (!data.success) {
-                    alert("קוד שגוי או מספר לא מאושר");
+                    alert("מספר לא מאושר");
                     return;
                 }
 
