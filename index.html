@@ -147,7 +147,7 @@
 
     <script>
 
-        const API_URL = "https://script.google.com/macros/s/AKfycbxOJ5OE4BDbW8uACSZEXPwvg815ig-SV39Tw4XcVUTFQ7A-Vxc36MW7u1tmXgzDPTN7KA/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbzU-EYczORrSOsCj1yD9ogw4U0BzqarOGhekbILa_-zOFlCHMfcfC2zWEBIErETME3SJQ/exec";
 
         function toggleMenu() {
             const menu = document.getElementById("sideMenu");
@@ -191,7 +191,7 @@
                 body: JSON.stringify({
                     action: "verifyOTP",
                     phone: phone,
-                    otp: "0000" // לא רלוונטי — השרת מתעלם
+                    otp: "0000"
                 })
             })
             .then(res => res.json())
