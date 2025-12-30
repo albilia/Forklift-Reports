@@ -142,7 +142,7 @@
             reader.readAsDataURL(file);
         }
 
-        function sendReport() {
+        async function sendReport() {
             const warehouse = document.getElementById("warehouse").value;
 
             if (!warehouse) {
@@ -155,30 +155,37 @@
                 return;
             }
 
-            alert("בשלב זה ה־OCR עדיין לא פעיל — הדיווח יישמר כצילום בלבד.");
+            // שלב 1 — OCR
+            const ocrResponse = await fetch(API_URL, {
+                method: "POST",
+                body: JSON.stringify({
+                    action: "processImage",
+                    image: lastImageBase64
+                })
+            }).then(res => res.json());
 
-            fetch(API_URL, {
+            if (!ocrResponse.success) {
+                alert("שגיאה בפענוח OCR");
+                return;
+            }
+
+            // שלב 2 — שליחה לטבלה הנכונה
+            const saveResponse = await fetch(API_URL, {
                 method: "POST",
                 body: JSON.stringify({
                     action: warehouse === "raw" ? "saveRawMaterial" : "saveReport",
                     token: token,
-                    ocr: {
-                        makat: "000000",
-                        qty: 0,
-                        reports: []
-                    }
+                    ocr: ocrResponse.parsed
                 })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    alert("הדיווח נשמר בהצלחה");
-                    lastImageBase64 = "";
-                    document.getElementById("preview").style.display = "none";
-                } else {
-                    alert("שגיאה בשליחה");
-                }
-            });
+            }).then(res => res.json());
+
+            if (saveResponse.success) {
+                alert("הדיווח נשמר בהצלחה");
+                lastImageBase64 = "";
+                document.getElementById("preview").style.display = "none";
+            } else {
+                alert("שגיאה בשליחה");
+            }
         }
 
         function loadHistory() {
