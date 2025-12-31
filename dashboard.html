@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>דיווח משטחים</title>
+    <title>מערכת דווחים</title>
 
     <style>
         body {
@@ -111,7 +111,7 @@
 
 <body>
 
-    <div class="header">דיווח משטחים</div>
+    <div class="header">מערכת דווחים</div>
 
     <div class="section">
         <h3>שלום, <span id="driverName"></span></h3>
@@ -141,7 +141,7 @@
 
     <script>
 
-        /* ← ה־API_URL המתוקן שלך */
+        /* ← ה־API_URL שלך */
         const API_URL = "https://script.google.com/macros/s/AKfycbzU-EYczORrSOsCj1yD9ogw4U0BzqarOGhekbILa_-zOFlCHMfcfC2zWEBIErETME3SJQ/exec";
 
         const token = localStorage.getItem("sessionToken");
@@ -173,6 +173,7 @@
             reader.readAsDataURL(file);
         }
 
+        /* שליחת דיווח עם OCR */
         async function sendReport() {
             const warehouse = document.getElementById("warehouse").value;
 
@@ -186,37 +187,46 @@
                 return;
             }
 
-            const ocrResponse = await fetch(API_URL, {
-                method: "POST",
-                body: JSON.stringify({
-                    action: "processImage",
-                    image: lastImageBase64
-                })
-            }).then(res => res.json());
+            try {
+                // שלב 1 — OCR
+                const ocrResponse = await fetch(API_URL, {
+                    method: "POST",
+                    body: JSON.stringify({
+                        action: "processImage",
+                        image: lastImageBase64
+                    })
+                }).then(res => res.json());
 
-            if (!ocrResponse.success) {
-                alert("שגיאה בפענוח OCR");
-                return;
-            }
+                if (!ocrResponse.success) {
+                    alert("שגיאה בפענוח OCR");
+                    return;
+                }
 
-            const saveResponse = await fetch(API_URL, {
-                method: "POST",
-                body: JSON.stringify({
-                    action: warehouse === "raw" ? "saveRawMaterial" : "saveReport",
-                    token: token,
-                    ocr: ocrResponse.parsed
-                })
-            }).then(res => res.json());
+                // שלב 2 — שליחה לטבלה
+                const saveResponse = await fetch(API_URL, {
+                    method: "POST",
+                    body: JSON.stringify({
+                        action: warehouse === "raw" ? "saveRawMaterial" : "saveReport",
+                        token: token,
+                        ocr: ocrResponse.parsed
+                    })
+                }).then(res => res.json());
 
-            if (saveResponse.success) {
-                alert("הדיווח נשמר בהצלחה");
-                lastImageBase64 = "";
-                document.getElementById("preview").style.display = "none";
-            } else {
-                alert("שגיאה בשליחה");
+                if (saveResponse.success) {
+                    alert("הדיווח נשמר בהצלחה");
+                    lastImageBase64 = "";
+                    document.getElementById("preview").style.display = "none";
+                } else {
+                    alert("שגיאה בשליחה");
+                }
+
+            } catch (err) {
+                console.error(err);
+                alert("שגיאה בחיבור לשרת");
             }
         }
 
+        /* היסטוריית דיווחים */
         function loadHistory() {
             const warehouse = document.getElementById("warehouse").value;
 
