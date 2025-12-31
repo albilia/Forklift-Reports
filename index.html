@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>דיווח משטחים</title>
+    <title>התחברות למערכת דווחים</title>
 
     <style>
         body {
@@ -21,12 +21,27 @@
             font-weight: bold;
         }
 
-        .section {
-            margin-top: 25px;
+        .login-box {
+            margin-top: 40px;
+            background: white;
+            padding: 25px;
+            width: 85%;
+            margin-left: auto;
+            margin-right: auto;
+            border-radius: 10px;
+        }
+
+        input {
+            width: 90%;
+            padding: 12px;
+            margin-top: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 18px;
         }
 
         button {
-            width: 260px;
+            width: 95%;
             padding: 14px;
             font-size: 18px;
             background: #d32f2f;
@@ -34,187 +49,63 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            margin-top: 10px;
+            margin-top: 15px;
         }
 
         button:hover {
             background: #b71c1c;
-        }
-
-        select {
-            width: 260px;
-            padding: 12px;
-            font-size: 18px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            margin-top: 10px;
-        }
-
-        #preview {
-            margin-top: 20px;
-            max-width: 90%;
-            border-radius: 10px;
-            display: none;
-        }
-
-        #historyBox {
-            margin-top: 25px;
-            padding: 15px;
-            background: white;
-            border-radius: 10px;
-            width: 90%;
-            margin-left: auto;
-            margin-right: auto;
-            display: none;
-            text-align: right;
-        }
-
-        .logout {
-            margin-top: 40px;
-            color: #444;
-            cursor: pointer;
-            text-decoration: underline;
         }
     </style>
 </head>
 
 <body>
 
-    <div class="header">דיווח משטחים</div>
+    <div class="header">מערכת דווחים</div>
 
-    <div class="section">
-        <h3>שלום, <span id="driverName"></span></h3>
+    <div class="login-box">
+        <h3>התחברות</h3>
 
-        <select id="warehouse">
-            <option value="">בחר מחסן...</option>
-            <option value="raw">מחסן חומרי גלם</option>
-            <option value="reports">מחסן העברת דו"חות</option>
-        </select>
+        <input type="text" id="username" placeholder="שם משתמש">
+        <input type="password" id="password" placeholder="סיסמה">
 
-        <br>
-
-        <button onclick="openCamera()">צלם דו"ח</button>
-
-        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none" onchange="showPreview(event)">
-
-        <img id="preview">
+        <button onclick="login()">התחבר</button>
     </div>
 
-    <button onclick="sendReport()">שלח דיווח</button>
-
-    <button onclick="loadHistory()">היסטוריית דיווחים</button>
-
-    <div id="historyBox"></div>
-
-    <div class="logout" onclick="logout()">התנתק</div>
-
     <script>
-
         const API_URL = "YOUR_WEB_APP_URL_HERE";
 
-        const token = localStorage.getItem("sessionToken");
-        const driverName = localStorage.getItem("driverName");
+        function login() {
+            const user = document.getElementById("username").value.trim();
+            const pass = document.getElementById("password").value.trim();
 
-        if (!token) {
-            window.location.href = "index.html";
-        }
-
-        document.getElementById("driverName").innerText = driverName;
-
-        let lastImageBase64 = "";
-
-        function openCamera() {
-            document.getElementById("cameraInput").click();
-        }
-
-        function showPreview(event) {
-            const file = event.target.files[0];
-            const reader = new FileReader();
-
-            reader.onload = function(e) {
-                lastImageBase64 = e.target.result;
-                const img = document.getElementById("preview");
-                img.src = lastImageBase64;
-                img.style.display = "block";
-            };
-
-            reader.readAsDataURL(file);
-        }
-
-        async function sendReport() {
-            const warehouse = document.getElementById("warehouse").value;
-
-            if (!warehouse) {
-                alert("בחר מחסן");
-                return;
-            }
-
-            if (!lastImageBase64) {
-                alert("צלם דו\"ח לפני שליחה");
-                return;
-            }
-
-            const saveResponse = await fetch(API_URL, {
-                method: "POST",
-                body: JSON.stringify({
-                    action: warehouse === "raw" ? "saveRawMaterial" : "saveReport",
-                    token: token,
-                    image: lastImageBase64
-                })
-            }).then(res => res.json());
-
-            if (saveResponse.success) {
-                alert("הדיווח נשמר בהצלחה");
-                lastImageBase64 = "";
-                document.getElementById("preview").style.display = "none";
-            } else {
-                alert("שגיאה בשליחה");
-            }
-        }
-
-        function loadHistory() {
-            const warehouse = document.getElementById("warehouse").value;
-
-            if (!warehouse) {
-                alert("בחר מחסן להצגת היסטוריה");
+            if (!user || !pass) {
+                alert("נא למלא שם משתמש וסיסמה");
                 return;
             }
 
             fetch(API_URL, {
                 method: "POST",
                 body: JSON.stringify({
-                    action: "getHistory",
-                    token: token,
-                    warehouse: warehouse
+                    action: "login",
+                    username: user,
+                    password: pass
                 })
             })
             .then(res => res.json())
             .then(data => {
                 if (!data.success) {
-                    alert("שגיאה בטעינת היסטוריה");
+                    alert("פרטי התחברות שגויים");
                     return;
                 }
 
-                const box = document.getElementById("historyBox");
-                box.innerHTML = "";
-                box.style.display = "block";
+                // שמירת נתוני משתמש
+                localStorage.setItem("sessionToken", data.token);
+                localStorage.setItem("driverName", data.name);
 
-                if (data.data.length === 0) {
-                    box.innerHTML = "<b>אין נתונים להצגה</b>";
-                    return;
-                }
-
-                data.data.forEach(row => {
-                    box.innerHTML += `<div>📌 ${row[0]} — ${row[2]} — ${row[3] || ""}</div>`;
-                });
+                // מעבר לדשבורד
+                window.location.href = "dashboard.html";
             });
         }
-
-        function logout() {
-            localStorage.clear();
-            window.location.href = "index.html";
-        }
-
     </script>
 
 </body>
