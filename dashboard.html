@@ -62,11 +62,44 @@
             padding: 15px;
             background: white;
             border-radius: 10px;
-            width: 90%;
+            width: 95%;
             margin-left: auto;
             margin-right: auto;
             display: none;
             text-align: right;
+        }
+
+        /* טבלת היסטוריה */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f44336;
+            color: white;
+        }
+
+        /* סינון */
+        #filters {
+            margin-top: 10px;
+            text-align: right;
+        }
+
+        #filters input {
+            padding: 8px;
+            margin: 5px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 16px;
         }
 
         .logout {
@@ -110,11 +143,10 @@
 
     <script>
 
-        const API_URL = "https://script.google.com/macros/s/AKfycbxOJ5OE4BDbW8uACSZEXPwvg815ig-SV39Tw4XcVUTFQ7A-Vxc36MW7u1tmXgzDPTN7KA/exec";
+        const API_URL = "YOUR_WEB_APP_URL_HERE";  /* ← שים כאן את ה־URL של ה־Web App */
 
         const token = localStorage.getItem("sessionToken");
         const driverName = localStorage.getItem("driverName");
-        const role = localStorage.getItem("role");
 
         if (!token) {
             window.location.href = "index.html";
@@ -142,6 +174,7 @@
             reader.readAsDataURL(file);
         }
 
+        /* שליחת דיווח עם OCR */
         async function sendReport() {
             const warehouse = document.getElementById("warehouse").value;
 
@@ -188,6 +221,7 @@
             }
         }
 
+        /* היסטוריית דיווחים עם טבלה + סינון */
         function loadHistory() {
             const warehouse = document.getElementById("warehouse").value;
 
@@ -212,7 +246,6 @@
                 }
 
                 const box = document.getElementById("historyBox");
-                box.innerHTML = "";
                 box.style.display = "block";
 
                 if (data.data.length === 0) {
@@ -220,9 +253,71 @@
                     return;
                 }
 
-                data.data.forEach(row => {
-                    box.innerHTML += `<div>📌 ${row[0]} — ${row[2]} — ${row[3] || ""}</div>`;
-                });
+                box.innerHTML = `
+                    <div id="filters">
+                        <input type="date" id="fromDate">
+                        <input type="date" id="toDate">
+                        <input type="text" id="searchText" placeholder="חיפוש לפי מק״ט / פק״ע / שם">
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>📅 תאריך</th>
+                                <th>⏰ שעה</th>
+                                <th>🔢 מק"ט</th>
+                                <th>📦 פק"ע</th>
+                                <th>🔢 כמות</th>
+                                <th>👤 מדווח</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyRows"></tbody>
+                    </table>
+                `;
+
+                const tbody = document.getElementById("historyRows");
+
+                function renderTable() {
+                    const from = document.getElementById("fromDate").value;
+                    const to = document.getElementById("toDate").value;
+                    const search = document.getElementById("searchText").value.trim();
+
+                    tbody.innerHTML = "";
+
+                    data.data.forEach(row => {
+                        const date = row[0].split(" ")[0];
+                        const makat = row[2] || "";
+                        const pka = row[3] || "";
+                        const qty = row[4] || "";
+                        const user = row[6] || "";
+
+                        if (from && date < from) return;
+                        if (to && date > to) return;
+
+                        if (search && !(
+                            makat.includes(search) ||
+                            pka.includes(search) ||
+                            user.includes(search)
+                        )) return;
+
+                        const tr = document.createElement("tr");
+                        tr.innerHTML = `
+                            <td>${row[0]}</td>
+                            <td>${row[1]}</td>
+                            <td>${makat}</td>
+                            <td>${pka}</td>
+                            <td>${qty}</td>
+                            <td>${user}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+
+                document.getElementById("fromDate").onchange = renderTable;
+                document.getElementById("toDate").onchange = renderTable;
+                document.getElementById("searchText").oninput = renderTable;
+
+                renderTable();
             });
         }
 
