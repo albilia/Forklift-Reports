@@ -247,7 +247,7 @@
   }
 
   /* ⭐ API URL ⭐ */
-  const API_URL = "https://script.google.com/macros/s/AKfycbzU-EYczORrSOsCj1yD9ogw4U0BzqarOGhekbILa_-zOFlCHMfcfC2zWEBIErETME3SJQ/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbzX5b5hPEF_wSx3zMh_CJ9if8u7Q_CTIg_UQhqqHr8hryUsBsdhMMa_rqaqizCvhAN99Q/exec";
 
   /* ⭐ התחברות אמיתית עם GET ⭐ */
   async function login() {
@@ -262,7 +262,7 @@
     loader.style.display = "block";
 
     try {
-      const url = `${API_URL}?action=verifyOTP&phone=${phone}&otp=`;
+      const url = `${API_URL}?action=verifyOTP&phone=${phone}`;
       const response = await fetch(url);
       const data = await response.json();
 
