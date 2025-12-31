@@ -258,8 +258,11 @@
     window.open("https://github.com/albilia/Forklift-Reports/issues", "_blank");
   }
 
-  /* ⭐ כניסה ⭐ */
-  function login() {
+  /* ⭐ API URL ⭐ */
+  const API_URL = "https://script.google.com/macros/s/AKfycbzU-EYczORrSOsCj1yD9ogw4U0BzqarOGhekbILa_-zOFlCHMfcfC2zWEBIErETME3SJQ/exec";
+
+  /* ⭐ התחברות אמיתית ⭐ */
+  async function login() {
     const phone = document.getElementById("phone").value.trim();
     const loader = document.getElementById("loader");
 
@@ -270,13 +273,35 @@
 
     loader.style.display = "block";
 
-    // ⭐ כאן מוגדר שם המשתמש לפי מספר הטלפון ⭐
-    // בעתיד תוכל להחליף למקור אמיתי (API / DB)
-    let userName = "ניסים אלביליה";
+    try {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "verifyOTP",
+          phone: phone,
+          otp: "" // לא בשימוש כי OTP כבוי
+        })
+      });
 
-    setTimeout(() => {
-      window.location.href = `dashboard.html?phone=${phone}&name=${encodeURIComponent(userName)}`;
-    }, 800);
+      const data = await response.json();
+
+      if (!data.success) {
+        alert("מספר טלפון לא מורשה במערכת");
+        loader.style.display = "none";
+        return;
+      }
+
+      // קיבלנו שם אמיתי + טוקן
+      const name = data.name;
+      const token = data.token;
+
+      window.location.href = `dashboard.html?token=${token}&name=${encodeURIComponent(name)}`;
+
+    } catch (err) {
+      alert("שגיאה בחיבור לשרת");
+      loader.style.display = "none";
+    }
   }
 </script>
 
