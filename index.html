@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>התחברות למערכת דווחים</title>
+    <title>התחברות</title>
 
     <style>
         body {
@@ -65,8 +65,7 @@
     <div class="login-box">
         <h3>התחברות</h3>
 
-        <input type="text" id="username" placeholder="שם משתמש">
-        <input type="password" id="password" placeholder="סיסמה">
+        <input type="text" id="phone" placeholder="הזן מספר טלפון">
 
         <button onclick="login()">התחבר</button>
     </div>
@@ -75,11 +74,10 @@
         const API_URL = "YOUR_WEB_APP_URL_HERE";
 
         function login() {
-            const user = document.getElementById("username").value.trim();
-            const pass = document.getElementById("password").value.trim();
+            const phone = document.getElementById("phone").value.trim();
 
-            if (!user || !pass) {
-                alert("נא למלא שם משתמש וסיסמה");
+            if (!phone) {
+                alert("נא להזין מספר טלפון");
                 return;
             }
 
@@ -87,22 +85,19 @@
                 method: "POST",
                 body: JSON.stringify({
                     action: "login",
-                    username: user,
-                    password: pass
+                    phone: phone
                 })
             })
             .then(res => res.json())
             .then(data => {
                 if (!data.success) {
-                    alert("פרטי התחברות שגויים");
+                    alert("מספר לא מזוהה");
                     return;
                 }
 
-                // שמירת נתוני משתמש
                 localStorage.setItem("sessionToken", data.token);
                 localStorage.setItem("driverName", data.name);
 
-                // מעבר לדשבורד
                 window.location.href = "dashboard.html";
             });
         }
