@@ -61,6 +61,23 @@
       background: #f0f0f0;
     }
 
+    /* ⭐ הגדלת לייבלים ורשימות ⭐ */
+    label {
+      font-size: 20px;
+      font-weight: bold;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    select {
+      width: 85%;
+      padding: 12px;
+      font-size: 18px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 20px;
+    }
+
     /* ⭐ כפתור המבורגר ⭐ */
     .menu-button {
       position: absolute;
@@ -147,6 +164,7 @@
   </style>
 </head>
 <body>
+
   <!-- ⭐ רקע מתכהה ⭐ -->
   <div class="overlay" id="overlay"></div>
 
@@ -194,6 +212,9 @@
   <!-- ⭐ תוכן הדשבורד ⭐ -->
   <div class="content">
 
+    <!-- ⭐ זיהוי משתמש ⭐ -->
+    <div id="userGreeting" style="font-size:22px; font-weight:bold; margin-bottom:25px;"></div>
+
     <!-- ⭐ בחירת סוג מחסן ⭐ -->
     <label for="mainWarehouse">בחר מחסן:</label>
     <select id="mainWarehouse" onchange="handleMainWarehouse()">
@@ -203,7 +224,7 @@
     </select>
 
     <!-- ⭐ תת קטגוריה למחסן תוצר גמר ⭐ -->
-    <div id="finishedSection" style="display:none; margin-top:20px;">
+    <div id="finishedSection" style="display:none;">
 
       <label for="finishedWarehouse">בחירת מחסן להעברה:</label>
       <select id="finishedWarehouse">
@@ -225,8 +246,8 @@
 
     </div>
 
-    <!-- ⭐ תת מחסן (אם צריך) ⭐ -->
-    <div id="subWarehouseSection" style="display:none; margin-top:20px;">
+    <!-- ⭐ תת מחסן ⭐ -->
+    <div id="subWarehouseSection" style="display:none;">
       <label for="subWarehouse">בחר תת מחסן:</label>
       <select id="subWarehouse">
         <option value="">-- בחר --</option>
@@ -239,14 +260,14 @@
     </div>
 
     <!-- ⭐ כפתור המשך ⭐ -->
-    <button class="report-box" style="margin-top:25px;" onclick="goToReport()">
+    <button class="report-box" onclick="goToReport()">
       המשך
     </button>
 
   </div>
 
 <script>
-  /* ⭐ פתיחה וסגירה של תפריט הצד ⭐ */
+  /* ⭐ תפריט צד ⭐ */
   const menuBtn = document.getElementById("menuBtn");
   const sideMenu = document.getElementById("sideMenu");
   const overlay = document.getElementById("overlay");
@@ -264,24 +285,19 @@
     overlay.classList.remove("show");
   });
 
-  /* ⭐ רטט לכל הכפתורים ⭐ */
+  /* ⭐ רטט ⭐ */
   document.querySelectorAll(".report-box, .menu-item, .logout-btn").forEach(el => {
     el.addEventListener("click", () => {
       navigator.vibrate?.(15);
     });
   });
 
-  /* ⭐ פונקציות ניווט ⭐ */
-  function openAbout() {
-    alert("אודות המערכת:\nפותח על ידי ניסים אלביליה.");
-  }
+  /* ⭐ זיהוי משתמש ⭐ */
+  const params = new URLSearchParams(window.location.search);
+  const userName = params.get("name");
 
-  function openSteps() {
-    alert("שלבים:\n1. בחר מחסן\n2. בחר מחסן להעברה (אם צריך)\n3. צלם ושלח");
-  }
-
-  function openGithub() {
-    window.open("https://github.com/albilia/Forklift-Reports/issues", "_blank");
+  if (userName) {
+    document.getElementById("userGreeting").innerText = `שלום, ${userName}`;
   }
 
   /* ⭐ לוגיקת בחירת מחסן ⭐ */
@@ -311,5 +327,6 @@
     window.location.href = "index.html";
   }
 </script>
+
 </body>
 </html>
