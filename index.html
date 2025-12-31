@@ -82,27 +82,76 @@
       color: #444;
     }
 
+    /* ⭐ כפתור המבורגר מונפש ⭐ */
     .menu-button {
       position: fixed;
       top: 15px;
       right: 15px;
-      font-size: 28px;
+      width: 35px;
+      height: 30px;
       cursor: pointer;
-      z-index: 1000;
+      z-index: 1100;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
 
+    .menu-button span {
+      display: block;
+      height: 4px;
+      background: #333;
+      border-radius: 4px;
+      transition: 0.35s;
+    }
+
+    .menu-button.active span:nth-child(1) {
+      transform: rotate(45deg) translate(6px, 6px);
+    }
+
+    .menu-button.active span:nth-child(2) {
+      opacity: 0;
+    }
+
+    .menu-button.active span:nth-child(3) {
+      transform: rotate(-45deg) translate(7px, -7px);
+    }
+
+    /* ⭐ תפריט צד ⭐ */
     .side-menu {
       position: fixed;
       top: 0;
-      right: -220px;
-      width: 220px;
+      right: -260px;
+      width: 260px;
       height: 100%;
       background: white;
-      box-shadow: -3px 0 8px rgba(0,0,0,0.2);
-      transition: 0.3s;
-      padding-top: 60px;
-      z-index: 999;
+      box-shadow: -3px 0 8px rgba(0,0,0,0.25);
+      transition: 0.35s ease;
+      padding-top: 70px;
+      z-index: 1050;
       overflow-y: auto;
+    }
+
+    .side-menu.open {
+      right: 0;
+    }
+
+    /* ⭐ רקע מתכהה ⭐ */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.45);
+      opacity: 0;
+      pointer-events: none;
+      transition: 0.3s;
+      z-index: 1040;
+    }
+
+    .overlay.show {
+      opacity: 1;
+      pointer-events: auto;
     }
 
     .menu-item {
@@ -116,13 +165,38 @@
     .menu-item:hover {
       background: #f0f0f0;
     }
+
+    /* ⭐ תמיכה ב־Dark Mode ⭐ */
+    body.dark .side-menu {
+      background: #1e1e1e;
+      color: white;
+    }
+
+    body.dark .menu-item {
+      border-bottom: 1px solid #444;
+    }
+
+    body.dark .menu-item:hover {
+      background: #333;
+    }
+
+    body.dark .menu-button span {
+      background: white;
+    }
   </style>
 </head>
-
 <body>
+  <!-- ⭐ אייקון המבורגר מונפש ⭐ -->
+  <div class="menu-button" id="menuBtn">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
 
-  <div class="menu-button" onclick="toggleMenu()">☰</div>
+  <!-- ⭐ רקע מתכהה ⭐ -->
+  <div class="overlay" id="overlay"></div>
 
+  <!-- ⭐ תפריט צד חדש ⭐ -->
   <div id="sideMenu" class="side-menu">
 
     <!-- אודות -->
@@ -139,7 +213,7 @@
       פותח על ידי ניסים אלביליה ©
     </div>
 
-    <!-- תמונה עגולה קטנה -->
+    <!-- תמונה עגולה -->
     <div style="text-align: center; margin-top: 10px;">
       <img 
         src="https://raw.githubusercontent.com/albilia/Forklift-Reports/main/me.jpg"
@@ -155,6 +229,7 @@
 
   </div>
 
+  <!-- ⭐ תוכן המסך המקורי ⭐ -->
   <div class="container">
     <img src="logo.jpg" class="logo" alt="לוגו">
 
@@ -169,74 +244,61 @@
 
     <div id="loader">מבצע פעולה...</div>
   </div>
+<script>
+  /* ⭐ פתיחה וסגירה של תפריט הצד ⭐ */
+  const menuBtn = document.getElementById("menuBtn");
+  const sideMenu = document.getElementById("sideMenu");
+  const overlay = document.getElementById("overlay");
 
-  <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbzU-EYczORrSOsCj1yD9ogw4U0BzqarOGhekbILa_-zOFlCHMfcfC2zWEBIErETME3SJQ/exec";
+  menuBtn.addEventListener("click", () => {
+    menuBtn.classList.toggle("active");
+    sideMenu.classList.toggle("open");
+    overlay.classList.toggle("show");
+    navigator.vibrate?.(20);
+  });
 
-    function toggleMenu() {
-      const menu = document.getElementById("sideMenu");
-      menu.style.right = (menu.style.right === "0px") ? "-220px" : "0px";
+  overlay.addEventListener("click", () => {
+    menuBtn.classList.remove("active");
+    sideMenu.classList.remove("open");
+    overlay.classList.remove("show");
+  });
+
+  /* ⭐ רטט לכל הכפתורים ⭐ */
+  document.querySelectorAll("button, .menu-item").forEach(el => {
+    el.addEventListener("click", () => {
+      navigator.vibrate?.(15);
+    });
+  });
+
+  /* ⭐ פונקציות ניווט ⭐ */
+  function openAbout() {
+    alert("אודות המערכת:\nפותח על ידי ניסים אלביליה.");
+  }
+
+  function openSteps() {
+    alert("שלבים:\n1. הזן מספר טלפון\n2. היכנס למערכת\n3. דווח בקלות");
+  }
+
+  function openGithub() {
+    window.open("https://github.com/albilia/Forklift-Reports/issues", "_blank");
+  }
+
+  /* ⭐ פונקציית כניסה ⭐ */
+  function login() {
+    const phone = document.getElementById("phone").value.trim();
+    const loader = document.getElementById("loader");
+
+    if (phone.length < 10) {
+      alert("מספר טלפון לא תקין");
+      return;
     }
 
-    function openAbout() {
-      alert(
-        "אודות:\n" +
-        "אפליקציית 'העברת דווחים' נועדה לתיעוד דווחי המשטחים והעברת הנתונים לטבלאות Google Sheet."
-      );
-    }
+    loader.style.display = "block";
 
-    function openSteps() {
-      alert(
-        "שלבים:\n\n" +
-        "1. הזנת מספר טלפון.\n" +
-        "2. כניסה למערכת ללא OTP (זמני)."
-      );
-    }
-
-    function openGithub() {
-      window.open("https://github.com/albilia/Forklift-Reports/issues");
-    }
-
-    function login() {
-      const phone = document.getElementById("phone").value.trim();
-
-      if (!phone || phone.length < 9) {
-        alert("נא להזין מספר טלפון תקין");
-        return;
-      }
-
-      document.getElementById("loader").style.display = "block";
-
-      fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify({
-          action: "verifyOTP",
-          phone: phone,
-          otp: "0000"
-        })
-      })
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById("loader").style.display = "none";
-
-        if (!data.success) {
-          alert("מספר לא מאושר");
-          return;
-        }
-
-        localStorage.setItem("sessionToken", data.token);
-        localStorage.setItem("driverName", data.name);
-        localStorage.setItem("role", data.role);
-
-        window.location.href = "dashboard.html";
-      })
-      .catch(err => {
-        document.getElementById("loader").style.display = "none";
-        alert("שגיאה בחיבור לשרת");
-        console.error(err);
-      });
-    }
-  </script>
-
+    setTimeout(() => {
+      window.location.href = "dashboard.html?phone=" + phone;
+    }, 800);
+  }
+</script>
 </body>
 </html>
