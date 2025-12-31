@@ -60,10 +60,6 @@
       cursor: pointer;
     }
 
-    .btn:hover {
-      background: #b71c1c;
-    }
-
     #loader {
       display: none;
       margin-top: 15px;
@@ -113,30 +109,29 @@
   </div>
 
 <script>
-  /* ⭐ קבלת פרמטרים מה־URL ⭐ */
+  /* קבלת פרמטרים */
   const params = new URLSearchParams(window.location.search);
   const token = params.get("token");
   const name = params.get("name");
-  const main = params.get("main");
-  const finished = params.get("finished");
-  const sub = params.get("sub");
+  const main = params.get("main");          // raw / finished
+  const finished = params.get("finished");  // תת מחסן של תוצר גמר
 
   if (!token) {
     alert("שגיאה: אין טוקן זיהוי");
     window.location.href = "index.html";
   }
 
-  /* ⭐ API URL ⭐ */
-  const API_URL = "https://script.google.com/macros/s/AKfycbzX5b5hPEF_wSx3zMh_CJ9if8u7Q_CTIg_UQhqqHr8hryUsBsdhMMa_rqaqizCvhAN99Q/exec";
+  /* API URL */
+  const API_URL = "YOUR_WEB_APP_URL"; // ← תעדכן כאן את ה־URL של ה־Apps Script
 
   let ocrResult = null;
 
-  /* ⭐ חזרה לדשבורד ⭐ */
+  /* חזרה לדשבורד */
   function goBack() {
     window.location.href = `dashboard.html?token=${token}&name=${encodeURIComponent(name)}`;
   }
 
-  /* ⭐ טיפול בתמונה ⭐ */
+  /* טיפול בתמונה */
   function handleImage(input) {
     const file = input.files[0];
     if (!file) return;
@@ -152,14 +147,18 @@
     reader.readAsDataURL(file);
   }
 
-  /* ⭐ OCR — GET במקום POST ⭐ */
+  /* OCR */
   async function runOCR(base64) {
     document.getElementById("loader").style.display = "block";
 
     try {
-      const response = await fetch(
-        `${API_URL}?action=processImage&image=${encodeURIComponent(base64)}`
-      );
+      const response = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          action: "processImage",
+          image: base64
+        })
+      });
 
       const data = await response.json();
       document.getElementById("loader").style.display = "none";
@@ -178,7 +177,7 @@
     }
   }
 
-  /* ⭐ הצגת OCR ⭐ */
+  /* הצגת OCR */
   function showOCR(parsed) {
     const box = document.getElementById("ocrBox");
     box.innerHTML = "";
@@ -203,7 +202,7 @@
     document.getElementById("saveBtn").style.display = "block";
   }
 
-  /* ⭐ שמירת דיווח — GET במקום POST ⭐ */
+  /* שמירת דיווח */
   async function saveReport() {
     if (!ocrResult) {
       alert("אין נתונים לשמירה");
@@ -215,10 +214,18 @@
 
     const action = main === "raw" ? "saveRawMaterial" : "saveReport";
 
+    const payload = {
+      action,
+      token,
+      ocr: ocrResult,
+      finishedWarehouse: finished   // רק לתוצר גמר
+    };
+
     try {
-      const response = await fetch(
-        `${API_URL}?action=${action}&token=${token}&subWarehouse=${sub}&ocr=${encodeURIComponent(JSON.stringify(ocrResult))}`
-      );
+      const response = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify(payload)
+      });
 
       const data = await response.json();
       document.getElementById("loader").style.display = "none";
