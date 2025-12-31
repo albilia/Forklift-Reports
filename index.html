@@ -5,11 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>דווחים</title>
 
-  <!-- אייקון למסך הבית של האייפון -->
   <link rel="apple-touch-icon" href="gilro-logo-v2.png">
   <link rel="icon" type="image/png" href="gilro-logo-v2.png">
 
-  <!-- הפעלת מצב אפליקציה באייפון ואנדרואיד -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="mobile-web-app-capable" content="yes">
@@ -82,7 +80,6 @@
       color: #444;
     }
 
-    /* ⭐ כפתור המבורגר ⭐ */
     .menu-button {
       position: fixed;
       top: 15px;
@@ -116,7 +113,6 @@
       transform: rotate(-45deg) translate(7px, -7px);
     }
 
-    /* ⭐ תפריט צד ⭐ */
     .side-menu {
       position: fixed;
       top: 0;
@@ -135,7 +131,6 @@
       right: 0;
     }
 
-    /* ⭐ רקע מתכהה ⭐ */
     .overlay {
       position: fixed;
       top: 0;
@@ -169,17 +164,14 @@
 </head>
 <body>
 
-  <!-- ⭐ כפתור המבורגר ⭐ -->
   <div class="menu-button" id="menuBtn">
     <span></span>
     <span></span>
     <span></span>
   </div>
 
-  <!-- ⭐ רקע מתכהה ⭐ -->
   <div class="overlay" id="overlay"></div>
 
-  <!-- ⭐ תפריט צד ⭐ -->
   <div id="sideMenu" class="side-menu">
 
     <div class="menu-item" onclick="openAbout()">אודות</div>
@@ -205,7 +197,6 @@
 
   </div>
 
-  <!-- ⭐ תוכן המסך ⭐ -->
   <div class="container">
     <img src="logo.jpg" class="logo" alt="לוגו">
 
@@ -220,7 +211,6 @@
   </div>
 
 <script>
-  /* ⭐ תפריט צד ⭐ */
   const menuBtn = document.getElementById("menuBtn");
   const sideMenu = document.getElementById("sideMenu");
   const overlay = document.getElementById("overlay");
@@ -238,14 +228,12 @@
     overlay.classList.remove("show");
   });
 
-  /* ⭐ רטט ⭐ */
   document.querySelectorAll("button, .menu-item").forEach(el => {
     el.addEventListener("click", () => {
       navigator.vibrate?.(15);
     });
   });
 
-  /* ⭐ פונקציות תפריט ⭐ */
   function openAbout() {
     alert("אודות המערכת:\nפותח על ידי ניסים אלביליה.");
   }
@@ -280,7 +268,7 @@
         body: JSON.stringify({
           action: "verifyOTP",
           phone: phone,
-          otp: "" // לא בשימוש כי OTP כבוי
+          otp: ""
         })
       });
 
@@ -292,7 +280,6 @@
         return;
       }
 
-      // קיבלנו שם אמיתי + טוקן
       const name = data.name;
       const token = data.token;
 
