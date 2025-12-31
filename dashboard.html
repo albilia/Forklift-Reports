@@ -2,23 +2,52 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>מערכת דווחים</title>
 
+    <!-- אפליקציה מלאה באייפון ואנדרואיד -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="mobile-web-app-capable" content="yes">
+
     <style>
-        body {
+        html, body {
+            height: 100%;
             margin: 0;
+            padding: 0;
+            overflow: hidden;
             font-family: Arial, sans-serif;
             background: #f5f5f5;
             text-align: center;
+        }
+
+        /* גלילה פנימית חלקה */
+        .app-container {
+            height: 100%;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .header {
             background: #d32f2f;
             color: white;
             padding: 15px;
+            padding-top: env(safe-area-inset-top);
             font-size: 22px;
             font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dark-toggle {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
         }
 
         .section {
@@ -106,24 +135,67 @@
             cursor: pointer;
             text-decoration: underline;
         }
+
+        /* ⭐⭐⭐ מצב כהה — מופעל ידנית ⭐⭐⭐ */
+        body.dark {
+            background: #121212;
+            color: white;
+        }
+
+        body.dark .header {
+            background: #b71c1c;
+        }
+
+        body.dark select,
+        body.dark input {
+            background: #1e1e1e;
+            color: white;
+            border: 1px solid #555;
+        }
+
+        body.dark button {
+            background: #b71c1c;
+        }
+
+        body.dark #historyBox {
+            background: #1e1e1e;
+            color: white;
+        }
+
+        body.dark table, 
+        body.dark th, 
+        body.dark td {
+            border-color: #444;
+        }
+
+        body.dark th {
+            background: #d32f2f;
+        }
+
+        body.dark .logout {
+            color: #bbb;
+        }
     </style>
 </head>
 
 <body>
 
-    <div class="header">מערכת דווחים</div>
+<div class="app-container">
+
+    <div class="header">
+        <span>מערכת דווחים</span>
+        <button class="dark-toggle" onclick="toggleDarkMode()">מצב כהה</button>
+    </div>
 
     <div class="section">
         <h3>שלום, <span id="driverName"></span></h3>
 
-        <!-- מחסן ראשי -->
         <select id="warehouse" onchange="toggleSubWarehouse()">
             <option value="">בחר מחסן...</option>
             <option value="raw">מחסן חומרי גלם</option>
             <option value="finished">מחסן תוצר גמר</option>
         </select>
 
-        <!-- תת־מחסנים -->
         <select id="subWarehouse" style="display:none;">
             <option value="">בחר תת־מחסן...</option>
             <option>דנידין</option>
@@ -160,218 +232,237 @@
 
     <div class="logout" onclick="logout()">התנתק</div>
 
-    <script>
+</div>
 
-        /* ← ה־API_URL שלך */
-        const API_URL = "https://script.google.com/macros/s/AKfycbzU-EYczORrSOsCj1yD9ogw4U0BzqarOGhekbILa_-zOFlCHMfcfC2zWEBIErETME3SJQ/exec";
+<script>
 
-        const token = localStorage.getItem("sessionToken");
-        const driverName = localStorage.getItem("driverName");
+const API_URL = "https://script.google.com/macros/s/AKfycbzU-EYczORrSOsCj1yD9ogw4U0BzqarOGhekbILa_-zOFlCHMfcfC2zWEBIErETME3SJQ/exec";
 
-        if (!token) {
-            window.location.href = "index.html";
-        }
+const token = localStorage.getItem("sessionToken");
+const driverName = localStorage.getItem("driverName");
 
-        document.getElementById("driverName").innerText = driverName;
+if (!token) {
+    window.location.href = "index.html";
+}
 
-        let lastImageBase64 = "";
+document.getElementById("driverName").innerText = driverName;
 
-        function toggleSubWarehouse() {
-            const warehouse = document.getElementById("warehouse").value;
-            const sub = document.getElementById("subWarehouse");
+/* ⭐ Dark Mode — שמירה והפעלה ⭐ */
+function applySavedTheme() {
+    const mode = localStorage.getItem("theme");
+    if (mode === "dark") {
+        document.body.classList.add("dark");
+        document.querySelector(".dark-toggle").innerText = "מצב בהיר";
+    }
+}
 
-            if (warehouse === "finished") {
-                sub.style.display = "block";
-            } else {
-                sub.style.display = "none";
-                sub.value = "";
-            }
-        }
+function toggleDarkMode() {
+    document.body.classList.toggle("dark");
 
-        function openCamera() {
-            document.getElementById("cameraInput").click();
-        }
+    const isDark = document.body.classList.contains("dark");
+    localStorage.setItem("theme", isDark ? "dark" : "light");
 
-        function showPreview(event) {
-            const file = event.target.files[0];
-            const reader = new FileReader();
+    document.querySelector(".dark-toggle").innerText =
+        isDark ? "מצב בהיר" : "מצב כהה";
+}
 
-            reader.onload = function(e) {
-                lastImageBase64 = e.target.result;
-                const img = document.getElementById("preview");
-                img.src = lastImageBase64;
-                img.style.display = "block";
-            };
+applySavedTheme();
 
-            reader.readAsDataURL(file);
-        }
+/* ⭐ המשך הקוד המקורי ⭐ */
 
-        /* שליחת דיווח עם OCR */
-        async function sendReport() {
-            const warehouse = document.getElementById("warehouse").value;
-            const subWarehouse = document.getElementById("subWarehouse").value;
+let lastImageBase64 = "";
 
-            if (!warehouse) {
-                alert("בחר מחסן");
-                return;
-            }
+function toggleSubWarehouse() {
+    const warehouse = document.getElementById("warehouse").value;
+    const sub = document.getElementById("subWarehouse");
 
-            if (warehouse === "finished" && !subWarehouse) {
-                alert("בחר תת־מחסן");
-                return;
-            }
+    if (warehouse === "finished") {
+        sub.style.display = "block";
+    } else {
+        sub.style.display = "none";
+        sub.value = "";
+    }
+}
 
-            if (!lastImageBase64) {
-                alert("צלם דו\"ח לפני שליחה");
-                return;
-            }
+function openCamera() {
+    document.getElementById("cameraInput").click();
+}
 
-            try {
-                // שלב 1 — OCR
-                const ocrResponse = await fetch(API_URL, {
-                    method: "POST",
-                    body: JSON.stringify({
-                        action: "processImage",
-                        image: lastImageBase64
-                    })
-                }).then(res => res.json());
+function showPreview(event) {
+    const file = event.target.files[0];
+    const reader = new FileReader();
 
-                if (!ocrResponse.success) {
-                    alert("שגיאה בפענוח OCR");
-                    return;
-                }
+    reader.onload = function(e) {
+        lastImageBase64 = e.target.result;
+        const img = document.getElementById("preview");
+        img.src = lastImageBase64;
+        img.style.display = "block";
+    };
 
-                // שלב 2 — שליחה לטבלה
-                const saveResponse = await fetch(API_URL, {
-                    method: "POST",
-                    body: JSON.stringify({
-                        action: warehouse === "raw" ? "saveRawMaterial" : "saveReport",
-                        token: token,
-                        ocr: ocrResponse.parsed,
-                        subWarehouse: subWarehouse
-                    })
-                }).then(res => res.json());
+    reader.readAsDataURL(file);
+}
 
-                if (saveResponse.success) {
-                    alert("הדיווח נשמר בהצלחה");
-                    lastImageBase64 = "";
-                    document.getElementById("preview").style.display = "none";
-                } else {
-                    alert("שגיאה בשליחה");
-                }
+async function sendReport() {
+    const warehouse = document.getElementById("warehouse").value;
+    const subWarehouse = document.getElementById("subWarehouse").value;
 
-            } catch (err) {
-                console.error(err);
-                alert("שגיאה בחיבור לשרת");
-            }
-        }
+    if (!warehouse) {
+        alert("בחר מחסן");
+        return;
+    }
 
-        /* היסטוריית דיווחים */
-        function loadHistory() {
-            const warehouse = document.getElementById("warehouse").value;
+    if (warehouse === "finished" && !subWarehouse) {
+        alert("בחר תת־מחסן");
+        return;
+    }
 
-            if (!warehouse) {
-                alert("בחר מחסן להצגת היסטוריה");
-                return;
-            }
+    if (!lastImageBase64) {
+        alert("צלם דו\"ח לפני שליחה");
+        return;
+    }
 
-            fetch(API_URL, {
-                method: "POST",
-                body: JSON.stringify({
-                    action: "getHistory",
-                    token: token,
-                    warehouse: warehouse
-                })
+    try {
+        const ocrResponse = await fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify({
+                action: "processImage",
+                image: lastImageBase64
             })
-            .then(res => res.json())
-            .then(data => {
-                if (!data.success) {
-                    alert("שגיאה בטעינת היסטוריה");
-                    return;
-                }
+        }).then(res => res.json());
 
-                const box = document.getElementById("historyBox");
-                box.style.display = "block";
+        if (!ocrResponse.success) {
+            alert("שגיאה בפענוח OCR");
+            return;
+        }
 
-                if (data.data.length === 0) {
-                    box.innerHTML = "<b>אין נתונים להצגה</b>";
-                    return;
-                }
+        const saveResponse = await fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify({
+                action: warehouse === "raw" ? "saveRawMaterial" : "saveReport",
+                token: token,
+                ocr: ocrResponse.parsed,
+                subWarehouse: subWarehouse
+            })
+        }).then(res => res.json());
 
-                box.innerHTML = `
-                    <div id="filters">
-                        <input type="date" id="fromDate">
-                        <input type="date" id="toDate">
-                        <input type="text" id="searchText" placeholder="חיפוש לפי מק״ט / פק״ע / שם">
-                    </div>
+        if (saveResponse.success) {
+            alert("הדיווח נשמר בהצלחה");
+            lastImageBase64 = "";
+            document.getElementById("preview").style.display = "none";
+        } else {
+            alert("שגיאה בשליחה");
+        }
 
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>📅 תאריך</th>
-                                <th>⏰ שעה</th>
-                                <th>🔢 מק"ט</th>
-                                <th>📦 פק"ע</th>
-                                <th>🔢 כמות</th>
-                                <th>👤 מדווח</th>
-                            </tr>
-                        </thead>
-                        <tbody id="historyRows"></tbody>
-                    </table>
+    } catch (err) {
+        console.error(err);
+        alert("שגיאה בחיבור לשרת");
+    }
+}
+
+function loadHistory() {
+    const warehouse = document.getElementById("warehouse").value;
+
+    if (!warehouse) {
+        alert("בחר מחסן להצגת היסטוריה");
+        return;
+    }
+
+    fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+            action: "getHistory",
+            token: token,
+            warehouse: warehouse
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (!data.success) {
+            alert("שגיאה בטעינת היסטוריה");
+            return;
+        }
+
+        const box = document.getElementById("historyBox");
+        box.style.display = "block";
+
+        if (data.data.length === 0) {
+            box.innerHTML = "<b>אין נתונים להצגה</b>";
+            return;
+        }
+
+        box.innerHTML = `
+            <div id="filters">
+                <input type="date" id="fromDate">
+                <input type="date" id="toDate">
+                <input type="text" id="searchText" placeholder="חיפוש לפי מק״ט / פק״ע / שם">
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>📅 תאריך</th>
+                        <th>⏰ שעה</th>
+                        <th>🔢 מק"ט</th>
+                        <th>📦 פק"ע</th>
+                        <th>🔢 כמות</th>
+                        <th>👤 מדווח</th>
+                    </tr>
+                </thead>
+                <tbody id="historyRows"></tbody>
+            </table>
+        `;
+
+        const tbody = document.getElementById("historyRows");
+
+        function renderTable() {
+            const from = document.getElementById("fromDate").value;
+            const to = document.getElementById("toDate").value;
+            const search = document.getElementById("searchText").value.trim();
+
+            tbody.innerHTML = "";
+
+            data.data.forEach(row => {
+                const date = row[0].split(" ")[0];
+                const makat = row[2] || "";
+                const pka = row[3] || "";
+                const qty = row[4] || "";
+                const user = row[6] || "";
+
+                if (from && date < from) return;
+                if (to && date > to) return;
+
+                if (search && !(
+                    makat.includes(search) ||
+                    pka.includes(search) ||
+                    user.includes(search)
+                )) return;
+
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${row[0]}</td>
+                    <td>${row[1]}</td>
+                    <td>${makat}</td>
+                    <td>${pka}</td>
+                    <td>${qty}</td>
+                    <td>${user}</td>
                 `;
-
-                const tbody = document.getElementById("historyRows");
-
-                function renderTable() {
-                    const from = document.getElementById("fromDate").value;
-                    const to = document.getElementById("toDate").value;
-                    const search = document.getElementById("searchText").value.trim();
-
-                    tbody.innerHTML = "";
-
-                    data.data.forEach(row => {
-                        const date = row[0].split(" ")[0];
-                        const makat = row[2] || "";
-                        const pka = row[3] || "";
-                        const qty = row[4] || "";
-                        const user = row[6] || "";
-
-                        if (from && date < from) return;
-                        if (to && date > to) return;
-
-                        if (search && !(
-                            makat.includes(search) ||
-                            pka.includes(search) ||
-                            user.includes(search)
-                        )) return;
-
-                        const tr = document.createElement("tr");
-                        tr.innerHTML = `
-                            <td>${row[0]}</td>
-                            <td>${row[1]}</td>
-                            <td>${makat}</td>
-                            <td>${pka}</td>
-                            <td>${qty}</td>
-                            <td>${user}</td>
-                        `;
-                        tbody.appendChild(tr);
-                    });
-                }
-
-                document.getElementById("fromDate").onchange = renderTable;
-                document.getElementById("toDate").onchange = renderTable;
-                document.getElementById("searchText").oninput = renderTable;
-
-                renderTable();
+                tbody.appendChild(tr);
             });
         }
 
-        function logout() {
-            localStorage.clear();
-            window.location.href = "index.html";
-        }
+        document.getElementById("fromDate").onchange = renderTable;
+        document.getElementById("toDate").onchange = renderTable;
+        document.getElementById("searchText").oninput = renderTable;
 
-    </script>
+        renderTable();
+    });
+}
 
-</body>
+function logout() {
+    localStorage.clear();
+    window.location.href = "index.html";
+}
+
+</script>
+
 </html>
