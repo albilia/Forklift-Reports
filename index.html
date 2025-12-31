@@ -82,7 +82,7 @@
       color: #444;
     }
 
-    /* ⭐ כפתור המבורגר מונפש ⭐ */
+    /* ⭐ כפתור המבורגר ⭐ */
     .menu-button {
       position: fixed;
       top: 15px;
@@ -165,28 +165,11 @@
     .menu-item:hover {
       background: #f0f0f0;
     }
-
-    /* ⭐ תמיכה ב־Dark Mode ⭐ */
-    body.dark .side-menu {
-      background: #1e1e1e;
-      color: white;
-    }
-
-    body.dark .menu-item {
-      border-bottom: 1px solid #444;
-    }
-
-    body.dark .menu-item:hover {
-      background: #333;
-    }
-
-    body.dark .menu-button span {
-      background: white;
-    }
   </style>
 </head>
 <body>
-  <!-- ⭐ אייקון המבורגר מונפש ⭐ -->
+
+  <!-- ⭐ כפתור המבורגר ⭐ -->
   <div class="menu-button" id="menuBtn">
     <span></span>
     <span></span>
@@ -196,40 +179,33 @@
   <!-- ⭐ רקע מתכהה ⭐ -->
   <div class="overlay" id="overlay"></div>
 
-  <!-- ⭐ תפריט צד חדש ⭐ -->
+  <!-- ⭐ תפריט צד ⭐ -->
   <div id="sideMenu" class="side-menu">
 
-    <!-- אודות -->
     <div class="menu-item" onclick="openAbout()">אודות</div>
-
-    <!-- שלבים -->
     <div class="menu-item" onclick="openSteps()">שלבים</div>
-
-    <!-- פתיחת טיקט -->
     <div class="menu-item" onclick="openGithub()">פתיחת טיקט 🐱‍💻</div>
 
-    <!-- זכויות יוצרים -->
-    <div style="text-align: center; margin-top: 15px; font-size: 12px; color: #666;">
+    <div style="text-align:center; margin-top:15px; font-size:12px; color:#666;">
       פותח על ידי ניסים אלביליה ©
     </div>
 
-    <!-- תמונה עגולה -->
-    <div style="text-align: center; margin-top: 10px;">
+    <div style="text-align:center; margin-top:10px;">
       <img 
         src="https://raw.githubusercontent.com/albilia/Forklift-Reports/main/me.jpg"
         alt="תמונה"
         style="
-          width: 80px;
-          height: 80px;
-          border-radius: 50%;
-          object-fit: cover;
+          width:80px;
+          height:80px;
+          border-radius:50%;
+          object-fit:cover;
         "
       >
     </div>
 
   </div>
 
-  <!-- ⭐ תוכן המסך המקורי ⭐ -->
+  <!-- ⭐ תוכן המסך ⭐ -->
   <div class="container">
     <img src="logo.jpg" class="logo" alt="לוגו">
 
@@ -238,14 +214,13 @@
 
     <input id="phone" type="tel" placeholder="05XXXXXXXX">
 
-    <br>
-
     <button onclick="login()">כניסה</button>
 
-    <div id="loader">מבצע פעולה...</div>
+    <div id="loader">מתחבר...</div>
   </div>
+
 <script>
-  /* ⭐ פתיחה וסגירה של תפריט הצד ⭐ */
+  /* ⭐ תפריט צד ⭐ */
   const menuBtn = document.getElementById("menuBtn");
   const sideMenu = document.getElementById("sideMenu");
   const overlay = document.getElementById("overlay");
@@ -263,14 +238,14 @@
     overlay.classList.remove("show");
   });
 
-  /* ⭐ רטט לכל הכפתורים ⭐ */
+  /* ⭐ רטט ⭐ */
   document.querySelectorAll("button, .menu-item").forEach(el => {
     el.addEventListener("click", () => {
       navigator.vibrate?.(15);
     });
   });
 
-  /* ⭐ פונקציות ניווט ⭐ */
+  /* ⭐ פונקציות תפריט ⭐ */
   function openAbout() {
     alert("אודות המערכת:\nפותח על ידי ניסים אלביליה.");
   }
@@ -283,7 +258,7 @@
     window.open("https://github.com/albilia/Forklift-Reports/issues", "_blank");
   }
 
-  /* ⭐ פונקציית כניסה ⭐ */
+  /* ⭐ כניסה ⭐ */
   function login() {
     const phone = document.getElementById("phone").value.trim();
     const loader = document.getElementById("loader");
@@ -295,10 +270,15 @@
 
     loader.style.display = "block";
 
+    // ⭐ כאן מוגדר שם המשתמש לפי מספר הטלפון ⭐
+    // בעתיד תוכל להחליף למקור אמיתי (API / DB)
+    let userName = "ניסים אלביליה";
+
     setTimeout(() => {
-      window.location.href = "dashboard.html?phone=" + phone;
+      window.location.href = `dashboard.html?phone=${phone}&name=${encodeURIComponent(userName)}`;
     }, 800);
   }
 </script>
+
 </body>
 </html>
