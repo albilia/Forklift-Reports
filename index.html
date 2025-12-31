@@ -74,12 +74,6 @@
             color: #444;
         }
 
-        footer {
-            margin-top: 40px;
-            color: #777;
-            font-size: 14px;
-        }
-
         .menu-button {
             position: fixed;
             top: 15px;
@@ -121,9 +115,35 @@
     <div class="menu-button" onclick="toggleMenu()">☰</div>
 
     <div id="sideMenu" class="side-menu">
+
+        <!-- אודות -->
         <div class="menu-item" onclick="openAbout()">אודות</div>
+
+        <!-- שלבים -->
         <div class="menu-item" onclick="openSteps()">שלבים</div>
+
+        <!-- פתיחת טיקט -->
         <div class="menu-item" onclick="openGithub()">פתיחת טיקט 🐱‍💻</div>
+
+        <!-- זכויות יוצרים -->
+        <div style="text-align: center; margin-top: 15px; font-size: 12px; color: #666;">
+            פותח על ידי ניסים אלביליה ©
+        </div>
+
+        <!-- תמונה עגולה קטנה -->
+        <div style="text-align: center; margin-top: 10px;">
+            <img 
+                src="https://raw.githubusercontent.com/albilia/Forklift-Reports/main/me.jpg"
+                alt="תמונה"
+                style="
+                    width: 80px;
+                    height: 80px;
+                    border-radius: 50%;
+                    object-fit: cover;
+                "
+            >
+        </div>
+
     </div>
 
     <div class="container">
@@ -140,10 +160,6 @@
 
         <div id="loader">מבצע פעולה...</div>
     </div>
-
-    <footer>
-        פותח על ידי ניסים אלביליה ©
-    </footer>
 
     <script>
 
