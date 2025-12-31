@@ -69,7 +69,6 @@
             text-align: right;
         }
 
-        /* טבלת היסטוריה */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -88,7 +87,6 @@
             color: white;
         }
 
-        /* סינון */
         #filters {
             margin-top: 10px;
             text-align: right;
@@ -143,7 +141,8 @@
 
     <script>
 
-        const API_URL = "YOUR_WEB_APP_URL_HERE";  /* ← שים כאן את ה־URL של ה־Web App */
+        /* ← ה־API_URL המתוקן שלך */
+        const API_URL = "https://script.google.com/macros/s/AKfycbzU-EYczORrSOsCj1yD9ogw4U0BzqarOGhekbILa_-zOFlCHMfcfC2zWEBIErETME3SJQ/exec";
 
         const token = localStorage.getItem("sessionToken");
         const driverName = localStorage.getItem("driverName");
@@ -174,7 +173,6 @@
             reader.readAsDataURL(file);
         }
 
-        /* שליחת דיווח עם OCR */
         async function sendReport() {
             const warehouse = document.getElementById("warehouse").value;
 
@@ -188,7 +186,6 @@
                 return;
             }
 
-            // שלב 1 — OCR
             const ocrResponse = await fetch(API_URL, {
                 method: "POST",
                 body: JSON.stringify({
@@ -202,7 +199,6 @@
                 return;
             }
 
-            // שלב 2 — שליחה לטבלה הנכונה
             const saveResponse = await fetch(API_URL, {
                 method: "POST",
                 body: JSON.stringify({
@@ -221,7 +217,6 @@
             }
         }
 
-        /* היסטוריית דיווחים עם טבלה + סינון */
         function loadHistory() {
             const warehouse = document.getElementById("warehouse").value;
 
