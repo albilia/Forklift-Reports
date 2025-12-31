@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>מערכת דווחים</title>
+    <title>דיווח משטחים</title>
 
     <style>
         body {
@@ -69,6 +69,7 @@
             text-align: right;
         }
 
+        /* טבלת היסטוריה */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -87,6 +88,7 @@
             color: white;
         }
 
+        /* סינון */
         #filters {
             margin-top: 10px;
             text-align: right;
@@ -111,7 +113,7 @@
 
 <body>
 
-    <div class="header">מערכת דווחים</div>
+    <div class="header">דיווח משטחים</div>
 
     <div class="section">
         <h3>שלום, <span id="driverName"></span></h3>
@@ -140,7 +142,8 @@
     <div class="logout" onclick="logout()">התנתק</div>
 
     <script>
-        const API_URL = "YOUR_WEB_APP_URL_HERE"; // ← שים כאן את כתובת ה־Web App שלך
+
+        const API_URL = "YOUR_WEB_APP_URL_HERE";  /* ← שים כאן את ה־URL של ה־Web App */
 
         const token = localStorage.getItem("sessionToken");
         const driverName = localStorage.getItem("driverName");
@@ -171,6 +174,7 @@
             reader.readAsDataURL(file);
         }
 
+        /* שליחת דיווח עם OCR */
         async function sendReport() {
             const warehouse = document.getElementById("warehouse").value;
 
@@ -184,6 +188,7 @@
                 return;
             }
 
+            // שלב 1 — OCR
             const ocrResponse = await fetch(API_URL, {
                 method: "POST",
                 body: JSON.stringify({
@@ -197,6 +202,7 @@
                 return;
             }
 
+            // שלב 2 — שליחה לטבלה הנכונה
             const saveResponse = await fetch(API_URL, {
                 method: "POST",
                 body: JSON.stringify({
@@ -215,6 +221,7 @@
             }
         }
 
+        /* היסטוריית דיווחים עם טבלה + סינון */
         function loadHistory() {
             const warehouse = document.getElementById("warehouse").value;
 
@@ -306,4 +313,20 @@
                     });
                 }
 
-                document.getElementById("
+                document.getElementById("fromDate").onchange = renderTable;
+                document.getElementById("toDate").onchange = renderTable;
+                document.getElementById("searchText").oninput = renderTable;
+
+                renderTable();
+            });
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = "index.html";
+        }
+
+    </script>
+
+</body>
+</html>
