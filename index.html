@@ -3,15 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>דווחים</title>
-
-    <!-- אייקון למסך הבית של האייפון -->
-    <link rel="apple-touch-icon" href="gilro-logo-v2.png">
-    <link rel="icon" type="image/png" href="gilro-logo-v2.png">
-
-    <!-- הפעלת מצב אפליקציה באייפון -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <title>דיווח משטחים</title>
 
     <style>
         body {
@@ -21,199 +13,206 @@
             text-align: center;
         }
 
-        .container {
-            margin-top: 60px;
-        }
-
-        .logo {
-            width: 120px;
-            margin-bottom: 20px;
-        }
-
-        .main-title {
-            font-size: 26px;
-            margin-bottom: 10px;
+        .header {
+            background: #d32f2f;
+            color: white;
+            padding: 15px;
+            font-size: 22px;
             font-weight: bold;
         }
 
-        .sub-title {
-            font-size: 20px;
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        input {
-            width: 220px;
-            padding: 12px;
-            font-size: 18px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            margin-bottom: 15px;
-            text-align: center;
+        .section {
+            margin-top: 25px;
         }
 
         button {
-            width: 240px;
-            padding: 12px;
+            width: 260px;
+            padding: 14px;
             font-size: 18px;
             background: #d32f2f;
             color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
+            margin-top: 10px;
         }
 
         button:hover {
             background: #b71c1c;
         }
 
-        #loader {
-            display: none;
+        select {
+            width: 260px;
+            padding: 12px;
+            font-size: 18px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+        }
+
+        #preview {
             margin-top: 20px;
-            font-size: 18px;
-            color: #444;
+            max-width: 90%;
+            border-radius: 10px;
+            display: none;
         }
 
-        footer {
-            margin-top: 40px;
-            color: #777;
-            font-size: 14px;
-        }
-
-        .menu-button {
-            position: fixed;
-            top: 15px;
-            right: 15px;
-            font-size: 28px;
-            cursor: pointer;
-            z-index: 1000;
-        }
-
-        .side-menu {
-            position: fixed;
-            top: 0;
-            right: -220px;
-            width: 220px;
-            height: 100%;
-            background: white;
-            box-shadow: -3px 0 8px rgba(0,0,0,0.2);
-            transition: 0.3s;
-            padding-top: 60px;
-            z-index: 999;
-        }
-
-        .menu-item {
+        #historyBox {
+            margin-top: 25px;
             padding: 15px;
-            border-bottom: 1px solid #ddd;
-            font-size: 18px;
-            cursor: pointer;
+            background: white;
+            border-radius: 10px;
+            width: 90%;
+            margin-left: auto;
+            margin-right: auto;
+            display: none;
             text-align: right;
         }
 
-        .menu-item:hover {
-            background: #f0f0f0;
+        .logout {
+            margin-top: 40px;
+            color: #444;
+            cursor: pointer;
+            text-decoration: underline;
         }
     </style>
 </head>
 
 <body>
 
-    <div class="menu-button" onclick="toggleMenu()">☰</div>
+    <div class="header">דיווח משטחים</div>
 
-    <div id="sideMenu" class="side-menu">
-        <div class="menu-item" onclick="openAbout()">אודות</div>
-        <div class="menu-item" onclick="openSteps()">שלבים</div>
-        <div class="menu-item" onclick="openGithub()">פתיחת טיקט 🐱‍💻</div>
-    </div>
+    <div class="section">
+        <h3>שלום, <span id="driverName"></span></h3>
 
-    <div class="container">
-        <img src="logo.jpg" class="logo" alt="לוגו">
-
-        <div class="main-title">העברת דווחים</div>
-        <div class="sub-title">הזן מספר טלפון כדי להיכנס</div>
-
-        <input id="phone" type="tel" placeholder="05XXXXXXXX">
+        <select id="warehouse">
+            <option value="">בחר מחסן...</option>
+            <option value="raw">מחסן חומרי גלם</option>
+            <option value="reports">מחסן העברת דו"חות</option>
+        </select>
 
         <br>
 
-        <button onclick="login()">כניסה</button>
+        <button onclick="openCamera()">צלם דו"ח</button>
 
-        <div id="loader">מבצע פעולה...</div>
+        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none" onchange="showPreview(event)">
+
+        <img id="preview">
     </div>
 
-    <footer>
-        פותח על ידי ניסים אלביליה ©
-    </footer>
+    <button onclick="sendReport()">שלח דיווח</button>
+
+    <button onclick="loadHistory()">היסטוריית דיווחים</button>
+
+    <div id="historyBox"></div>
+
+    <div class="logout" onclick="logout()">התנתק</div>
 
     <script>
 
-        const API_URL = "https://script.google.com/macros/s/AKfycbzU-EYczORrSOsCj1yD9ogw4U0BzqarOGhekbILa_-zOFlCHMfcfC2zWEBIErETME3SJQ/exec";
+        const API_URL = "YOUR_WEB_APP_URL_HERE";
 
-        function toggleMenu() {
-            const menu = document.getElementById("sideMenu");
-            menu.style.right = (menu.style.right === "0px") ? "-220px" : "0px";
+        const token = localStorage.getItem("sessionToken");
+        const driverName = localStorage.getItem("driverName");
+
+        if (!token) {
+            window.location.href = "index.html";
         }
 
-        function openAbout() {
-            alert(
-                "אודות:\n" +
-                "אפליקציית 'העברת דווחים' נועדה לתיעוד דווחי המשטחים והעברת הנתונים לטבלאות Google Sheet."
-            );
+        document.getElementById("driverName").innerText = driverName;
+
+        let lastImageBase64 = "";
+
+        function openCamera() {
+            document.getElementById("cameraInput").click();
         }
 
-        function openSteps() {
-            alert(
-                "שלבים:\n\n" +
-                "1. הזנת מספר טלפון.\n" +
-                "2. כניסה למערכת ללא OTP (זמני)."
-            );
+        function showPreview(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                lastImageBase64 = e.target.result;
+                const img = document.getElementById("preview");
+                img.src = lastImageBase64;
+                img.style.display = "block";
+            };
+
+            reader.readAsDataURL(file);
         }
 
-        function openGithub() {
-            window.open("https://github.com/albilia/Forklift-Reports/issues");
-        }
+        async function sendReport() {
+            const warehouse = document.getElementById("warehouse").value;
 
-        /* -----------------------------
-           כניסה ללא OTP
-        ------------------------------ */
-        function login() {
-            const phone = document.getElementById("phone").value.trim();
-
-            if (!phone || phone.length < 9) {
-                alert("נא להזין מספר טלפון תקין");
+            if (!warehouse) {
+                alert("בחר מחסן");
                 return;
             }
 
-            document.getElementById("loader").style.display = "block";
+            if (!lastImageBase64) {
+                alert("צלם דו\"ח לפני שליחה");
+                return;
+            }
+
+            const saveResponse = await fetch(API_URL, {
+                method: "POST",
+                body: JSON.stringify({
+                    action: warehouse === "raw" ? "saveRawMaterial" : "saveReport",
+                    token: token,
+                    image: lastImageBase64
+                })
+            }).then(res => res.json());
+
+            if (saveResponse.success) {
+                alert("הדיווח נשמר בהצלחה");
+                lastImageBase64 = "";
+                document.getElementById("preview").style.display = "none";
+            } else {
+                alert("שגיאה בשליחה");
+            }
+        }
+
+        function loadHistory() {
+            const warehouse = document.getElementById("warehouse").value;
+
+            if (!warehouse) {
+                alert("בחר מחסן להצגת היסטוריה");
+                return;
+            }
 
             fetch(API_URL, {
                 method: "POST",
                 body: JSON.stringify({
-                    action: "verifyOTP",
-                    phone: phone,
-                    otp: "0000"
+                    action: "getHistory",
+                    token: token,
+                    warehouse: warehouse
                 })
             })
             .then(res => res.json())
             .then(data => {
-                document.getElementById("loader").style.display = "none";
-
                 if (!data.success) {
-                    alert("מספר לא מאושר");
+                    alert("שגיאה בטעינת היסטוריה");
                     return;
                 }
 
-                localStorage.setItem("sessionToken", data.token);
-                localStorage.setItem("driverName", data.name);
-                localStorage.setItem("role", data.role);
+                const box = document.getElementById("historyBox");
+                box.innerHTML = "";
+                box.style.display = "block";
 
-                window.location.href = "dashboard.html";
-            })
-            .catch(err => {
-                document.getElementById("loader").style.display = "none";
-                alert("שגיאה בחיבור לשרת");
-                console.error(err);
+                if (data.data.length === 0) {
+                    box.innerHTML = "<b>אין נתונים להצגה</b>";
+                    return;
+                }
+
+                data.data.forEach(row => {
+                    box.innerHTML += `<div>📌 ${row[0]} — ${row[2]} — ${row[3] || ""}</div>`;
+                });
             });
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = "index.html";
         }
 
     </script>
