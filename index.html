@@ -1,238 +1,242 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>דווחים</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>דווחים</title>
 
-    <!-- אייקון למסך הבית של האייפון -->
-    <link rel="apple-touch-icon" href="gilro-logo-v2.png">
-    <link rel="icon" type="image/png" href="gilro-logo-v2.png">
+  <!-- אייקון למסך הבית של האייפון -->
+  <link rel="apple-touch-icon" href="gilro-logo-v2.png">
+  <link rel="icon" type="image/png" href="gilro-logo-v2.png">
 
-    <!-- הפעלת מצב אפליקציה באייפון -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <!-- הפעלת מצב אפליקציה באייפון ואנדרואיד -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="mobile-web-app-capable" content="yes">
 
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
-            text-align: center;
-        }
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      text-align: center;
+    }
 
-        .container {
-            margin-top: 60px;
-        }
+    .container {
+      height: calc(100vh - 60px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
 
-        .logo {
-            width: 120px;
-            margin-bottom: 20px;
-        }
+    .logo {
+      width: 120px;
+      margin-bottom: 20px;
+    }
 
-        .main-title {
-            font-size: 26px;
-            margin-bottom: 10px;
-            font-weight: bold;
-        }
+    .main-title {
+      font-size: 26px;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
 
-        .sub-title {
-            font-size: 20px;
-            margin-bottom: 20px;
-            color: #333;
-        }
+    .sub-title {
+      font-size: 20px;
+      margin-bottom: 20px;
+      color: #333;
+    }
 
-        input {
-            width: 220px;
-            padding: 12px;
-            font-size: 18px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            margin-bottom: 15px;
-            text-align: center;
-        }
+    input {
+      width: 220px;
+      padding: 12px;
+      font-size: 18px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 15px;
+      text-align: center;
+    }
 
-        button {
-            width: 240px;
-            padding: 12px;
-            font-size: 18px;
-            background: #d32f2f;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-        }
+    button {
+      width: 240px;
+      padding: 12px;
+      font-size: 18px;
+      background: #d32f2f;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
 
-        button:hover {
-            background: #b71c1c;
-        }
+    button:hover {
+      background: #b71c1c;
+    }
 
-        #loader {
-            display: none;
-            margin-top: 20px;
-            font-size: 18px;
-            color: #444;
-        }
+    #loader {
+      display: none;
+      margin-top: 20px;
+      font-size: 18px;
+      color: #444;
+    }
 
-        .menu-button {
-            position: fixed;
-            top: 15px;
-            right: 15px;
-            font-size: 28px;
-            cursor: pointer;
-            z-index: 1000;
-        }
+    .menu-button {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      font-size: 28px;
+      cursor: pointer;
+      z-index: 1000;
+    }
 
-        .side-menu {
-            position: fixed;
-            top: 0;
-            right: -220px;
-            width: 220px;
-            height: 100%;
-            background: white;
-            box-shadow: -3px 0 8px rgba(0,0,0,0.2);
-            transition: 0.3s;
-            padding-top: 60px;
-            z-index: 999;
-        }
+    .side-menu {
+      position: fixed;
+      top: 0;
+      right: -220px;
+      width: 220px;
+      height: 100%;
+      background: white;
+      box-shadow: -3px 0 8px rgba(0,0,0,0.2);
+      transition: 0.3s;
+      padding-top: 60px;
+      z-index: 999;
+      overflow-y: auto;
+    }
 
-        .menu-item {
-            padding: 15px;
-            border-bottom: 1px solid #ddd;
-            font-size: 18px;
-            cursor: pointer;
-            text-align: right;
-        }
+    .menu-item {
+      padding: 15px;
+      border-bottom: 1px solid #ddd;
+      font-size: 18px;
+      cursor: pointer;
+      text-align: right;
+    }
 
-        .menu-item:hover {
-            background: #f0f0f0;
-        }
-    </style>
+    .menu-item:hover {
+      background: #f0f0f0;
+    }
+  </style>
 </head>
 
 <body>
 
-    <div class="menu-button" onclick="toggleMenu()">☰</div>
+  <div class="menu-button" onclick="toggleMenu()">☰</div>
 
-    <div id="sideMenu" class="side-menu">
+  <div id="sideMenu" class="side-menu">
 
-        <!-- אודות -->
-        <div class="menu-item" onclick="openAbout()">אודות</div>
+    <!-- אודות -->
+    <div class="menu-item" onclick="openAbout()">אודות</div>
 
-        <!-- שלבים -->
-        <div class="menu-item" onclick="openSteps()">שלבים</div>
+    <!-- שלבים -->
+    <div class="menu-item" onclick="openSteps()">שלבים</div>
 
-        <!-- פתיחת טיקט -->
-        <div class="menu-item" onclick="openGithub()">פתיחת טיקט 🐱‍💻</div>
+    <!-- פתיחת טיקט -->
+    <div class="menu-item" onclick="openGithub()">פתיחת טיקט 🐱‍💻</div>
 
-        <!-- זכויות יוצרים -->
-        <div style="text-align: center; margin-top: 15px; font-size: 12px; color: #666;">
-            פותח על ידי ניסים אלביליה ©
-        </div>
-
-        <!-- תמונה עגולה קטנה -->
-        <div style="text-align: center; margin-top: 10px;">
-            <img 
-                src="https://raw.githubusercontent.com/albilia/Forklift-Reports/main/me.jpg"
-                alt="תמונה"
-                style="
-                    width: 80px;
-                    height: 80px;
-                    border-radius: 50%;
-                    object-fit: cover;
-                "
-            >
-        </div>
-
+    <!-- זכויות יוצרים -->
+    <div style="text-align: center; margin-top: 15px; font-size: 12px; color: #666;">
+      פותח על ידי ניסים אלביליה ©
     </div>
 
-    <div class="container">
-        <img src="logo.jpg" class="logo" alt="לוגו">
-
-        <div class="main-title">העברת דווחים</div>
-        <div class="sub-title">הזן מספר טלפון כדי להיכנס</div>
-
-        <input id="phone" type="tel" placeholder="05XXXXXXXX">
-
-        <br>
-
-        <button onclick="login()">כניסה</button>
-
-        <div id="loader">מבצע פעולה...</div>
+    <!-- תמונה עגולה קטנה -->
+    <div style="text-align: center; margin-top: 10px;">
+      <img 
+        src="https://raw.githubusercontent.com/albilia/Forklift-Reports/main/me.jpg"
+        alt="תמונה"
+        style="
+          width: 80px;
+          height: 80px;
+          border-radius: 50%;
+          object-fit: cover;
+        "
+      >
     </div>
 
-    <script>
+  </div>
 
-        const API_URL = "https://script.google.com/macros/s/AKfycbzU-EYczORrSOsCj1yD9ogw4U0BzqarOGhekbILa_-zOFlCHMfcfC2zWEBIErETME3SJQ/exec";
+  <div class="container">
+    <img src="logo.jpg" class="logo" alt="לוגו">
 
-        function toggleMenu() {
-            const menu = document.getElementById("sideMenu");
-            menu.style.right = (menu.style.right === "0px") ? "-220px" : "0px";
+    <div class="main-title">העברת דווחים</div>
+    <div class="sub-title">הזן מספר טלפון כדי להיכנס</div>
+
+    <input id="phone" type="tel" placeholder="05XXXXXXXX">
+
+    <br>
+
+    <button onclick="login()">כניסה</button>
+
+    <div id="loader">מבצע פעולה...</div>
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbzU-EYczORrSOsCj1yD9ogw4U0BzqarOGhekbILa_-zOFlCHMfcfC2zWEBIErETME3SJQ/exec";
+
+    function toggleMenu() {
+      const menu = document.getElementById("sideMenu");
+      menu.style.right = (menu.style.right === "0px") ? "-220px" : "0px";
+    }
+
+    function openAbout() {
+      alert(
+        "אודות:\n" +
+        "אפליקציית 'העברת דווחים' נועדה לתיעוד דווחי המשטחים והעברת הנתונים לטבלאות Google Sheet."
+      );
+    }
+
+    function openSteps() {
+      alert(
+        "שלבים:\n\n" +
+        "1. הזנת מספר טלפון.\n" +
+        "2. כניסה למערכת ללא OTP (זמני)."
+      );
+    }
+
+    function openGithub() {
+      window.open("https://github.com/albilia/Forklift-Reports/issues");
+    }
+
+    function login() {
+      const phone = document.getElementById("phone").value.trim();
+
+      if (!phone || phone.length < 9) {
+        alert("נא להזין מספר טלפון תקין");
+        return;
+      }
+
+      document.getElementById("loader").style.display = "block";
+
+      fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          action: "verifyOTP",
+          phone: phone,
+          otp: "0000"
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("loader").style.display = "none";
+
+        if (!data.success) {
+          alert("מספר לא מאושר");
+          return;
         }
 
-        function openAbout() {
-            alert(
-                "אודות:\n" +
-                "אפליקציית 'העברת דווחים' נועדה לתיעוד דווחי המשטחים והעברת הנתונים לטבלאות Google Sheet."
-            );
-        }
+        localStorage.setItem("sessionToken", data.token);
+        localStorage.setItem("driverName", data.name);
+        localStorage.setItem("role", data.role);
 
-        function openSteps() {
-            alert(
-                "שלבים:\n\n" +
-                "1. הזנת מספר טלפון.\n" +
-                "2. כניסה למערכת ללא OTP (זמני)."
-            );
-        }
-
-        function openGithub() {
-            window.open("https://github.com/albilia/Forklift-Reports/issues");
-        }
-
-        /* -----------------------------
-           כניסה ללא OTP
-        ------------------------------ */
-        function login() {
-            const phone = document.getElementById("phone").value.trim();
-
-            if (!phone || phone.length < 9) {
-                alert("נא להזין מספר טלפון תקין");
-                return;
-            }
-
-            document.getElementById("loader").style.display = "block";
-
-            fetch(API_URL, {
-                method: "POST",
-                body: JSON.stringify({
-                    action: "verifyOTP",
-                    phone: phone,
-                    otp: "0000"
-                })
-            })
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById("loader").style.display = "none";
-
-                if (!data.success) {
-                    alert("מספר לא מאושר");
-                    return;
-                }
-
-                localStorage.setItem("sessionToken", data.token);
-                localStorage.setItem("driverName", data.name);
-                localStorage.setItem("role", data.role);
-
-                window.location.href = "dashboard.html";
-            })
-            .catch(err => {
-                document.getElementById("loader").style.display = "none";
-                alert("שגיאה בחיבור לשרת");
-                console.error(err);
-            });
-        }
-
-    </script>
+        window.location.href = "dashboard.html";
+      })
+      .catch(err => {
+        document.getElementById("loader").style.display = "none";
+        alert("שגיאה בחיבור לשרת");
+        console.error(err);
+      });
+    }
+  </script>
 
 </body>
 </html>
