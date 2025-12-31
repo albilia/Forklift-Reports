@@ -37,28 +37,9 @@
       font-weight: bold;
     }
 
-    .logout-btn:hover {
-      background: #ffe5e5;
-    }
-
     .content {
       padding: 20px;
       text-align: center;
-    }
-
-    .report-box {
-      background: white;
-      padding: 20px;
-      margin: 15px auto;
-      width: 85%;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-      font-size: 18px;
-      cursor: pointer;
-    }
-
-    .report-box:hover {
-      background: #f0f0f0;
     }
 
     label {
@@ -77,124 +58,26 @@
       margin-bottom: 20px;
     }
 
-    .menu-button {
-      position: absolute;
-      right: 15px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 35px;
-      height: 30px;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .menu-button span {
-      display: block;
-      height: 4px;
+    .report-box {
       background: white;
-      border-radius: 4px;
-      transition: 0.35s;
-    }
-
-    .menu-button.active span:nth-child(1) {
-      transform: rotate(45deg) translate(6px, 6px);
-    }
-
-    .menu-button.active span:nth-child(2) {
-      opacity: 0;
-    }
-
-    .menu-button.active span:nth-child(3) {
-      transform: rotate(-45deg) translate(7px, -7px);
-    }
-
-    .side-menu {
-      position: fixed;
-      top: 0;
-      right: -260px;
-      width: 260px;
-      height: 100%;
-      background: white;
-      box-shadow: -3px 0 8px rgba(0,0,0,0.25);
-      transition: 0.35s ease;
-      padding-top: 70px;
-      z-index: 1050;
-      overflow-y: auto;
-    }
-
-    .side-menu.open {
-      right: 0;
-    }
-
-    .menu-item {
-      padding: 15px;
-      border-bottom: 1px solid #ddd;
+      padding: 20px;
+      margin: 15px auto;
+      width: 85%;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
       font-size: 18px;
       cursor: pointer;
-      text-align: right;
     }
 
-    .menu-item:hover {
+    .report-box:hover {
       background: #f0f0f0;
-    }
-
-    .overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.45);
-      opacity: 0;
-      pointer-events: none;
-      transition: 0.3s;
-      z-index: 1040;
-    }
-
-    .overlay.show {
-      opacity: 1;
-      pointer-events: auto;
     }
   </style>
 </head>
 <body>
 
-  <div class="overlay" id="overlay"></div>
-
-  <div id="sideMenu" class="side-menu">
-    <div class="menu-item" onclick="openAbout()">אודות</div>
-    <div class="menu-item" onclick="openSteps()">שלבים</div>
-    <div class="menu-item" onclick="openGithub()">פתיחת טיקט 🐱‍💻</div>
-
-    <div style="text-align:center; margin-top:15px; font-size:12px; color:#666;">
-      פותח על ידי ניסים אלביליה ©
-    </div>
-
-    <div style="text-align:center; margin-top:10px;">
-      <img 
-        src="https://raw.githubusercontent.com/albilia/Forklift-Reports/main/me.jpg"
-        alt="תמונה"
-        style="
-          width:80px;
-          height:80px;
-          border-radius:50%;
-          object-fit:cover;
-        "
-      >
-    </div>
-  </div>
-
   <div class="top-bar">
     דשבורד דווחים
-
-    <div class="menu-button" id="menuBtn">
-      <span></span>
-      <span></span>
-      <span></span>
-    </div>
-
     <button class="logout-btn" onclick="logout()">יציאה</button>
   </div>
 
@@ -202,6 +85,7 @@
 
     <div id="userGreeting" style="font-size:22px; font-weight:bold; margin-bottom:25px;"></div>
 
+    <!-- בחירת מחסן ראשי -->
     <label for="mainWarehouse">בחר מחסן:</label>
     <select id="mainWarehouse" onchange="handleMainWarehouse()">
       <option value="">-- בחר --</option>
@@ -209,10 +93,11 @@
       <option value="finished">מחסן תוצר גמר</option>
     </select>
 
+    <!-- תת מחסן עבור תוצר גמר בלבד -->
     <div id="finishedSection" style="display:none;">
-      <label for="finishedWarehouse">בחירת מחסן להעברה:</label>
+      <label for="finishedWarehouse">בחר תת מחסן:</label>
       <select id="finishedWarehouse">
-        <option value="">-- בחר מחסן --</option>
+        <option value="">-- בחר תת מחסן --</option>
         <option>דנידין</option>
         <option>בצק סוכר ימין</option>
         <option>בצק סוכר שמאל</option>
@@ -229,18 +114,6 @@
       </select>
     </div>
 
-    <div id="subWarehouseSection" style="display:none;">
-      <label for="subWarehouse">בחר תת מחסן:</label>
-      <select id="subWarehouse">
-        <option value="">-- בחר --</option>
-        <option>A1</option>
-        <option>A2</option>
-        <option>B1</option>
-        <option>B2</option>
-        <option>C1</option>
-      </select>
-    </div>
-
     <button class="report-box" onclick="goToReport()">
       המשך
     </button>
@@ -248,31 +121,7 @@
   </div>
 
 <script>
-  /* ⭐ תפריט צד ⭐ */
-  const menuBtn = document.getElementById("menuBtn");
-  const sideMenu = document.getElementById("sideMenu");
-  const overlay = document.getElementById("overlay");
-
-  menuBtn.addEventListener("click", () => {
-    menuBtn.classList.toggle("active");
-    sideMenu.classList.toggle("open");
-    overlay.classList.toggle("show");
-    navigator.vibrate?.(20);
-  });
-
-  overlay.addEventListener("click", () => {
-    menuBtn.classList.remove("active");
-    sideMenu.classList.remove("open");
-    overlay.classList.remove("show");
-  });
-
-  document.querySelectorAll(".report-box, .menu-item, .logout-btn").forEach(el => {
-    el.addEventListener("click", () => {
-      navigator.vibrate?.(15);
-    });
-  });
-
-  /* ⭐ קבלת פרמטרים מה־URL ⭐ */
+  /* קבלת פרמטרים */
   const params = new URLSearchParams(window.location.search);
   const userName = params.get("name");
   const token = params.get("token");
@@ -286,45 +135,29 @@
     document.getElementById("userGreeting").innerText = `שלום, ${userName}`;
   }
 
-  /* ⭐ לוגיקת בחירת מחסן ⭐ */
+  /* לוגיקת בחירת מחסן */
   function handleMainWarehouse() {
     const main = document.getElementById("mainWarehouse").value;
 
     if (main === "finished") {
       document.getElementById("finishedSection").style.display = "block";
-      document.getElementById("subWarehouseSection").style.display = "block";
     } else {
       document.getElementById("finishedSection").style.display = "none";
-      document.getElementById("subWarehouseSection").style.display = "none";
     }
   }
 
-  /* ⭐ מעבר למסך הדיווח ⭐ */
+  /* מעבר לדיווח */
   function goToReport() {
     const main = document.getElementById("mainWarehouse").value;
     const finished = document.getElementById("finishedWarehouse").value;
-    const sub = document.getElementById("subWarehouse").value;
 
     window.location.href =
-      `report.html?token=${token}&name=${encodeURIComponent(userName)}&main=${main}&finished=${finished}&sub=${sub}`;
+      `report.html?token=${token}&name=${encodeURIComponent(userName)}&main=${main}&finished=${finished}`;
   }
 
-  /* ⭐ יציאה ⭐ */
+  /* יציאה */
   function logout() {
     window.location.href = "index.html";
-  }
-
-  /* ⭐ תפריט מידע ⭐ */
-  function openAbout() {
-    alert("אודות המערכת:\nפותח על ידי ניסים אלביליה.");
-  }
-
-  function openSteps() {
-    alert("שלבים:\n1. בחר מחסן\n2. צלם תווית\n3. דווח בקלות");
-  }
-
-  function openGithub() {
-    window.open("https://github.com/albilia/Forklift-Reports/issues", "_blank");
   }
 </script>
 
