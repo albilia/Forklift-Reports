@@ -61,7 +61,6 @@
       background: #f0f0f0;
     }
 
-    /* ⭐ הגדלת לייבלים ורשימות ⭐ */
     label {
       font-size: 20px;
       font-weight: bold;
@@ -78,7 +77,6 @@
       margin-bottom: 20px;
     }
 
-    /* ⭐ כפתור המבורגר ⭐ */
     .menu-button {
       position: absolute;
       right: 15px;
@@ -112,7 +110,6 @@
       transform: rotate(-45deg) translate(7px, -7px);
     }
 
-    /* ⭐ תפריט צד ⭐ */
     .side-menu {
       position: fixed;
       top: 0;
@@ -143,7 +140,6 @@
       background: #f0f0f0;
     }
 
-    /* ⭐ רקע מתכהה ⭐ */
     .overlay {
       position: fixed;
       top: 0;
@@ -165,12 +161,9 @@
 </head>
 <body>
 
-  <!-- ⭐ רקע מתכהה ⭐ -->
   <div class="overlay" id="overlay"></div>
 
-  <!-- ⭐ תפריט צד ⭐ -->
   <div id="sideMenu" class="side-menu">
-
     <div class="menu-item" onclick="openAbout()">אודות</div>
     <div class="menu-item" onclick="openSteps()">שלבים</div>
     <div class="menu-item" onclick="openGithub()">פתיחת טיקט 🐱‍💻</div>
@@ -191,31 +184,24 @@
         "
       >
     </div>
-
   </div>
 
-  <!-- ⭐ סרגל עליון ⭐ -->
   <div class="top-bar">
     דשבורד דווחים
 
-    <!-- כפתור המבורגר -->
     <div class="menu-button" id="menuBtn">
       <span></span>
       <span></span>
       <span></span>
     </div>
 
-    <!-- כפתור יציאה -->
     <button class="logout-btn" onclick="logout()">יציאה</button>
   </div>
 
-  <!-- ⭐ תוכן הדשבורד ⭐ -->
   <div class="content">
 
-    <!-- ⭐ זיהוי משתמש ⭐ -->
     <div id="userGreeting" style="font-size:22px; font-weight:bold; margin-bottom:25px;"></div>
 
-    <!-- ⭐ בחירת סוג מחסן ⭐ -->
     <label for="mainWarehouse">בחר מחסן:</label>
     <select id="mainWarehouse" onchange="handleMainWarehouse()">
       <option value="">-- בחר --</option>
@@ -223,9 +209,7 @@
       <option value="finished">מחסן תוצר גמר</option>
     </select>
 
-    <!-- ⭐ תת קטגוריה למחסן תוצר גמר ⭐ -->
     <div id="finishedSection" style="display:none;">
-
       <label for="finishedWarehouse">בחירת מחסן להעברה:</label>
       <select id="finishedWarehouse">
         <option value="">-- בחר מחסן --</option>
@@ -243,10 +227,8 @@
         <option>קלוי קלוף</option>
         <option>קלוי קלוף טור</option>
       </select>
-
     </div>
 
-    <!-- ⭐ תת מחסן ⭐ -->
     <div id="subWarehouseSection" style="display:none;">
       <label for="subWarehouse">בחר תת מחסן:</label>
       <select id="subWarehouse">
@@ -259,7 +241,6 @@
       </select>
     </div>
 
-    <!-- ⭐ כפתור המשך ⭐ -->
     <button class="report-box" onclick="goToReport()">
       המשך
     </button>
@@ -285,16 +266,21 @@
     overlay.classList.remove("show");
   });
 
-  /* ⭐ רטט ⭐ */
   document.querySelectorAll(".report-box, .menu-item, .logout-btn").forEach(el => {
     el.addEventListener("click", () => {
       navigator.vibrate?.(15);
     });
   });
 
-  /* ⭐ זיהוי משתמש ⭐ */
+  /* ⭐ קבלת פרמטרים מה־URL ⭐ */
   const params = new URLSearchParams(window.location.search);
   const userName = params.get("name");
+  const token = params.get("token");
+
+  if (!token) {
+    alert("שגיאה: אין טוקן זיהוי");
+    window.location.href = "index.html";
+  }
 
   if (userName) {
     document.getElementById("userGreeting").innerText = `שלום, ${userName}`;
@@ -319,12 +305,26 @@
     const finished = document.getElementById("finishedWarehouse").value;
     const sub = document.getElementById("subWarehouse").value;
 
-    window.location.href = `report.html?main=${main}&finished=${finished}&sub=${sub}`;
+    window.location.href =
+      `report.html?token=${token}&name=${encodeURIComponent(userName)}&main=${main}&finished=${finished}&sub=${sub}`;
   }
 
   /* ⭐ יציאה ⭐ */
   function logout() {
     window.location.href = "index.html";
+  }
+
+  /* ⭐ תפריט מידע ⭐ */
+  function openAbout() {
+    alert("אודות המערכת:\nפותח על ידי ניסים אלביליה.");
+  }
+
+  function openSteps() {
+    alert("שלבים:\n1. בחר מחסן\n2. צלם תווית\n3. דווח בקלות");
+  }
+
+  function openGithub() {
+    window.open("https://github.com/albilia/Forklift-Reports/issues", "_blank");
   }
 </script>
 
