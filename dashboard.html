@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>דיווח משטחים</title>
+    <title>מערכת דווחים</title>
 
     <style>
         body {
@@ -62,11 +62,42 @@
             padding: 15px;
             background: white;
             border-radius: 10px;
-            width: 90%;
+            width: 95%;
             margin-left: auto;
             margin-right: auto;
             display: none;
             text-align: right;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f44336;
+            color: white;
+        }
+
+        #filters {
+            margin-top: 10px;
+            text-align: right;
+        }
+
+        #filters input {
+            padding: 8px;
+            margin: 5px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 16px;
         }
 
         .logout {
@@ -80,7 +111,7 @@
 
 <body>
 
-    <div class="header">דיווח משטחים</div>
+    <div class="header">מערכת דווחים</div>
 
     <div class="section">
         <h3>שלום, <span id="driverName"></span></h3>
@@ -109,8 +140,7 @@
     <div class="logout" onclick="logout()">התנתק</div>
 
     <script>
-
-        const API_URL = "YOUR_WEB_APP_URL_HERE";
+        const API_URL = "YOUR_WEB_APP_URL_HERE"; // ← שים כאן את כתובת ה־Web App שלך
 
         const token = localStorage.getItem("sessionToken");
         const driverName = localStorage.getItem("driverName");
@@ -154,12 +184,25 @@
                 return;
             }
 
+            const ocrResponse = await fetch(API_URL, {
+                method: "POST",
+                body: JSON.stringify({
+                    action: "processImage",
+                    image: lastImageBase64
+                })
+            }).then(res => res.json());
+
+            if (!ocrResponse.success) {
+                alert("שגיאה בפענוח OCR");
+                return;
+            }
+
             const saveResponse = await fetch(API_URL, {
                 method: "POST",
                 body: JSON.stringify({
                     action: warehouse === "raw" ? "saveRawMaterial" : "saveReport",
                     token: token,
-                    image: lastImageBase64
+                    ocr: ocrResponse.parsed
                 })
             }).then(res => res.json());
 
@@ -196,7 +239,6 @@
                 }
 
                 const box = document.getElementById("historyBox");
-                box.innerHTML = "";
                 box.style.display = "block";
 
                 if (data.data.length === 0) {
@@ -204,18 +246,64 @@
                     return;
                 }
 
-                data.data.forEach(row => {
-                    box.innerHTML += `<div>📌 ${row[0]} — ${row[2]} — ${row[3] || ""}</div>`;
-                });
-            });
-        }
+                box.innerHTML = `
+                    <div id="filters">
+                        <input type="date" id="fromDate">
+                        <input type="date" id="toDate">
+                        <input type="text" id="searchText" placeholder="חיפוש לפי מק״ט / פק״ע / שם">
+                    </div>
 
-        function logout() {
-            localStorage.clear();
-            window.location.href = "index.html";
-        }
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>📅 תאריך</th>
+                                <th>⏰ שעה</th>
+                                <th>🔢 מק"ט</th>
+                                <th>📦 פק"ע</th>
+                                <th>🔢 כמות</th>
+                                <th>👤 מדווח</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyRows"></tbody>
+                    </table>
+                `;
 
-    </script>
+                const tbody = document.getElementById("historyRows");
 
-</body>
-</html>
+                function renderTable() {
+                    const from = document.getElementById("fromDate").value;
+                    const to = document.getElementById("toDate").value;
+                    const search = document.getElementById("searchText").value.trim();
+
+                    tbody.innerHTML = "";
+
+                    data.data.forEach(row => {
+                        const date = row[0].split(" ")[0];
+                        const makat = row[2] || "";
+                        const pka = row[3] || "";
+                        const qty = row[4] || "";
+                        const user = row[6] || "";
+
+                        if (from && date < from) return;
+                        if (to && date > to) return;
+
+                        if (search && !(
+                            makat.includes(search) ||
+                            pka.includes(search) ||
+                            user.includes(search)
+                        )) return;
+
+                        const tr = document.createElement("tr");
+                        tr.innerHTML = `
+                            <td>${row[0]}</td>
+                            <td>${row[1]}</td>
+                            <td>${makat}</td>
+                            <td>${pka}</td>
+                            <td>${qty}</td>
+                            <td>${user}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+
+                document.getElementById("
