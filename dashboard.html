@@ -194,19 +194,57 @@
   <!-- ⭐ תוכן הדשבורד ⭐ -->
   <div class="content">
 
-    <div class="report-box" onclick="openReport('daily')">
-      דווח יומי
+    <!-- ⭐ בחירת סוג מחסן ⭐ -->
+    <label for="mainWarehouse">בחר מחסן:</label>
+    <select id="mainWarehouse" onchange="handleMainWarehouse()">
+      <option value="">-- בחר --</option>
+      <option value="raw">מחסן חומרי גלם</option>
+      <option value="finished">מחסן תוצר גמר</option>
+    </select>
+
+    <!-- ⭐ תת קטגוריה למחסן תוצר גמר ⭐ -->
+    <div id="finishedSection" style="display:none; margin-top:20px;">
+
+      <label for="finishedWarehouse">בחירת מחסן להעברה:</label>
+      <select id="finishedWarehouse">
+        <option value="">-- בחר מחסן --</option>
+        <option>דנידין</option>
+        <option>בצק סוכר ימין</option>
+        <option>בצק סוכר שמאל</option>
+        <option>שדרה מרכזית רצפה</option>
+        <option>שדרה מרכזית ימין</option>
+        <option>שדרה מרכזית שמאל</option>
+        <option>שדרה שמאל</option>
+        <option>שדרה שמאל שמאל</option>
+        <option>שדרה שמאל תחת הגלריה</option>
+        <option>כניסה שמאל</option>
+        <option>כניסה ימין</option>
+        <option>קלוי קלוף</option>
+        <option>קלוי קלוף טור</option>
+      </select>
+
     </div>
 
-    <div class="report-box" onclick="openReport('weekly')">
-      דווח שבועי
+    <!-- ⭐ תת מחסן (אם צריך) ⭐ -->
+    <div id="subWarehouseSection" style="display:none; margin-top:20px;">
+      <label for="subWarehouse">בחר תת מחסן:</label>
+      <select id="subWarehouse">
+        <option value="">-- בחר --</option>
+        <option>A1</option>
+        <option>A2</option>
+        <option>B1</option>
+        <option>B2</option>
+        <option>C1</option>
+      </select>
     </div>
 
-    <div class="report-box" onclick="openReport('monthly')">
-      דווח חודשי
-    </div>
+    <!-- ⭐ כפתור המשך ⭐ -->
+    <button class="report-box" style="margin-top:25px;" onclick="goToReport()">
+      המשך
+    </button>
 
   </div>
+
 <script>
   /* ⭐ פתיחה וסגירה של תפריט הצד ⭐ */
   const menuBtn = document.getElementById("menuBtn");
@@ -239,16 +277,33 @@
   }
 
   function openSteps() {
-    alert("שלבים:\n1. בחר סוג דווח\n2. מלא את הפרטים\n3. שלח דווח בקלות");
+    alert("שלבים:\n1. בחר מחסן\n2. בחר מחסן להעברה (אם צריך)\n3. צלם ושלח");
   }
 
   function openGithub() {
     window.open("https://github.com/albilia/Forklift-Reports/issues", "_blank");
   }
 
-  /* ⭐ פתיחת דווח ⭐ */
-  function openReport(type) {
-    window.location.href = "report.html?type=" + type;
+  /* ⭐ לוגיקת בחירת מחסן ⭐ */
+  function handleMainWarehouse() {
+    const main = document.getElementById("mainWarehouse").value;
+
+    if (main === "finished") {
+      document.getElementById("finishedSection").style.display = "block";
+      document.getElementById("subWarehouseSection").style.display = "block";
+    } else {
+      document.getElementById("finishedSection").style.display = "none";
+      document.getElementById("subWarehouseSection").style.display = "none";
+    }
+  }
+
+  /* ⭐ מעבר למסך הדיווח ⭐ */
+  function goToReport() {
+    const main = document.getElementById("mainWarehouse").value;
+    const finished = document.getElementById("finishedWarehouse").value;
+    const sub = document.getElementById("subWarehouse").value;
+
+    window.location.href = `report.html?main=${main}&finished=${finished}&sub=${sub}`;
   }
 
   /* ⭐ יציאה ⭐ */
@@ -258,5 +313,3 @@
 </script>
 </body>
 </html>
-
-
