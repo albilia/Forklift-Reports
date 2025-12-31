@@ -116,10 +116,31 @@
     <div class="section">
         <h3>שלום, <span id="driverName"></span></h3>
 
-        <select id="warehouse">
+        <!-- מחסן ראשי -->
+        <select id="warehouse" onchange="toggleSubWarehouse()">
             <option value="">בחר מחסן...</option>
             <option value="raw">מחסן חומרי גלם</option>
-            <option value="reports">מחסן העברת דו"חות</option>
+            <option value="finished">מחסן תוצר גמר</option>
+        </select>
+
+        <!-- תת־מחסנים -->
+        <select id="subWarehouse" style="display:none;">
+            <option value="">בחר תת־מחסן...</option>
+            <option>דנידין</option>
+            <option>בצק סוכר שמאל</option>
+            <option>בצק סוכר ימין</option>
+            <option>שדרה מרכזית רצפה</option>
+            <option>שדרה מרכזית שמאל</option>
+            <option>שדרה מרכזית ימין</option>
+            <option>שדרה שמאל</option>
+            <option>שדרה שמאל שמאל</option>
+            <option>שדרה שמאל תחת הגלריה</option>
+            <option>כניסה שמאל</option>
+            <option>כניסה ימין</option>
+            <option>מחסן חדש שמאל</option>
+            <option>מחסן חדש ימין</option>
+            <option>קלוי קלוף מחסן</option>
+            <option>קלוי קלוף טור</option>
         </select>
 
         <br>
@@ -155,6 +176,18 @@
 
         let lastImageBase64 = "";
 
+        function toggleSubWarehouse() {
+            const warehouse = document.getElementById("warehouse").value;
+            const sub = document.getElementById("subWarehouse");
+
+            if (warehouse === "finished") {
+                sub.style.display = "block";
+            } else {
+                sub.style.display = "none";
+                sub.value = "";
+            }
+        }
+
         function openCamera() {
             document.getElementById("cameraInput").click();
         }
@@ -176,9 +209,15 @@
         /* שליחת דיווח עם OCR */
         async function sendReport() {
             const warehouse = document.getElementById("warehouse").value;
+            const subWarehouse = document.getElementById("subWarehouse").value;
 
             if (!warehouse) {
                 alert("בחר מחסן");
+                return;
+            }
+
+            if (warehouse === "finished" && !subWarehouse) {
+                alert("בחר תת־מחסן");
                 return;
             }
 
@@ -208,7 +247,8 @@
                     body: JSON.stringify({
                         action: warehouse === "raw" ? "saveRawMaterial" : "saveReport",
                         token: token,
-                        ocr: ocrResponse.parsed
+                        ocr: ocrResponse.parsed,
+                        subWarehouse: subWarehouse
                     })
                 }).then(res => res.json());
 
