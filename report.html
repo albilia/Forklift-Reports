@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>דיווח משטח</title>
 
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ffffff">
+
   <style>
     body {
       margin: 0;
@@ -113,25 +116,23 @@
   const params = new URLSearchParams(window.location.search);
   const token = params.get("token");
   const name = params.get("name");
-  const main = params.get("main");          // raw / finished
-  const finished = params.get("finished");  // תת מחסן של תוצר גמר
+  const main = params.get("main");          
+  const finished = params.get("finished");  
 
   if (!token) {
     alert("שגיאה: אין טוקן זיהוי");
     window.location.href = "index.html";
   }
 
-  /* ⭐ API URL שלך הוכנס כאן ⭐ */
+  /* ⭐ API URL ⭐ */
   const API_URL = "https://script.google.com/macros/s/AKfycbzX5b5hPEF_wSx3zMh_CJ9if8u7Q_CTIg_UQhqqHr8hryUsBsdhMMa_rqaqizCvhAN99Q/exec";
 
   let ocrResult = null;
 
-  /* חזרה לדשבורד */
   function goBack() {
     window.location.href = `dashboard.html?token=${token}&name=${encodeURIComponent(name)}`;
   }
 
-  /* טיפול בתמונה */
   function handleImage(input) {
     const file = input.files[0];
     if (!file) return;
@@ -147,7 +148,6 @@
     reader.readAsDataURL(file);
   }
 
-  /* OCR */
   async function runOCR(base64) {
     document.getElementById("loader").style.display = "block";
 
@@ -177,7 +177,6 @@
     }
   }
 
-  /* הצגת OCR */
   function showOCR(parsed) {
     const box = document.getElementById("ocrBox");
     box.innerHTML = "";
@@ -202,7 +201,6 @@
     document.getElementById("saveBtn").style.display = "block";
   }
 
-  /* שמירת דיווח */
   async function saveReport() {
     if (!ocrResult) {
       alert("אין נתונים לשמירה");
@@ -218,7 +216,7 @@
       action,
       token,
       ocr: ocrResult,
-      finishedWarehouse: finished   // רק לתוצר גמר
+      finishedWarehouse: finished
     };
 
     try {
@@ -243,6 +241,32 @@
       document.getElementById("loader").style.display = "none";
     }
   }
+</script>
+
+<!-- ⭐ רישום Service Worker ⭐ -->
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
+}
+</script>
+
+<!-- ⭐ סווייפ מהשוליים בלבד ⭐ -->
+<script>
+let startX = 0;
+let endX = 0;
+const EDGE_SIZE = 40;
+
+document.addEventListener("touchstart", e => {
+  startX = e.changedTouches[0].clientX;
+});
+
+document.addEventListener("touchend", e => {
+  endX = e.changedTouches[0].clientX;
+  const diff = endX - startX;
+
+  if (startX < EDGE_SIZE && diff > 80) history.back();
+  if (startX > window.innerWidth - EDGE_SIZE && diff < -80) history.forward();
+});
 </script>
 
 </body>
