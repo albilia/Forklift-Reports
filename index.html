@@ -5,12 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>דווחים</title>
 
+  <!-- אייקונים -->
   <link rel="apple-touch-icon" href="gilro-logo-v2.png">
   <link rel="icon" type="image/png" href="gilro-logo-v2.png">
 
+  <!-- הפיכת האתר לאפליקציה -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="mobile-web-app-capable" content="yes">
+
+  <!-- ⭐ manifest.json — חובה ל‑PWA ⭐ -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ffffff">
 
   <style>
     html, body {
@@ -282,6 +288,31 @@
       loader.style.display = "none";
     }
   }
+</script>
+
+<!-- ⭐ רישום Service Worker ⭐ -->
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
+}
+</script>
+
+<!-- ⭐ מחוות סווייפ אחורה/קדימה ⭐ -->
+<script>
+let startX = 0;
+let endX = 0;
+
+document.addEventListener("touchstart", e => {
+  startX = e.changedTouches[0].screenX;
+});
+
+document.addEventListener("touchend", e => {
+  endX = e.changedTouches[0].screenX;
+  const diff = endX - startX;
+
+  if (diff < -80) history.back();
+  if (diff > 80) history.forward();
+});
 </script>
 
 </body>
