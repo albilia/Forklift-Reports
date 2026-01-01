@@ -1,283 +1,33 @@
-<!DOCTYPE html>
-<html lang="he" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>דיווח משטח</title>
+<!-- בתוך <body> -->
+<div class="content">
 
-  <!-- PWA -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#ffffff">
+  <h2 style="margin-bottom:10px;">צלם תווית</h2>
 
-  <!-- Menu CSS -->
-  <link rel="stylesheet" href="menu.css">
+  <input type="file" accept="image/*" capture="environment" id="cameraInput" style="display:none" onchange="handleImage(this)">
 
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      text-align: center;
-    }
-
-    .top-bar {
-      background: #d32f2f;
-      color: white;
-      padding: 15px;
-      font-size: 22px;
-      font-weight: bold;
-      position: relative;
-    }
-
-    .back-btn {
-      position: absolute;
-      left: 15px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: white;
-      color: #d32f2f;
-      border: none;
-      padding: 8px 14px;
-      border-radius: 6px;
+  <img 
+    src="camera-icon.png" 
+    alt="צלם תווית"
+    onclick="document.getElementById('cameraInput').click()"
+    style="
+      width: 100px;
+      height: 100px;
+      object-fit: contain;
       cursor: pointer;
-      font-weight: bold;
-    }
+      margin-top: 10px;
+      margin-bottom: 20px;
+      transition: transform 0.2s;
+    "
+    onmouseover="this.style.transform='scale(1.05)'"
+    onmouseout="this.style.transform='scale(1)'"
+  />
 
-    .content {
-      padding: 20px;
-    }
+  <img id="preview" class="preview">
 
-    .preview {
-      width: 90%;
-      margin: 15px auto;
-      border-radius: 10px;
-      display: none;
-    }
+  <div id="loader">מעבד תמונה...</div>
 
-    .btn {
-      width: 85%;
-      padding: 15px;
-      margin: 10px auto;
-      background: #d32f2f;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 20px;
-      cursor: pointer;
-    }
+  <div id="ocrBox" class="ocr-box"></div>
 
-    #loader {
-      display: none;
-      margin-top: 15px;
-      font-size: 18px;
-      color: #444;
-    }
+  <button id="saveBtn" class="btn" style="display:none" onclick="saveReport()">שמור דיווח</button>
 
-    .ocr-box {
-      background: white;
-      padding: 15px;
-      margin: 15px auto;
-      width: 85%;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-      text-align: right;
-      display: none;
-    }
-
-    .ocr-item {
-      font-size: 18px;
-      margin-bottom: 8px;
-    }
-  </style>
-</head>
-<body>
-
-  <!-- ⭐ תפריט נטען אוטומטית -->
-  <div id="menuContainer"></div>
-
-  <div class="top-bar">
-    דיווח משטח
-    <button class="back-btn" onclick="goBack()">חזור</button>
-  </div>
-
-  <div class="content">
-
-    <h2>צלם את תווית המשטח</h2>
-
-    <input type="file" accept="image/*" capture="environment" id="cameraInput" style="display:none" onchange="handleImage(this)">
-    <button class="btn" onclick="document.getElementById('cameraInput').click()">צלם תווית</button>
-
-    <img id="preview" class="preview">
-
-    <div id="loader">מעבד תמונה...</div>
-
-    <div id="ocrBox" class="ocr-box"></div>
-
-    <button id="saveBtn" class="btn" style="display:none" onclick="saveReport()">שמור דיווח</button>
-
-  </div>
-
-<script>
-  /* קבלת פרמטרים */
-  const params = new URLSearchParams(window.location.search);
-  const token = params.get("token");
-  const name = params.get("name");
-  const main = params.get("main");
-  const finished = params.get("finished");
-
-  if (!token) {
-    alert("שגיאה: אין טוקן זיהוי");
-    window.location.href = "index.html";
-  }
-
-  /* ⭐ API URL ⭐ */
-  const API_URL = "https://script.google.com/macros/s/AKfycbzX5b5hPEF_wSx3zMh_CJ9if8u7Q_CTIg_UQhqqHr8hryUsBsdhMMa_rqaqizCvhAN99Q/exec";
-
-  let ocrResult = null;
-
-  function goBack() {
-    window.location.href = `dashboard.html?token=${token}&name=${encodeURIComponent(name)}`;
-  }
-
-  function handleImage(input) {
-    const file = input.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const img = document.getElementById("preview");
-      img.src = e.target.result;
-      img.style.display = "block";
-
-      runOCR(e.target.result);
-    };
-    reader.readAsDataURL(file);
-  }
-
-  async function runOCR(base64) {
-    document.getElementById("loader").style.display = "block";
-
-    try {
-      const response = await fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify({
-          action: "processImage",
-          image: base64
-        })
-      });
-
-      const data = await response.json();
-      document.getElementById("loader").style.display = "none";
-
-      if (!data.success) {
-        alert("שגיאה בפענוח התמונה");
-        return;
-      }
-
-      ocrResult = data.parsed;
-      showOCR(data.parsed);
-
-    } catch (err) {
-      alert("שגיאה בחיבור לשרת");
-      document.getElementById("loader").style.display = "none";
-    }
-  }
-
-  function showOCR(parsed) {
-    const box = document.getElementById("ocrBox");
-    box.innerHTML = "";
-
-    if (!parsed.reports || parsed.reports.length === 0) {
-      box.innerHTML = "<b>לא זוהו נתונים מהתמונה</b>";
-      box.style.display = "block";
-      return;
-    }
-
-    parsed.reports.forEach((r, i) => {
-      box.innerHTML += `
-        <div class="ocr-item"><b>שורה ${i+1}:</b></div>
-        <div class="ocr-item">מק״ט: ${r.makat}</div>
-        <div class="ocr-item">פק״ע: ${r.pka}</div>
-        <div class="ocr-item">כמות: ${r.qty}</div>
-        <hr>
-      `;
-    });
-
-    box.style.display = "block";
-    document.getElementById("saveBtn").style.display = "block";
-  }
-
-  async function saveReport() {
-    if (!ocrResult) {
-      alert("אין נתונים לשמירה");
-      return;
-    }
-
-    document.getElementById("loader").innerText = "שומר דיווח...";
-    document.getElementById("loader").style.display = "block";
-
-    const action = main === "raw" ? "saveRawMaterial" : "saveReport";
-
-    const payload = {
-      action,
-      token,
-      ocr: ocrResult,
-      finishedWarehouse: finished
-    };
-
-    try {
-      const response = await fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify(payload)
-      });
-
-      const data = await response.json();
-      document.getElementById("loader").style.display = "none";
-
-      if (!data.success) {
-        alert("שגיאה בשמירת הדיווח");
-        return;
-      }
-
-      alert("הדיווח נשמר בהצלחה!");
-      goBack();
-
-    } catch (err) {
-      alert("שגיאה בחיבור לשרת");
-      document.getElementById("loader").style.display = "none";
-    }
-  }
-</script>
-
-<!-- ⭐ טעינת תפריט -->
-<script src="menu.js"></script>
-
-<!-- ⭐ רישום Service Worker -->
-<script>
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("service-worker.js");
-}
-</script>
-
-<!-- ⭐ סווייפ מהשוליים בלבד -->
-<script>
-let startX = 0;
-let endX = 0;
-const EDGE_SIZE = 40;
-
-document.addEventListener("touchstart", e => {
-  startX = e.changedTouches[0].clientX;
-});
-
-document.addEventListener("touchend", e => {
-  endX = e.changedTouches[0].clientX;
-  const diff = endX - startX;
-
-  if (startX < EDGE_SIZE && diff > 80) history.back();
-  if (startX > window.innerWidth - EDGE_SIZE && diff < -80) history.forward();
-});
-</script>
-
-</body>
-</html>
+</div>
