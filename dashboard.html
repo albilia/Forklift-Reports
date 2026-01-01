@@ -5,8 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>דשבורד דווחים</title>
 
+  <!-- PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#ffffff">
+
+  <!-- Menu CSS -->
+  <link rel="stylesheet" href="menu.css">
 
   <style>
     body {
@@ -78,6 +82,9 @@
   </style>
 </head>
 <body>
+
+  <!-- ⭐ תפריט נטען אוטומטית -->
+  <div id="menuContainer"></div>
 
   <div class="top-bar">
     דשבורד דווחים
@@ -158,14 +165,17 @@
   }
 </script>
 
-<!-- ⭐ רישום Service Worker ⭐ -->
+<!-- ⭐ טעינת תפריט -->
+<script src="menu.js"></script>
+
+<!-- ⭐ רישום Service Worker -->
 <script>
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("service-worker.js");
 }
 </script>
 
-<!-- ⭐ סווייפ מהשוליים ⭐ -->
+<!-- ⭐ סווייפ מהשוליים בלבד -->
 <script>
 let startX = 0;
 let endX = 0;
