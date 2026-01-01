@@ -13,7 +13,27 @@ fetch("menu.html")
       sideMenu.classList.toggle("open");
       navigator.vibrate?.(20);
     });
+
+    // ⭐ טוען את מספר הגרסה אחרי שהתפריט נטען
+    loadVersion();
   });
+
+// ⭐ פונקציה שמביאה את מספר הגרסה מ-GitHub
+async function loadVersion() {
+  try {
+    const res = await fetch(
+      "https://raw.githubusercontent.com/albilia/Forklift-Reports/main/version.json?t=" + Date.now()
+    );
+    const data = await res.json();
+
+    const versionLine = document.getElementById("versionLine");
+    if (versionLine) {
+      versionLine.textContent = "מס' גרסה: " + data.version;
+    }
+  } catch (e) {
+    console.log("Version fetch failed");
+  }
+}
 
 // פונקציות תפריט
 function openAbout() {
