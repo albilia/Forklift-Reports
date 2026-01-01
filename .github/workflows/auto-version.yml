@@ -1,0 +1,38 @@
+name: Auto Update Version
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Read current version
+        id: read_version
+        run: |
+          VERSION=$(jq -r '.version' version.json)
+          echo "current_version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Bump version
+        id: bump_version
+        run: |
+          VERSION=${{ steps.read_version.outputs.current_version }}
+          IFS='.' read -r major minor patch <<< "$VERSION"
+          patch=$((patch + 1))
+          NEW_VERSION="$major.$minor.$patch"
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "{ \"version\": \"$NEW_VERSION\" }" > version.json
+
+      - name: Commit updated version
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add version.json
+          git commit -m "Auto bump version to ${{ steps.bump_version.outputs.new_version }}"
+          git push
