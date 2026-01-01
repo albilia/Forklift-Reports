@@ -5,8 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>דיווח משטח</title>
 
+  <!-- PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#ffffff">
+
+  <!-- Menu CSS -->
+  <link rel="stylesheet" href="menu.css">
 
   <style>
     body {
@@ -89,6 +93,9 @@
 </head>
 <body>
 
+  <!-- ⭐ תפריט נטען אוטומטית -->
+  <div id="menuContainer"></div>
+
   <div class="top-bar">
     דיווח משטח
     <button class="back-btn" onclick="goBack()">חזור</button>
@@ -116,8 +123,8 @@
   const params = new URLSearchParams(window.location.search);
   const token = params.get("token");
   const name = params.get("name");
-  const main = params.get("main");          
-  const finished = params.get("finished");  
+  const main = params.get("main");
+  const finished = params.get("finished");
 
   if (!token) {
     alert("שגיאה: אין טוקן זיהוי");
@@ -243,14 +250,17 @@
   }
 </script>
 
-<!-- ⭐ רישום Service Worker ⭐ -->
+<!-- ⭐ טעינת תפריט -->
+<script src="menu.js"></script>
+
+<!-- ⭐ רישום Service Worker -->
 <script>
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("service-worker.js");
 }
 </script>
 
-<!-- ⭐ סווייפ מהשוליים בלבד ⭐ -->
+<!-- ⭐ סווייפ מהשוליים בלבד -->
 <script>
 let startX = 0;
 let endX = 0;
