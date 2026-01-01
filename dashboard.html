@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>דשבורד דווחים</title>
 
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ffffff">
+
   <style>
     body {
       margin: 0;
@@ -85,7 +88,6 @@
 
     <div id="userGreeting" style="font-size:22px; font-weight:bold; margin-bottom:25px;"></div>
 
-    <!-- בחירת מחסן ראשי -->
     <label for="mainWarehouse">בחר מחסן:</label>
     <select id="mainWarehouse" onchange="handleMainWarehouse()">
       <option value="">-- בחר --</option>
@@ -93,7 +95,6 @@
       <option value="finished">מחסן תוצר גמר</option>
     </select>
 
-    <!-- תת מחסן עבור תוצר גמר בלבד -->
     <div id="finishedSection" style="display:none;">
       <label for="finishedWarehouse">בחר תת מחסן:</label>
       <select id="finishedWarehouse">
@@ -121,7 +122,6 @@
   </div>
 
 <script>
-  /* קבלת פרמטרים */
   const params = new URLSearchParams(window.location.search);
   const userName = params.get("name");
   const token = params.get("token");
@@ -135,7 +135,6 @@
     document.getElementById("userGreeting").innerText = `שלום, ${userName}`;
   }
 
-  /* לוגיקת בחירת מחסן */
   function handleMainWarehouse() {
     const main = document.getElementById("mainWarehouse").value;
 
@@ -146,7 +145,6 @@
     }
   }
 
-  /* מעבר לדיווח */
   function goToReport() {
     const main = document.getElementById("mainWarehouse").value;
     const finished = document.getElementById("finishedWarehouse").value;
@@ -155,10 +153,35 @@
       `report.html?token=${token}&name=${encodeURIComponent(userName)}&main=${main}&finished=${finished}`;
   }
 
-  /* יציאה */
   function logout() {
     window.location.href = "index.html";
   }
+</script>
+
+<!-- ⭐ רישום Service Worker ⭐ -->
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
+}
+</script>
+
+<!-- ⭐ סווייפ מהשוליים ⭐ -->
+<script>
+let startX = 0;
+let endX = 0;
+const EDGE_SIZE = 40;
+
+document.addEventListener("touchstart", e => {
+  startX = e.changedTouches[0].clientX;
+});
+
+document.addEventListener("touchend", e => {
+  endX = e.changedTouches[0].clientX;
+  const diff = endX - startX;
+
+  if (startX < EDGE_SIZE && diff > 80) history.back();
+  if (startX > window.innerWidth - EDGE_SIZE && diff < -80) history.forward();
+});
 </script>
 
 </body>
