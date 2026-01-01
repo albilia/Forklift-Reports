@@ -5,18 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>דווחים</title>
 
-  <!-- אייקונים -->
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <!-- Icons -->
   <link rel="apple-touch-icon" href="gilro-logo-v2.png">
   <link rel="icon" type="image/png" href="gilro-logo-v2.png">
 
-  <!-- הפיכת האתר לאפליקציה -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="mobile-web-app-capable" content="yes">
-
-  <!-- ⭐ manifest.json — חובה ל‑PWA ⭐ -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#ffffff">
+  <!-- Menu CSS -->
+  <link rel="stylesheet" href="menu.css">
 
   <style>
     html, body {
@@ -85,123 +85,12 @@
       font-size: 18px;
       color: #444;
     }
-
-    .menu-button {
-      position: fixed;
-      top: 15px;
-      right: 15px;
-      width: 35px;
-      height: 30px;
-      cursor: pointer;
-      z-index: 1100;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .menu-button span {
-      display: block;
-      height: 4px;
-      background: #333;
-      border-radius: 4px;
-      transition: 0.35s;
-    }
-
-    .menu-button.active span:nth-child(1) {
-      transform: rotate(45deg) translate(6px, 6px);
-    }
-
-    .menu-button.active span:nth-child(2) {
-      opacity: 0;
-    }
-
-    .menu-button.active span:nth-child(3) {
-      transform: rotate(-45deg) translate(7px, -7px);
-    }
-
-    .side-menu {
-      position: fixed;
-      top: 0;
-      right: -260px;
-      width: 260px;
-      height: 100%;
-      background: white;
-      box-shadow: -3px 0 8px rgba(0,0,0,0.25);
-      transition: 0.35s ease;
-      padding-top: 70px;
-      z-index: 1050;
-      overflow-y: auto;
-    }
-
-    .side-menu.open {
-      right: 0;
-    }
-
-    .overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.45);
-      opacity: 0;
-      pointer-events: none;
-      transition: 0.3s;
-      z-index: 1040;
-    }
-
-    .overlay.show {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .menu-item {
-      padding: 15px;
-      border-bottom: 1px solid #ddd;
-      font-size: 18px;
-      cursor: pointer;
-      text-align: right;
-    }
-
-    .menu-item:hover {
-      background: #f0f0f0;
-    }
   </style>
 </head>
 <body>
 
-  <div class="menu-button" id="menuBtn">
-    <span></span>
-    <span></span>
-    <span></span>
-  </div>
-
-  <div class="overlay" id="overlay"></div>
-
-  <div id="sideMenu" class="side-menu">
-
-    <div class="menu-item" onclick="openAbout()">אודות</div>
-    <div class="menu-item" onclick="openSteps()">שלבים</div>
-    <div class="menu-item" onclick="openGithub()">פתיחת טיקט 🐱‍💻</div>
-
-    <div style="text-align:center; margin-top:15px; font-size:12px; color:#666;">
-      פותח על ידי ניסים אלביליה ©
-    </div>
-
-    <div style="text-align:center; margin-top:10px;">
-      <img 
-        src="https://raw.githubusercontent.com/albilia/Forklift-Reports/main/me.jpg"
-        alt="תמונה"
-        style="
-          width:80px;
-          height:80px;
-          border-radius:50%;
-          object-fit:cover;
-        "
-      >
-    </div>
-
-  </div>
+  <!-- ⭐ תפריט נטען אוטומטית -->
+  <div id="menuContainer"></div>
 
   <div class="container">
     <img src="logo.jpg" class="logo" alt="לוגו">
@@ -217,45 +106,9 @@
   </div>
 
 <script>
-  const menuBtn = document.getElementById("menuBtn");
-  const sideMenu = document.getElementById("sideMenu");
-  const overlay = document.getElementById("overlay");
-
-  menuBtn.addEventListener("click", () => {
-    menuBtn.classList.toggle("active");
-    sideMenu.classList.toggle("open");
-    overlay.classList.toggle("show");
-    navigator.vibrate?.(20);
-  });
-
-  overlay.addEventListener("click", () => {
-    menuBtn.classList.remove("active");
-    sideMenu.classList.remove("open");
-    overlay.classList.remove("show");
-  });
-
-  document.querySelectorAll("button, .menu-item").forEach(el => {
-    el.addEventListener("click", () => {
-      navigator.vibrate?.(15);
-    });
-  });
-
-  function openAbout() {
-    alert("אודות המערכת:\nפותח על ידי ניסים אלביליה.");
-  }
-
-  function openSteps() {
-    alert("שלבים:\n1. הזן מספר טלפון\n2. היכנס למערכת\n3. דווח בקלות");
-  }
-
-  function openGithub() {
-    window.open("https://github.com/albilia/Forklift-Reports/issues", "_blank");
-  }
-
   /* ⭐ API URL ⭐ */
   const API_URL = "https://script.google.com/macros/s/AKfycbzX5b5hPEF_wSx3zMh_CJ9if8u7Q_CTIg_UQhqqHr8hryUsBsdhMMa_rqaqizCvhAN99Q/exec";
 
-  /* ⭐ התחברות אמיתית עם GET ⭐ */
   async function login() {
     const phone = document.getElementById("phone").value.trim();
     const loader = document.getElementById("loader");
@@ -290,28 +143,32 @@
   }
 </script>
 
-<!-- ⭐ רישום Service Worker ⭐ -->
+<!-- ⭐ טעינת תפריט -->
+<script src="menu.js"></script>
+
+<!-- ⭐ רישום Service Worker -->
 <script>
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("service-worker.js");
 }
 </script>
 
-<!-- ⭐ מחוות סווייפ אחורה/קדימה ⭐ -->
+<!-- ⭐ סווייפ מהשוליים בלבד -->
 <script>
 let startX = 0;
 let endX = 0;
+const EDGE_SIZE = 40;
 
 document.addEventListener("touchstart", e => {
-  startX = e.changedTouches[0].screenX;
+  startX = e.changedTouches[0].clientX;
 });
 
 document.addEventListener("touchend", e => {
-  endX = e.changedTouches[0].screenX;
+  endX = e.changedTouches[0].clientX;
   const diff = endX - startX;
 
-  if (diff < -80) history.back();
-  if (diff > 80) history.forward();
+  if (startX < EDGE_SIZE && diff > 80) history.back();
+  if (startX > window.innerWidth - EDGE_SIZE && diff < -80) history.forward();
 });
 </script>
 
