@@ -70,7 +70,7 @@
   }
 
   /* ⭐⭐ API_URL החדש ⭐⭐ */
-  const API_URL = "https://script.google.com/macros/s/AKfycbygmxpveoVjirdF2QfsQ4z6I1ePtEErqNolLrA45onByFOO16VQVL0244s1jhpRxOyaCg/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbwgWfnist6v7pYzYjbWY9hIhGvjyrZH1-7Bqa5hOABlvOFM8Tqh3j8xzNtxtH_G4tZe7Q/exec";
 
   let ocrResult = null;
 
@@ -214,12 +214,10 @@ document.addEventListener("touchend", e => {
 });
 </script>
 
-<!-- ⭐ שלב 1: בדיקת טעינה -->
 <script>
   console.log("Version check script loaded (report)");
 </script>
 
-<!-- ⭐ שלב 2: מנגנון עדכון גרסה אוטומטי -->
 <script>
 async function checkVersion() {
   try {
@@ -238,10 +236,7 @@ async function checkVersion() {
   }
 }
 
-// בדיקה בטעינה
 checkVersion();
-
-// בדיקה כל 10 שניות
 setInterval(checkVersion, 10000);
 </script>
 
