@@ -17,7 +17,7 @@
     .preview { width: 90%; margin: 15px auto; border-radius: 10px; display: none; }
     .btn { width: 85%; padding: 15px; margin: 10px auto; background: #d32f2f; color: white; border: none; border-radius: 10px; font-size: 20px; cursor: pointer; }
     #loader { display: none; margin-top: 15px; font-size: 18px; color: #444; }
-    .ocr-box { background: white; padding: 15px; margin: 15px auto; width: 85%; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); text-align: right; display: none; }
+    .ocr-box { background: white; padding: 15px; margin: 15px auto; width: 85%; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); text-align: right; }
     .ocr-item { font-size: 18px; margin-bottom: 8px; }
   </style>
 </head>
@@ -51,17 +51,18 @@
 
     <div id="loader">מעבד תמונה...</div>
 
-    <div id="ocrBox" class="ocr-box"></div>
+    <div id="ocrList"></div>
 
-    <button id="saveBtn" class="btn" style="display:none" onclick="saveReport()">שמור דיווח</button>
+    <button id="saveBtn" class="btn" style="display:none" onclick="saveAll()">שמור דיווח</button>
 
   </div>
 
 <script>
+  /* קבלת פרמטרים */
   const params = new URLSearchParams(window.location.search);
   const token = params.get("token");
   const name = params.get("name");
-  const main = params.get("main");
+  const main = params.get("main"); // raw / finished
   const finished = params.get("finished");
 
   if (!token) {
@@ -69,10 +70,14 @@
     window.location.href = "index.html";
   }
 
-  /* ⭐⭐ API_URL החדש ⭐⭐ */
-  const API_URL = "https://script.google.com/macros/s/AKfycbwgWfnist6v7pYzYjbWY9hIhGvjyrZH1-7Bqa5hOABlvOFM8Tqh3j8xzNtxtH_G4tZe7Q/exec";
+  /* ⭐ API URL החדש ⭐ */
+  const API_URL = "https://script.google.com/macros/s/AKfycbwo9OSMpBZBHnEbrVd4vD3HzBnU_VxWgCAKRG6OIWDoZWd5S3rwPa3x2T-dbBtoBqf8mA/exec";
 
-  let ocrResult = null;
+  /* רשימת תוצאות OCR (לחומרי גלם) */
+  let rawReports = [];
+
+  /* תוצאות OCR לתוצר גמר */
+  let finishedReports = [];
 
   function goBack() {
     window.location.href = `dashboard.html?token=${token}&name=${encodeURIComponent(name)}`;
@@ -101,7 +106,8 @@
         method: "POST",
         body: JSON.stringify({
           action: "processImage",
-          image: base64
+          image: base64,
+          main: main
         })
       });
 
@@ -113,8 +119,15 @@
         return;
       }
 
-      ocrResult = data.parsed;
-      showOCR(data.parsed);
+      if (main === "raw") {
+        rawReports.push(data.parsed.reports[0]);
+        showRawList();
+      } else {
+        finishedReports = data.parsed.reports;
+        showFinishedList();
+      }
+
+      document.getElementById("saveBtn").style.display = "block";
 
     } catch (err) {
       alert("שגיאה בחיבור לשרת");
@@ -122,47 +135,57 @@
     }
   }
 
-  function showOCR(parsed) {
-    const box = document.getElementById("ocrBox");
+  function showRawList() {
+    const box = document.getElementById("ocrList");
     box.innerHTML = "";
 
-    if (!parsed.reports || parsed.reports.length === 0) {
-      box.innerHTML = "<b>לא זוהו נתונים מהתמונה</b>";
-      box.style.display = "block";
-      return;
-    }
-
-    parsed.reports.forEach((r, i) => {
+    rawReports.forEach((r, i) => {
       box.innerHTML += `
-        <div class="ocr-item"><b>שורה ${i+1}:</b></div>
-        <div class="ocr-item">מק״ט: ${r.makat}</div>
-        <div class="ocr-item">פק״ע: ${r.pka}</div>
-        <div class="ocr-item">כמות: ${r.qty}</div>
-        <hr>
+        <div class="ocr-box">
+          <div class="ocr-item"><b>צילום ${i+1}:</b></div>
+          <div class="ocr-item">מק״ט: ${r.makat}</div>
+          <div class="ocr-item">כמות: ${r.qty}</div>
+        </div>
       `;
     });
-
-    box.style.display = "block";
-    document.getElementById("saveBtn").style.display = "block";
   }
 
-  async function saveReport() {
-    if (!ocrResult) {
-      alert("אין נתונים לשמירה");
-      return;
-    }
+  function showFinishedList() {
+    const box = document.getElementById("ocrList");
+    box.innerHTML = "";
 
+    finishedReports.forEach((r, i) => {
+      box.innerHTML += `
+        <div class="ocr-box">
+          <div class="ocr-item"><b>תווית ${i+1}:</b></div>
+          <div class="ocr-item">מק״ט: ${r.makat}</div>
+          <div class="ocr-item">פק״ע: ${r.pka}</div>
+          <div class="ocr-item">כמות: ${r.qty}</div>
+        </div>
+      `;
+    });
+  }
+
+  async function saveAll() {
     document.getElementById("loader").innerText = "שומר דיווח...";
     document.getElementById("loader").style.display = "block";
 
-    const action = main === "raw" ? "saveRawMaterial" : "saveReport";
+    let payload;
 
-    const payload = {
-      action,
-      token,
-      ocr: ocrResult,
-      finishedWarehouse: finished
-    };
+    if (main === "raw") {
+      payload = {
+        action: "saveRawMaterialBatch",
+        token,
+        reports: rawReports
+      };
+    } else {
+      payload = {
+        action: "saveReport",
+        token,
+        ocr: { reports: finishedReports },
+        finishedWarehouse: finished
+      };
+    }
 
     try {
       const response = await fetch(API_URL, {
@@ -194,50 +217,6 @@
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("service-worker.js");
 }
-</script>
-
-<script>
-let startX = 0;
-let endX = 0;
-const EDGE_SIZE = 40;
-
-document.addEventListener("touchstart", e => {
-  startX = e.changedTouches[0].clientX;
-});
-
-document.addEventListener("touchend", e => {
-  endX = e.changedTouches[0].clientX;
-  const diff = endX - startX;
-
-  if (startX < EDGE_SIZE && diff > 80) history.back();
-  if (startX > window.innerWidth - EDGE_SIZE && diff < -80) history.forward();
-});
-</script>
-
-<script>
-  console.log("Version check script loaded (report)");
-</script>
-
-<script>
-async function checkVersion() {
-  try {
-    const res = await fetch("https://raw.githubusercontent.com/albilia/Forklift-Reports/main/version.json?t=" + Date.now());
-    const data = await res.json();
-
-    const localVersion = localStorage.getItem("app_version") || "0";
-
-    if (data.version !== localVersion) {
-      console.log("🔄 גרסה חדשה זוהתה — מרענן...");
-      localStorage.setItem("app_version", data.version);
-      location.reload(true);
-    }
-  } catch (e) {
-    console.log("Version check failed");
-  }
-}
-
-checkVersion();
-setInterval(checkVersion, 10000);
 </script>
 
 </body>
