@@ -16,10 +16,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
 
   <!-- Icons -->
-  <!-- אייקון למסך הבית באייפון -->
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
-
-  <!-- אייקון לדפדפן -->
   <link rel="icon" type="image/png" href="apple-touch-icon.png">
 
   <!-- Menu CSS -->
@@ -114,7 +111,7 @@
 
 <script>
   /* ⭐ API URL ⭐ */
-  const API_URL = "https://script.google.com/macros/s/AKfycbzX5b5hPEF_wSx3zMh_CJ9if8u7Q_CTIg_UQhqqHr8hryUsBsdhMMa_rqaqizCvhAN99Q/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbwgWfnist6v7pYzYjbWY9hIhGvjyrZH1-7Bqa5hOABlvOFM8Tqh3j8xzNtxtH_G4tZe7Q/exec";
 
   async function login() {
     const phone = document.getElementById("phone").value.trim();
@@ -150,17 +147,14 @@
   }
 </script>
 
-<!-- ⭐ טעינת תפריט -->
 <script src="menu.js"></script>
 
-<!-- ⭐ רישום Service Worker -->
 <script>
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("service-worker.js");
 }
 </script>
 
-<!-- ⭐ סווייפ מהשוליים בלבד -->
 <script>
 let startX = 0;
 let endX = 0;
@@ -179,12 +173,10 @@ document.addEventListener("touchend", e => {
 });
 </script>
 
-<!-- ⭐ שלב 1: בדיקת טעינה -->
 <script>
   console.log("Version check script loaded");
 </script>
 
-<!-- ⭐ שלב 2: מנגנון עדכון גרסה אוטומטי -->
 <script>
 async function checkVersion() {
   try {
@@ -203,10 +195,7 @@ async function checkVersion() {
   }
 }
 
-// בדיקה בטעינה
 checkVersion();
-
-// בדיקה כל 10 שניות
 setInterval(checkVersion, 10000);
 </script>
 
