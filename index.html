@@ -3,119 +3,200 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>התחברות</title>
 
+  <!-- שם שיוצג במסך הבית באייפון -->
+  <meta name="apple-mobile-web-app-title" content="Nis">
+
+  <title>Nis</title>
+
+  <!-- PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#ffffff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <!-- Icons -->
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="apple-touch-icon.png">
+
+  <!-- Menu CSS -->
+  <link rel="stylesheet" href="menu.css">
 
   <style>
-    body { margin: 0; padding: 0; font-family: Arial, sans-serif; background: #f5f5f5; text-align: center; }
-    .container { margin-top: 80px; }
-    input { width: 80%; padding: 15px; margin: 10px auto; border-radius: 10px; border: 1px solid #ccc; font-size: 18px; display: block; }
-    .btn { width: 85%; padding: 15px; margin: 10px auto; background: #d32f2f; color: white; border: none; border-radius: 10px; font-size: 20px; cursor: pointer; }
-    #loader { display: none; margin-top: 15px; font-size: 18px; color: #444; }
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      text-align: center;
+    }
+
+    .container {
+      height: calc(100vh - 60px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .logo {
+      width: 120px;
+      margin-bottom: 20px;
+    }
+
+    .main-title {
+      font-size: 26px;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    .sub-title {
+      font-size: 20px;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    input {
+      width: 220px;
+      padding: 12px;
+      font-size: 18px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    button {
+      width: 240px;
+      padding: 12px;
+      font-size: 18px;
+      background: #d32f2f;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #b71c1c;
+    }
+
+    #loader {
+      display: none;
+      margin-top: 20px;
+      font-size: 18px;
+      color: #444;
+    }
   </style>
 </head>
 <body>
 
+  <!-- ⭐ תפריט נטען אוטומטית -->
+  <div id="menuContainer"></div>
+
   <div class="container">
-    <h1>ברוך הבא</h1>
-    <p>הכנס מספר טלפון</p>
+    <img src="logo.jpg" class="logo" alt="לוגו">
 
-    <input type="tel" id="phone" placeholder="לדוגמה: 0541234567">
+    <div class="main-title">העברת דווחים</div>
+    <div class="sub-title">הזן מספר טלפון כדי להיכנס</div>
 
-    <button class="btn" onclick="sendOTP()">המשך</button>
+    <input id="phone" type="tel" placeholder="05XXXXXXXX">
 
-    <div id="otpSection" style="display:none;">
-      <p>הכנס קוד אימות</p>
-      <input type="number" id="otp" placeholder="קוד אימות">
-      <button class="btn" onclick="verifyOTP()">אמת</button>
-    </div>
+    <button onclick="login()">כניסה</button>
 
-    <div id="loader">טוען...</div>
+    <div id="loader">מתחבר...</div>
   </div>
 
 <script>
-  /* ⭐ API URL החדש ⭐ */
+  /* ⭐ API URL — הוחלף לכתובת החדשה שלך ⭐ */
   const API_URL = "https://script.google.com/macros/s/AKfycbwo9OSMpBZBHnEbrVd4vD3HzBnU_VxWgCAKRG6OIWDoZWd5S3rwPa3x2T-dbBtoBqf8mA/exec";
 
-  async function sendOTP() {
+  async function login() {
     const phone = document.getElementById("phone").value.trim();
-    if (!phone) {
-      alert("אנא הכנס מספר טלפון");
+    const loader = document.getElementById("loader");
+
+    if (phone.length < 10) {
+      alert("מספר טלפון לא תקין");
       return;
     }
 
-    document.getElementById("loader").style.display = "block";
+    loader.style.display = "block";
 
     try {
-      const response = await fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify({
-          action: "sendOTP",
-          phone
-        })
-      });
-
+      const url = `${API_URL}?action=verifyOTP&phone=${phone}`;
+      const response = await fetch(url);
       const data = await response.json();
-      document.getElementById("loader").style.display = "none";
 
       if (!data.success) {
-        alert("שגיאה בשליחת קוד");
+        alert("מספר טלפון לא מורשה במערכת");
+        loader.style.display = "none";
         return;
       }
 
-      document.getElementById("otpSection").style.display = "block";
+      const name = data.name;
+      const token = data.token;
+
+      window.location.href = `dashboard.html?token=${token}&name=${encodeURIComponent(name)}`;
 
     } catch (err) {
       alert("שגיאה בחיבור לשרת");
-      document.getElementById("loader").style.display = "none";
-    }
-  }
-
-  async function verifyOTP() {
-    const phone = document.getElementById("phone").value.trim();
-    const otp = document.getElementById("otp").value.trim();
-
-    if (!otp) {
-      alert("אנא הכנס קוד אימות");
-      return;
-    }
-
-    document.getElementById("loader").style.display = "block";
-
-    try {
-      const response = await fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify({
-          action: "verifyOTP",
-          phone,
-          otp
-        })
-      });
-
-      const data = await response.json();
-      document.getElementById("loader").style.display = "none";
-
-      if (!data.success) {
-        alert("קוד אימות שגוי או משתמש לא מורשה");
-        return;
-      }
-
-      window.location.href =
-        `dashboard.html?token=${data.token}&name=${encodeURIComponent(data.name)}&role=${data.role}`;
-
-    } catch (err) {
-      alert("שגיאה בחיבור לשרת");
-      document.getElementById("loader").style.display = "none";
+      loader.style.display = "none";
     }
   }
 </script>
+
+<script src="menu.js"></script>
 
 <script>
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("service-worker.js");
 }
+</script>
+
+<script>
+let startX = 0;
+let endX = 0;
+const EDGE_SIZE = 40;
+
+document.addEventListener("touchstart", e => {
+  startX = e.changedTouches[0].clientX;
+});
+
+document.addEventListener("touchend", e => {
+  endX = e.changedTouches[0].clientX;
+  const diff = endX - startX;
+
+  if (startX < EDGE_SIZE && diff > 80) history.back();
+  if (startX > window.innerWidth - EDGE_SIZE && diff < -80) history.forward();
+});
+</script>
+
+<script>
+  console.log("Version check script loaded");
+</script>
+
+<script>
+async function checkVersion() {
+  try {
+    const res = await fetch("https://raw.githubusercontent.com/albilia/Forklift-Reports/main/version.json?t=" + Date.now());
+    const data = await res.json();
+
+    const localVersion = localStorage.getItem("app_version") || "0";
+
+    if (data.version !== localVersion) {
+      console.log("🔄 גרסה חדשה זוהתה — מרענן...");
+      localStorage.setItem("app_version", data.version);
+      location.reload(true);
+    }
+  } catch (e) {
+    console.log("Version check failed");
+  }
+}
+
+checkVersion();
+setInterval(checkVersion, 10000);
 </script>
 
 </body>
