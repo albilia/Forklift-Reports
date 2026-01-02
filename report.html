@@ -1,63 +1,7 @@
-<!DOCTYPE html>
-<html lang="he" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>דיווח משטח</title>
-
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#ffffff">
-  <link rel="stylesheet" href="menu.css">
-
-  <style>
-    body { margin: 0; padding: 0; font-family: Arial, sans-serif; background: #f5f5f5; text-align: center; }
-    .top-bar { background: #d32f2f; color: white; padding: 15px; font-size: 22px; font-weight: bold; position: relative; }
-    .back-btn { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); background: white; color: #d32f2f; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-    .content { padding: 20px; }
-    .preview { width: 90%; margin: 15px auto; border-radius: 10px; display: none; }
-    .btn { width: 85%; padding: 15px; margin: 10px auto; background: #d32f2f; color: white; border: none; border-radius: 10px; font-size: 20px; cursor: pointer; }
-    #loader { display: none; margin-top: 15px; font-size: 18px; color: #444; }
-    .ocr-box { background: white; padding: 15px; margin: 15px auto; width: 85%; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); text-align: right; }
-    .ocr-item { font-size: 18px; margin-bottom: 8px; }
-  </style>
-</head>
-<body>
-
-  <div id="menuContainer"></div>
-
-  <div class="top-bar">
-    דיווח משטח
-    <button class="back-btn" onclick="goBack()">חזור</button>
-  </div>
-
-  <div class="content">
-
-    <h2 style="margin-bottom:20px; font-size:22px;">צלם תווית</h2>
-
-    <input type="file" accept="image/*" capture="environment" id="cameraInput" style="display:none" onchange="handleImage(this)">
-
-    <div style="display:flex; justify-content:center; align-items:center; margin-bottom:25px;">
-      <img 
-        src="camera-icon.png" 
-        alt="צלם תווית"
-        onclick="document.getElementById('cameraInput').click()"
-        style="width: 80px; height: 80px; object-fit: contain; cursor: pointer; transition: transform 0.2s;"
-        onmouseover="this.style.transform='scale(1.05)'"
-        onmouseout="this.style.transform='scale(1)'"
-      />
-    </div>
-
-    <img id="preview" class="preview">
-
-    <div id="loader">מעבד תמונה...</div>
-
-    <div id="ocrList"></div>
-
-    <button id="saveBtn" class="btn" style="display:none" onclick="saveAll()">שמור דיווח</button>
-
-  </div>
-
 <script>
+  /* ⭐ API URL החדש ⭐ */
+  const API_URL = "https://script.google.com/macros/s/AKfycbyXMQiGqDvOV0IQnO5aQdeL8nsiGSDog9xbA9kfnz3lAvlBSunkYKvW8hbxlu5JLAGFiA/exec";
+
   /* קבלת פרמטרים */
   const params = new URLSearchParams(window.location.search);
   const token = params.get("token");
@@ -69,9 +13,6 @@
     alert("שגיאה: אין טוקן זיהוי");
     window.location.href = "index.html";
   }
-
-  /* ⭐ API URL החדש ⭐ */
-  const API_URL = "https://script.google.com/macros/s/AKfycbyQ6-Gz-a2txnCpdjdI4OEvz_DfEpWa_CymVDJ-mQJmOB8eiC5QbfDk3v3gEHvqgYlr/exec";
 
   /* רשימת תוצאות OCR (לחומרי גלם) */
   let rawReports = [];
@@ -210,14 +151,3 @@
     }
   }
 </script>
-
-<script src="menu.js"></script>
-
-<script>
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("service-worker.js");
-}
-</script>
-
-</body>
-</html>
