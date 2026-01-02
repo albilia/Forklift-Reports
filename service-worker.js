@@ -1,7 +1,5 @@
-// ⭐ שם קאש — שינוי שלו מנקה אוטומטית את כל הגרסאות הישנות
-const CACHE_NAME = "forklift-cache-v2";
+const CACHE_NAME = "forklift-cache-v3";
 
-// ⭐ רשימת קבצים לשמירה בקאש (אפשר להוסיף/להוריד)
 const ASSETS = [
   "./",
   "index.html",
@@ -15,42 +13,50 @@ const ASSETS = [
   "camera-icon.png"
 ];
 
-// ⭐ התקנה — מוחק קאש ישן ומטמיע קבצים חדשים
+// התקנה
 self.addEventListener("install", event => {
   event.waitUntil(
-    caches.delete(CACHE_NAME).then(() =>
-      caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
-    )
+    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
   );
   self.skipWaiting();
 });
 
-// ⭐ הפעלה — מוחק כל קאש ישן שלא תואם לגרסה הנוכחית
+// הפעלה
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(
-        keys
-          .filter(key => key !== CACHE_NAME)
-          .map(key => caches.delete(key))
-      )
+      Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)))
     )
   );
   self.clients.claim();
 });
 
-// ⭐ טעינה — קודם מהשרת, ואם אין אינטרנט → מהקאש
+// טעינה בטוחה
 self.addEventListener("fetch", event => {
+  const url = event.request.url;
+
+  // דלג על בקשות שאסור לקאש
+  if (
+    url.startsWith("chrome-extension://") ||
+    url.startsWith("moz-extension://") ||
+    url.startsWith("safari-extension://") ||
+    event.request.method !== "GET"
+  ) {
+    return;
+  }
+
   event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        // ⭐ שומר בקאש רק בקשות GET — POST לא נתמך בקאש
-        if (event.request.method === "GET") {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-        }
-        return response;
-      })
-      .catch(() => caches.match(event.request))
+    caches.match(event.request).then(cached => {
+      return (
+        cached ||
+        fetch(event.request)
+          .then(response => {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+            return response;
+          })
+          .catch(() => cached)
+      );
+    })
   );
 });
