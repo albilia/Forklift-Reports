@@ -113,7 +113,7 @@
 
 <script>
   /* ⭐ API URL — הוחלפה לכתובת החדשה */
-  const API_URL = "https://script.google.com/macros/s/AKfycbz0ZuXpjRQXUo76gtmRznhFqHM0cqI1sJFHnAGkLUascRW5W6DoW2f0GF4mGGHiqaaF9A/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbxPEM4m7oG8AN0ycJUMMK1jel98rwVwp8nje4m0TVFFvfRGpOuZZoOpIpRB4F9YpE_TPQ/exec";
 
   async function login() {
     const phone = document.getElementById("phone").value.trim();
@@ -192,7 +192,7 @@ async function checkVersion() {
 
     if (data.version !== localVersion) {
       console.log("🔄 גרסה חדשה זוהתה — מרענן...");
-      localVersion = localStorage.setItem("app_version", data.version);
+      localStorage.setItem("app_version", data.version);
       location.reload();
     }
   } catch (e) {
