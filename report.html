@@ -8,34 +8,50 @@
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
-      background: #1a1a1a;
-      color: #ffffff;
+      background: #1a1a1a; /* ⭐ רקע כהה ללילה */
+      color: #f5f5f5;       /* ⭐ טקסט בהיר */
       text-align: center;
       font-size: 22px;
+      position: relative;
+      overflow-x: hidden;
     }
 
-    /* ⭐ כותרת בסגנון 1 — מסגרת סימטרית */
-    .banner-box {
-      font-size: 42px;
+    h2 {
+      font-size: 40px;
+      margin-bottom: 25px;
       font-weight: bold;
       color: #ffffff;
-      display: inline-block;
-      padding: 12px 30px;
-      border: 4px solid #ffffff;
-      border-radius: 12px;
-      margin-bottom: 25px;
-      letter-spacing: 2px;
-      text-align: center;
-      white-space: pre;
     }
 
     #preview {
-      width: 90%;
-      max-width: 450px;
+      max-width: 100%;
       margin-top: 20px;
-      border: 3px solid #fff;
-      border-radius: 12px;
       display: none;
+      border-radius: 10px;
+      border: 6px solid black; /* ⭐ מסגרת שחורה עבה */
+    }
+
+    /* ⭐ טוען — גדול וברור */
+    #loader {
+      display: none;
+      font-weight: bold;
+      margin-top: 25px;
+      font-size: 40px;
+      color: #ffeb3b; /* צהוב בולט */
+    }
+
+    /* ⭐ OCR גדול, ברור, עם ניגודיות חזקה */
+    .ocr-box {
+      background: #2b2b2b;
+      border: 3px solid #555;
+      padding: 28px;
+      margin: 25px auto;
+      border-radius: 14px;
+      width: 92%;
+      text-align: right;
+      font-size: 38px;
+      line-height: 1.45;
+      color: #ffffff;
     }
 
     button {
@@ -47,33 +63,90 @@
       background: #d32f2f;
       color: white;
       cursor: pointer;
+      animation: pulse 2s infinite;
       width: 80%;
       max-width: 350px;
     }
 
-    #loader {
-      display: none;
-      font-size: 26px;
-      margin-top: 20px;
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+      100% { transform: scale(1); }
+    }
+
+    #flash {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: white;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease-out;
+      z-index: 9999;
+    }
+    #flash.active {
+      opacity: 1;
+    }
+
+    .camera-icon {
+      width: 200px;
+      margin-bottom: 30px;
+      cursor: pointer;
+      filter: brightness(1.2);
     }
   </style>
 </head>
 
 <body>
 
-  <!-- ⭐ כותרת חדשה בסגנון 1 -->
-  <h2 class="banner-box">צילום תווית</h2>
+  <div id="flash"></div>
 
-  <input type="file" accept="image/*" capture="environment" id="cameraInput" style="display:none;" onchange="showPreview(event)">
-  <button onclick="document.getElementById('cameraInput').click()">צלם תווית</button>
+  <audio id="clickSound" src="click.mp3" preload="auto"></audio>
+
+  <h2>צילום תווית</h2>
+
+  <img src="camera-icon.png"
+       alt="צלם"
+       class="camera-icon"
+       onclick="triggerCamera();">
+
+  <input id="cameraInput"
+         type="file"
+         accept="image/*"
+         capture="environment"
+         onchange="handleImage(this)"
+         style="display:none;">
 
   <img id="preview">
+  <div id="loader">טוען...</div>
+  <div id="ocrList"></div>
 
-  <div id="loader">מעבד את התמונה…</div>
+  <!-- ⭐ כפתור שמור ממורכז -->
+  <button id="saveBtn" onclick="saveAll()" 
+          style="display:none; margin: 20px auto; display:block;">
+    שמור דיווח
+  </button>
 
-  <button onclick="sendToServer()">שלח</button>
+  <button onclick="goBack()">חזור לדשבורד</button>
 
 <script>
+  function triggerCamera() {
+    const flash = document.getElementById("flash");
+
+    // ⭐ פלאש בלבד — בלי צליל
+    flash.classList.add("active");
+    setTimeout(() => flash.classList.remove("active"), 150);
+
+    if (navigator.vibrate) navigator.vibrate(120);
+
+    document.getElementById("cameraInput").click();
+  }
+
+  /* ⭐ API URL — הוחלפה לכתובת החדשה */
+  const API_URL = "https://script.google.com/macros/s/AKfycbxYWCMCrx8wfDstE7tsytRh9O1fSG19NGLNIba7n_aYsBjX_5vEwl5OblNyolrPt8FgjA/exec";
+
   const params = new URLSearchParams(window.location.search);
   const token = params.get("token");
   const name = params.get("name");
@@ -85,42 +158,143 @@
     window.location.href = "index.html";
   }
 
-  function showPreview(event) {
-    const img = document.getElementById("preview");
-    img.src = URL.createObjectURL(event.target.files[0]);
-    img.style.display = "block";
+  let rawReports = [];
+  let finishedReports = [];
+
+  function goBack() {
+    window.location.href = `dashboard.html?token=${token}&name=${encodeURIComponent(name)}`;
   }
 
-  function sendToServer() {
-    const fileInput = document.getElementById("cameraInput");
-    if (!fileInput.files.length) {
-      alert("צלם תווית לפני השליחה");
-      return;
-    }
+  function handleImage(input) {
+    const file = input.files[0];
+    if (!file) return;
 
+    // ⭐ זה הרגע שבו iPhone באמת צילם → כאן משמיעים את הצליל
+    document.getElementById("clickSound").play().catch(()=>{});
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = document.getElementById("preview");
+      img.src = e.target.result;
+      img.style.display = "block";
+
+      runOCR(e.target.result);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  async function runOCR(base64) {
     document.getElementById("loader").style.display = "block";
 
-    const formData = new FormData();
-    formData.append("image", fileInput.files[0]);
-    formData.append("token", token);
-    formData.append("name", name);
-    formData.append("main", main);
-    if (finished) formData.append("finished", finished);
+    try {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          action: "processImage",
+          image: base64,
+          main: main
+        })
+      });
 
-    fetch("upload.php", {
-      method: "POST",
-      body: formData
-    })
-    .then(r => r.text())
-    .then(res => {
+      const data = await response.json();
       document.getElementById("loader").style.display = "none";
-      alert("התמונה נשלחה בהצלחה");
-      window.location.href = "dashboard.html?token=" + token + "&name=" + encodeURIComponent(name);
-    })
-    .catch(err => {
+
+      if (!data.parsed || !data.parsed.reports || data.parsed.reports.length === 0) {
+        return;
+      }
+
+      if (main === "raw") {
+        const first = data.parsed.reports[0];
+        if (first) {
+          rawReports.push(first);
+          showRawList();
+        }
+      } else {
+        finishedReports = data.parsed.reports;
+        showFinishedList();
+      }
+
+      document.getElementById("saveBtn").style.display = "block";
+
+    } catch (err) {
+      alert("שגיאה בחיבור לשרת");
       document.getElementById("loader").style.display = "none";
-      alert("שגיאה בשליחה");
+    }
+  }
+
+  function showRawList() {
+    const box = document.getElementById("ocrList");
+    box.innerHTML = "";
+
+    rawReports.forEach((r, i) => {
+      box.innerHTML += `
+        <div class="ocr-box">
+          <b>צילום ${i+1}:</b><br>
+          מק״ט: ${r.makat}<br>
+          כמות: ${r.qty}
+        </div>
+      `;
     });
+  }
+
+  function showFinishedList() {
+    const box = document.getElementById("ocrList");
+    box.innerHTML = "";
+
+    finishedReports.forEach((r, i) => {
+      box.innerHTML += `
+        <div class="ocr-box">
+          <b>תווית ${i+1}:</b><br>
+          מק״ט: ${r.makat}<br>
+          פק״ע: ${r.pka}<br>
+          כמות: ${r.qty}
+        </div>
+      `;
+    });
+  }
+
+  async function saveAll() {
+    document.getElementById("loader").innerText = "שומר דיווח...";
+    document.getElementById("loader").style.display = "block";
+
+    let payload;
+
+    if (main === "raw") {
+      payload = {
+        action: "saveRawMaterialBatch",
+        token,
+        reports: rawReports
+      };
+    } else {
+      payload = {
+        action: "saveReport",
+        token,
+        ocr: { reports: finishedReports },
+        finishedWarehouse: finished
+      };
+    }
+
+    try {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+      document.getElementById("loader").style.display = "none";
+
+      if (!data.success) {
+        alert("שגיאה בשמירת הדיווח");
+        return;
+      }
+
+      alert("הדיווח נשמר בהצלחה!");
+      goBack();
+
+    } catch (err) {
+      alert("שגיאה בחיבור לשרת");
+      document.getElementById("loader").style.display = "none";
+    }
   }
 </script>
 
