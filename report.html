@@ -10,13 +10,14 @@
       padding: 20px;
       background: #f9f9f9;
       text-align: center;
-      font-size: 18px;
+      font-size: 20px;
       position: relative;
       overflow-x: hidden;
     }
     h2 {
-      font-size: 26px;
-      margin-bottom: 15px;
+      font-size: 32px;
+      margin-bottom: 20px;
+      font-weight: bold;
     }
     #preview {
       max-width: 100%;
@@ -28,31 +29,42 @@
       display: none;
       font-weight: bold;
       margin-top: 20px;
+      font-size: 22px;
     }
+
+    /* תיבת דו"ח OCR */
     .ocr-box {
       background: #fff;
-      border: 1px solid #ccc;
-      padding: 15px;
-      margin: 10px auto;
-      border-radius: 8px;
-      width: 90%;
-      text-align: left;
+      border: 2px solid #ccc;
+      padding: 18px;
+      margin: 15px auto;
+      border-radius: 10px;
+      width: 92%;
+      text-align: right;
+      font-size: 20px;
     }
-    .ocr-item {
-      margin-bottom: 5px;
-    }
+
+    /* כפתורים */
     button {
-      margin: 15px;
-      padding: 12px 22px;
-      font-size: 18px;
+      margin: 20px;
+      padding: 15px 28px;
+      font-size: 22px;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       background: #d32f2f;
       color: white;
       cursor: pointer;
+      animation: pulse 2s infinite;
     }
 
-    /* ⭐ פלאש צילום */
+    /* ⭐ אנימציית פולס */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+      100% { transform: scale(1); }
+    }
+
+    /* פלאש */
     #flash {
       position: fixed;
       top: 0;
@@ -75,18 +87,18 @@
 
   <div id="flash"></div>
 
-  <!-- ⭐ צליל קליק -->
+  <!-- צליל קליק -->
   <audio id="clickSound" src="click.mp3" preload="auto"></audio>
 
   <h2>צילום תווית</h2>
 
-  <!-- ⭐ אייקון מצלמה שמפעיל פלאש + קליק + רטט + מצלמה אחורית -->
+  <!-- אייקון מצלמה גדול -->
   <img src="camera-icon.png"
        alt="צלם"
-       style="width:100px; margin-bottom:20px; cursor:pointer;"
+       style="width:140px; margin-bottom:25px; cursor:pointer;"
        onclick="triggerCamera();">
 
-  <!-- ⭐ קלט קובץ מוסתר לחלוטין -->
+  <!-- קלט קובץ מוסתר -->
   <input id="cameraInput"
          type="file"
          accept="image/*"
@@ -102,29 +114,22 @@
   <button onclick="goBack()">חזור לדשבורד</button>
 
   <script>
-    /* ⭐ פלאש + קליק + רטט + פתיחת מצלמה */
+    /* פלאש + קליק + רטט + פתיחת מצלמה */
     function triggerCamera() {
       const flash = document.getElementById("flash");
       const clickSound = document.getElementById("clickSound");
 
-      // פלאש
       flash.classList.add("active");
       setTimeout(() => flash.classList.remove("active"), 150);
 
-      // צליל קליק
       clickSound.currentTime = 0;
       clickSound.play().catch(() => {});
 
-      // רטט (אנדרואיד)
-      if (navigator.vibrate) {
-        navigator.vibrate(100);
-      }
+      if (navigator.vibrate) navigator.vibrate(120);
 
-      // פתיחת מצלמה
       document.getElementById("cameraInput").click();
     }
 
-    /* ⭐ API URL */
     const API_URL = "https://script.google.com/macros/s/AKfycbyXMQiGqDvOV0IQnO5aQdeL8nsiGSDog9xbA9kfnz3lAvlBSunkYKvW8hbxlu5JLAGFiA/exec";
 
     const params = new URLSearchParams(window.location.search);
@@ -204,9 +209,9 @@
       rawReports.forEach((r, i) => {
         box.innerHTML += `
           <div class="ocr-box">
-            <div class="ocr-item"><b>צילום ${i+1}:</b></div>
-            <div class="ocr-item">מק״ט: ${r.makat}</div>
-            <div class="ocr-item">כמות: ${r.qty}</div>
+            <b>צילום ${i+1}:</b><br>
+            מק״ט: ${r.makat}<br>
+            כמות: ${r.qty}
           </div>
         `;
       });
@@ -219,10 +224,10 @@
       finishedReports.forEach((r, i) => {
         box.innerHTML += `
           <div class="ocr-box">
-            <div class="ocr-item"><b>תווית ${i+1}:</b></div>
-            <div class="ocr-item">מק״ט: ${r.makat}</div>
-            <div class="ocr-item">פק״ע: ${r.pka}</div>
-            <div class="ocr-item">כמות: ${r.qty}</div>
+            <b>תווית ${i+1}:</b><br>
+            מק״ט: ${r.makat}<br>
+            פק״ע: ${r.pka}<br>
+            כמות: ${r.qty}
           </div>
         `;
       });
