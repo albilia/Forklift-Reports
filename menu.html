@@ -90,12 +90,12 @@
     מס' גרסה: ...
   </div>
 
-  <!-- ⭐ זכויות יוצרים — בדיוק כמו שהיה, רק מודגש ⭐ -->
+  <!-- ⭐ זכויות יוצרים — מודגש בלבד ⭐ -->
   <div style="text-align:center; margin-top:15px; font-size:16px; font-weight:bold;">
     © פותח על ידי ניסים אלביליה
   </div>
 
-  <!-- ⭐ התמונה שהייתה — מוחזרת בדיוק כמו שהייתה ⭐ -->
+  <!-- ⭐ התמונה המקורית ⭐ -->
   <div style="text-align:center; margin-top:10px;">
     <img 
       src="https://raw.githubusercontent.com/albilia/Forklift-Reports/main/me.jpg"
@@ -109,6 +109,40 @@
     >
   </div>
 
+</div>
+
+<!-- ⭐ מודאל נקי להצגת טקסט ארוך ⭐ -->
+<div id="infoModal" style="
+  display:none;
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.6);
+  z-index:99999;
+  padding:20px;
+  box-sizing:border-box;
+">
+  <div style="
+    background:white;
+    color:black;
+    max-width:500px;
+    margin:60px auto;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 0 10px rgba(0,0,0,0.3);
+    max-height:80%;
+    overflow-y:auto;
+    text-align:right;
+    direction:rtl;
+  ">
+    <div style="text-align:left;">
+      <span onclick="closeModal()" style="cursor:pointer; font-size:26px;">✕</span>
+    </div>
+    <h2 id="modalTitle" style="margin-top:0;"></h2>
+    <div id="modalBody" style="white-space:pre-line; font-size:18px; line-height:1.5;"></div>
+  </div>
 </div>
 
 <script>
@@ -136,10 +170,21 @@
   }
   loadVersion();
 
-  /* ⭐ אודות — טקסט חדש ⭐ */
+  /* ⭐ מודאל ⭐ */
+  function openModal(title, body) {
+    document.getElementById("modalTitle").innerText = title;
+    document.getElementById("modalBody").innerText = body;
+    document.getElementById("infoModal").style.display = "block";
+  }
+
+  function closeModal() {
+    document.getElementById("infoModal").style.display = "none";
+  }
+
+  /* ⭐ אודות ⭐ */
   function openAbout() {
-    alert(
-      "אודות המערכת:\n\n" +
+    openModal(
+      "אודות המערכת",
       "מערכת Nis רפורטר פותחה לתת מענה לסריקת תוויות ומדבקות במחסנים.\n" +
       "לכל מחסן נכתב קוד מותאם למערכת Google Cloud Vision OCR.\n\n" +
       "מחסן חומרי גלם משתמש בקוד לקריאת מדבקות.\n" +
@@ -150,10 +195,10 @@
     );
   }
 
-  /* ⭐ שלבים — טקסט חדש ⭐ */
+  /* ⭐ שלבים ⭐ */
   function openSteps() {
-    alert(
-      "שלבי העבודה:\n\n" +
+    openModal(
+      "שלבי העבודה",
       "1. הזן מספר טלפון במסך הכניסה.\n" +
       "2. בחר מחסן — חומרי גלם / תוצר גמר.\n" +
       "3. במחסן תוצר גמר: בחר תת מחסן.\n" +
