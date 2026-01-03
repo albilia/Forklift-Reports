@@ -35,6 +35,7 @@
       font-size: 26px;
     }
 
+    /* ⭐ OCR גדול וברור יותר */
     .ocr-box {
       background: #fff;
       border: 2px solid #ccc;
@@ -43,7 +44,7 @@
       border-radius: 12px;
       width: 92%;
       text-align: right;
-      font-size: 24px;
+      font-size: 30px;
     }
 
     button {
@@ -114,7 +115,12 @@
   <div id="loader">טוען...</div>
   <div id="ocrList"></div>
 
-  <button id="saveBtn" onclick="saveAll()" style="display:none;">שמור דיווח</button>
+  <!-- ⭐ כפתור שמור ממורכז -->
+  <button id="saveBtn" onclick="saveAll()" 
+          style="display:none; margin: 20px auto; display:block;">
+    שמור דיווח
+  </button>
+
   <button onclick="goBack()">חזור לדשבורד</button>
 
 <script>
