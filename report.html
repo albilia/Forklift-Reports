@@ -114,12 +114,17 @@
          type="file"
          accept="image/*"
          capture="environment"
+         multiple
          onchange="handleImage(this)"
          style="display:none;">
 
   <img id="preview">
   <div id="loader">טוען...</div>
   <div id="ocrList"></div>
+
+  <button id="processAllBtn" onclick="processAll()" style="display:none;">
+    פענח הכול
+  </button>
 
   <button id="saveBtn" onclick="saveAll()"
           style="display:none; margin: 20px auto; display:block;">
@@ -139,7 +144,7 @@
     document.getElementById("cameraInput").click();
   }
 
-  /* ⭐ API URL — הוחלפה לכתובת החדשה */
+  /* ⭐ API URL — הכתובת החדשה */
   const API_URL = "https://script.google.com/macros/s/AKfycbz0ZuXpjRQXUo76gtmRznhFqHM0cqI1sJFHnAGkLUascRW5W6DoW2f0GF4mGGHiqaaF9A/exec";
 
   const params = new URLSearchParams(window.location.search);
@@ -155,65 +160,90 @@
 
   let rawReports = [];
   let finishedReports = [];
+  let pendingImages = [];
 
   function goBack() {
     window.location.href = `dashboard.html?token=${token}&name=${encodeURIComponent(name)}`;
   }
 
   function handleImage(input) {
-    const file = input.files[0];
-    if (!file) return;
+    const files = input.files;
+    if (!files || files.length === 0) return;
 
-    document.getElementById("clickSound").play().catch(()=>{});
+    for (const file of files) {
+      pendingImages.push(file);
+    }
 
+    // מציגים את התמונה האחרונה שצולמה בתצוגה מקדימה
+    const lastFile = files[files.length - 1];
     const reader = new FileReader();
     reader.onload = function(e) {
       const img = document.getElementById("preview");
       img.src = e.target.result;
       img.style.display = "block";
-
-      runOCR(e.target.result);
     };
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(lastFile);
+
+    document.getElementById("processAllBtn").style.display = "block";
   }
 
-  async function runOCR(base64) {
+  async function processAll() {
+    if (pendingImages.length === 0) return;
+
+    document.getElementById("loader").innerText = "מעבד תמונות...";
     document.getElementById("loader").style.display = "block";
 
-    try {
-      const response = await fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify({
-          action: "processImage",
-          image: base64,
-          main: main
-        })
-      });
-
-      const data = await response.json();
-      document.getElementById("loader").style.display = "none";
-
-      if (!data.parsed || !data.parsed.reports || data.parsed.reports.length === 0) {
-        return;
-      }
-
-      if (main === "raw") {
-        const first = data.parsed.reports[0];
-        if (first) {
-          rawReports.push(first);
-          showRawList();
-        }
-      } else {
-        finishedReports = data.parsed.reports;
-        showFinishedList();
-      }
-
-      document.getElementById("saveBtn").style.display = "block";
-
-    } catch (err) {
-      alert("שגיאה בחיבור לשרת");
-      document.getElementById("loader").style.display = "none";
+    for (const file of pendingImages) {
+      await processSingleImage(file);
     }
+
+    pendingImages = [];
+    document.getElementById("loader").style.display = "none";
+    document.getElementById("saveBtn").style.display = "block";
+    document.getElementById("processAllBtn").style.display = "none";
+  }
+
+  async function processSingleImage(file) {
+    return new Promise(resolve => {
+      document.getElementById("clickSound").play().catch(()=>{});
+
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        const base64 = e.target.result;
+
+        try {
+          const response = await fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify({
+              action: "processImage",
+              image: base64,
+              main: main
+            })
+          });
+
+          const data = await response.json();
+
+          if (data.parsed && data.parsed.reports && data.parsed.reports.length > 0) {
+            if (main === "raw") {
+              const first = data.parsed.reports[0];
+              if (first) {
+                rawReports.push(first);
+                showRawList();
+              }
+            } else {
+              finishedReports.push(...data.parsed.reports);
+              showFinishedList();
+            }
+          }
+        } catch (err) {
+          console.log("OCR error", err);
+        }
+
+        resolve();
+      };
+
+      reader.readAsDataURL(file);
+    });
   }
 
   function showRawList() {
