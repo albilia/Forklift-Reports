@@ -35,7 +35,6 @@
       font-size: 26px;
     }
 
-    /* תיבת דו"ח OCR */
     .ocr-box {
       background: #fff;
       border: 2px solid #ccc;
@@ -47,7 +46,6 @@
       font-size: 24px;
     }
 
-    /* כפתורים */
     button {
       margin: 20px;
       padding: 18px 32px;
@@ -62,14 +60,12 @@
       max-width: 350px;
     }
 
-    /* ⭐ אנימציית פולס */
     @keyframes pulse {
       0% { transform: scale(1); }
       50% { transform: scale(1.06); }
       100% { transform: scale(1); }
     }
 
-    /* פלאש */
     #flash {
       position: fixed;
       top: 0;
@@ -86,13 +82,11 @@
       opacity: 1;
     }
 
-    /* אייקון מצלמה גדול */
     .camera-icon {
       width: 200px;
       margin-bottom: 30px;
       cursor: pointer;
     }
-
   </style>
 </head>
 
@@ -100,18 +94,15 @@
 
   <div id="flash"></div>
 
-  <!-- צליל קליק -->
   <audio id="clickSound" src="click.mp3" preload="auto"></audio>
 
   <h2>צילום תווית</h2>
 
-  <!-- אייקון מצלמה גדול -->
   <img src="camera-icon.png"
        alt="צלם"
        class="camera-icon"
        onclick="triggerCamera();">
 
-  <!-- קלט קובץ מוסתר -->
   <input id="cameraInput"
          type="file"
          accept="image/*"
@@ -127,7 +118,6 @@
   <button onclick="goBack()">חזור לדשבורד</button>
 
   <script>
-    /* פלאש + קליק + רטט + פתיחת מצלמה */
     function triggerCamera() {
       const flash = document.getElementById("flash");
       const clickSound = document.getElementById("clickSound");
@@ -194,7 +184,6 @@
         const data = await response.json();
         document.getElementById("loader").style.display = "none";
 
-        /* ⭐ מניעת קריסה במקרה שאין נתונים */
         if (!data.parsed || !data.parsed.reports || data.parsed.reports.length === 0) {
           return;
         }
