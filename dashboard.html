@@ -5,9 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>דשבורד דווחים</title>
 
+  <!-- PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#ffffff">
 
+  <!-- Menu CSS -->
   <link rel="stylesheet" href="menu.css">
 
   <style>
@@ -81,6 +83,7 @@
 </head>
 <body>
 
+  <!-- ⭐ תפריט -->
   <div id="menuContainer"></div>
 
   <div class="top-bar">
@@ -130,12 +133,6 @@
   const userName = params.get("name");
   const token = params.get("token");
 
-  /* ⭐ איפוס בחירה בכניסה חדשה */
-  if (!document.referrer.includes("dashboard.html")) {
-    localStorage.removeItem("mainWarehouse");
-    localStorage.removeItem("finishedWarehouse");
-  }
-
   if (!token) {
     alert("שגיאה: אין טוקן זיהוי");
     window.location.href = "index.html";
@@ -145,6 +142,13 @@
     document.getElementById("userGreeting").innerText = `שלום, ${userName}`;
   }
 
+  /* ⭐ איפוס בחירה רק אם מגיעים מה־index (כניסה חדשה) */
+  if (document.referrer.includes("index.html")) {
+    localStorage.removeItem("mainWarehouse");
+    localStorage.removeItem("finishedWarehouse");
+  }
+
+  /* ⭐ טעינת בחירה אחרונה */
   window.addEventListener("load", () => {
     const savedMain = localStorage.getItem("mainWarehouse");
     const savedFinished = localStorage.getItem("finishedWarehouse");
@@ -182,7 +186,7 @@
       `report.html?token=${token}&name=${encodeURIComponent(userName)}&main=${main}&finished=${finished}`;
   }
 
-  /* ⭐ איפוס מלא בלחיצה על יציאה */
+  /* ⭐ יציאה — איפוס מלא */
   function logout() {
     localStorage.removeItem("mainWarehouse");
     localStorage.removeItem("finishedWarehouse");
