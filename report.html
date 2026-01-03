@@ -8,8 +8,8 @@
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
-      background: #1a1a1a; /* ⭐ רקע כהה ללילה */
-      color: #f5f5f5;       /* ⭐ טקסט בהיר */
+      background: #1a1a1a;
+      color: #f5f5f5;
       text-align: center;
       font-size: 22px;
       position: relative;
@@ -28,19 +28,17 @@
       margin-top: 20px;
       display: none;
       border-radius: 10px;
-      border: 6px solid black; /* ⭐ מסגרת שחורה עבה */
+      border: 6px solid black;
     }
 
-    /* ⭐ טוען — גדול וברור */
     #loader {
       display: none;
       font-weight: bold;
       margin-top: 25px;
       font-size: 40px;
-      color: #ffeb3b; /* צהוב בולט */
+      color: #ffeb3b;
     }
 
-    /* ⭐ OCR גדול, ברור, עם ניגודיות חזקה */
     .ocr-box {
       background: #2b2b2b;
       border: 3px solid #555;
@@ -123,8 +121,7 @@
   <div id="loader">טוען...</div>
   <div id="ocrList"></div>
 
-  <!-- ⭐ כפתור שמור ממורכז -->
-  <button id="saveBtn" onclick="saveAll()" 
+  <button id="saveBtn" onclick="saveAll()"
           style="display:none; margin: 20px auto; display:block;">
     שמור דיווח
   </button>
@@ -134,8 +131,6 @@
 <script>
   function triggerCamera() {
     const flash = document.getElementById("flash");
-
-    // ⭐ פלאש בלבד — בלי צליל
     flash.classList.add("active");
     setTimeout(() => flash.classList.remove("active"), 150);
 
@@ -145,7 +140,7 @@
   }
 
   /* ⭐ API URL — הוחלפה לכתובת החדשה */
-  const API_URL = "https://script.google.com/macros/s/AKfycbxYWCMCrx8wfDstE7tsytRh9O1fSG19NGLNIba7n_aYsBjX_5vEwl5OblNyolrPt8FgjA/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbzcIekK2GS95AxQqDqmhjmvzL2BphbBNaiCKXZY5jcSFpBprKNANgVVfdPgSufIywFleQ/exec";
 
   const params = new URLSearchParams(window.location.search);
   const token = params.get("token");
@@ -169,7 +164,6 @@
     const file = input.files[0];
     if (!file) return;
 
-    // ⭐ זה הרגע שבו iPhone באמת צילם → כאן משמיעים את הצליל
     document.getElementById("clickSound").play().catch(()=>{});
 
     const reader = new FileReader();
