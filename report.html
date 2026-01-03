@@ -181,14 +181,17 @@
         const data = await response.json();
         document.getElementById("loader").style.display = "none";
 
-        if (!data.success) {
-          alert("שגיאה בפענוח התמונה");
-          return;
+        /* ⭐ מניעת קריסה במקרה שאין נתונים */
+        if (!data.parsed || !data.parsed.reports || data.parsed.reports.length === 0) {
+          return; // לא מציגים כלום ולא קורסים
         }
 
         if (main === "raw") {
-          rawReports.push(data.parsed.reports[0]);
-          showRawList();
+          const first = data.parsed.reports[0];
+          if (first) {
+            rawReports.push(first);
+            showRawList();
+          }
         } else {
           finishedReports = data.parsed.reports;
           showFinishedList();
