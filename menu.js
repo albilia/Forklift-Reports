@@ -14,11 +14,11 @@ fetch("menu.html")
       navigator.vibrate?.(20);
     });
 
-    // ⭐ טוען את מספר הגרסה אחרי שהתפריט נטען
+    // טוען את מספר הגרסה אחרי שהתפריט נטען
     loadVersion();
   });
 
-// ⭐ פונקציה שמביאה את מספר הגרסה מ-GitHub
+// מביא את מספר הגרסה מ-GitHub
 async function loadVersion() {
   try {
     const res = await fetch(
@@ -35,15 +35,5 @@ async function loadVersion() {
   }
 }
 
-// פונקציות תפריט
-function openAbout() {
-  alert("אודות המערכת:\nפותח על ידי ניסים אלביליה.");
-}
-
-function openSteps() {
-  alert("שלבים:\n1. הזן מספר טלפון\n2. היכנס למערכת\n3. דווח בקלות");
-}
-
-function openGithub() {
-  window.open("https://github.com/albilia/Forklift-Reports/issues", "_blank");
-}
+// ⭐ אין כאן יותר openAbout / openSteps / openGithub
+// ⭐ הפונקציות האלו עכשיו נמצאות בתוך menu.html
