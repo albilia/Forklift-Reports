@@ -8,7 +8,8 @@
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
-      background: #f9f9f9;
+      background: #1a1a1a; /* ⭐ רקע כהה ללילה */
+      color: #f5f5f5;       /* ⭐ טקסט בהיר */
       text-align: center;
       font-size: 22px;
       position: relative;
@@ -19,6 +20,7 @@
       font-size: 40px;
       margin-bottom: 25px;
       font-weight: bold;
+      color: #ffffff;
     }
 
     #preview {
@@ -26,31 +28,36 @@
       margin-top: 20px;
       display: none;
       border-radius: 10px;
+      border: 6px solid black; /* ⭐ מסגרת שחורה עבה */
     }
 
+    /* ⭐ טוען — גדול וברור */
     #loader {
       display: none;
       font-weight: bold;
-      margin-top: 20px;
-      font-size: 26px;
+      margin-top: 25px;
+      font-size: 40px;
+      color: #ffeb3b; /* צהוב בולט */
     }
 
-    /* ⭐ OCR גדול וברור יותר */
+    /* ⭐ OCR גדול, ברור, עם ניגודיות חזקה */
     .ocr-box {
-      background: #fff;
-      border: 2px solid #ccc;
-      padding: 22px;
-      margin: 20px auto;
-      border-radius: 12px;
+      background: #2b2b2b;
+      border: 3px solid #555;
+      padding: 28px;
+      margin: 25px auto;
+      border-radius: 14px;
       width: 92%;
       text-align: right;
-      font-size: 30px;
+      font-size: 38px;
+      line-height: 1.45;
+      color: #ffffff;
     }
 
     button {
       margin: 20px;
       padding: 18px 32px;
-      font-size: 26px;
+      font-size: 28px;
       border: none;
       border-radius: 10px;
       background: #d32f2f;
@@ -87,6 +94,7 @@
       width: 200px;
       margin-bottom: 30px;
       cursor: pointer;
+      filter: brightness(1.2);
     }
   </style>
 </head>
