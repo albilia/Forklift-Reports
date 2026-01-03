@@ -1,15 +1,10 @@
-<!-- ⭐ תפריט צד — Nis רפורטר ⭐ -->
+<!-- תפריט צד — Nis רפורטר -->
 
 <style>
-  /* כפתור המבורגר */
   .menu-button {
     width: 40px;
     cursor: pointer;
     margin: 15px;
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    z-index: 10001;
   }
   .menu-button span {
     display: block;
@@ -20,7 +15,6 @@
     transition: 0.3s;
   }
 
-  /* תפריט צד */
   .side-menu {
     position: fixed;
     top: 0;
@@ -31,9 +25,8 @@
     color: #fff;
     padding: 20px;
     transition: 0.35s;
-    z-index: 10000;
+    z-index: 9999;
     font-size: 22px;
-    overflow-y: auto;
   }
   .side-menu.open {
     right: 0;
@@ -44,61 +37,14 @@
     border-bottom: 1px solid #333;
     cursor: pointer;
   }
-
-  /* ⭐ חלון מודאלי ⭐ */
-  .modal {
-    display: none;
-    position: fixed;
-    z-index: 20000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.75);
-    backdrop-filter: blur(4px);
-  }
-
-  .modal-content {
-    background: #222;
-    color: #fff;
-    margin: 10% auto;
-    padding: 25px;
-    border-radius: 12px;
-    width: 85%;
-    max-width: 600px;
-    box-shadow: 0 0 20px #000;
-    text-align: right;
-    direction: rtl;
-  }
-
-  .close-btn {
-    float: left;
-    font-size: 32px;
-    cursor: pointer;
-    color: #ff4444;
-  }
-
-  .modal-title {
-    font-size: 32px;
-    font-weight: bold;
-    margin-bottom: 15px;
-  }
-
-  .modal-body {
-    font-size: 22px;
-    line-height: 1.6;
-    white-space: pre-line;
-  }
 </style>
 
-<!-- כפתור המבורגר -->
 <div class="menu-button" id="menuBtn">
   <span></span>
   <span></span>
   <span></span>
 </div>
 
-<!-- תפריט צד -->
 <div id="sideMenu" class="side-menu">
 
   <div class="menu-item" onclick="openAbout()">אודות</div>
@@ -119,32 +65,9 @@
     © פותח על ידי ניסים אלביליה
   </div>
 
-  <div style="text-align:center; margin-top:10px;">
-    <img 
-      src="https://raw.githubusercontent.com/albilia/Forklift-Reports/main/me.jpg"
-      alt="תמונה"
-      style="
-        width:80px;
-        height:80px;
-        border-radius:50%;
-        object-fit:cover;
-      "
-    >
-  </div>
-
-</div>
-
-<!-- ⭐ חלון מודאלי ⭐ -->
-<div id="infoModal" class="modal">
-  <div class="modal-content">
-    <span class="close-btn" onclick="closeModal()">×</span>
-    <div id="modalTitle" class="modal-title"></div>
-    <div id="modalBody" class="modal-body"></div>
-  </div>
 </div>
 
 <script>
-  /* פתיחה/סגירה של התפריט */
   const menuBtn = document.getElementById("menuBtn");
   const sideMenu = document.getElementById("sideMenu");
 
@@ -153,7 +76,6 @@
     navigator.vibrate?.(20);
   });
 
-  /* טעינת גרסה */
   async function loadVersion() {
     try {
       const res = await fetch(
@@ -167,57 +89,31 @@
   }
   loadVersion();
 
-  /* ⭐ מודאל ⭐ */
-  function openModal(title, body) {
-    document.getElementById("modalTitle").innerText = title;
-    document.getElementById("modalBody").innerText = body;
-    document.getElementById("infoModal").style.display = "block";
-  }
-
-  function closeModal() {
-    document.getElementById("infoModal").style.display = "none";
-  }
-
-  /* ⭐ אודות ⭐ */
   function openAbout() {
-    openModal(
-      "אודות המערכת",
+    alert(
+      "אודות המערכת:\n\n" +
       "מערכת Nis רפורטר פותחה לתת מענה לסריקת תוויות ומדבקות במחסנים.\n" +
-      "לכל מחסן נכתב קוד עם לוגיקה שהותאמה למערכת Google Cloud Vision OCR\n" +
-      "על מנת לאפשר סריקת מדבקות וסריקת תוויות על פי בחירת המחסנים המתאימים.\n\n" +
-
-      "מחסן חומרי גלם משתמש בקוד שהותאם לקריאת מדבקות.\n" +
-      "מחסן תוצר גמר משתמש בקוד שהותאם לקריאת תוויות.\n\n" +
-
-      "כניסה למערכת:\n" +
-      "הכניסה מתבצעת באמצעות זיהוי מספר הנייד של העובד שהורשה להשתמש במערכת.\n" +
-      "מנהל העבודה יכול להוסיף או למחוק משתמשים מתוך דף ניהול המשתמשים.\n\n" +
-
-      "שימוש באפליקציה:\n" +
-      "האפליקציה רצה כפיילוט לאיסוף מידע מהשטח ע\"י מחסנאים/מלגזנים.\n" +
-      "במידה ויש תקלה — ניתן לפתוח טיקט דרך סמל ≣ → פתיחת טיקט.\n" +
-      "יש להזין נושא (Add a title) ותיאור (Add a description).\n" +
-      "חשוב לציין דגם מכשיר ושם פותח התקלה.\n\n" +
-
+      "לכל מחסן נכתב קוד מותאם למערכת Google Cloud Vision OCR.\n\n" +
+      "מחסן חומרי גלם משתמש בקוד לקריאת מדבקות.\n" +
+      "מחסן תוצר גמר משתמש בקוד לקריאת תוויות.\n\n" +
+      "הכניסה למערכת מתבצעת באמצעות זיהוי מספר הנייד של העובד שהורשה לכך.\n" +
+      "מנהל העבודה יכול להוסיף או למחוק משתמשים במערכת ניהול המשתמשים.\n\n" +
       "© כל הזכויות שמורות — Nis רפורטר"
     );
   }
 
-  /* ⭐ שלבים ⭐ */
   function openSteps() {
-    openModal(
-      "שלבי העבודה",
-      "א. הזנת מספר טלפון במסך הכניסה.\n\n" +
-      "ב. בחירת מחסן — חומרי גלם / תוצר גמר.\n\n" +
-      "ג. במחסן תוצר גמר: בחירת 'תת מחסן' (דנידין, בצק־סוכר, שדרה מרכזית וכו').\n\n" +
-      "ד. במסך הדיווח: לחיצה על אייקון המצלמה לצילום ריבוי תמונות.\n\n" +
-      "ה. לאחר הצילום: לחיצה על 'פענח הכל' לשליחת התמונות ל־OCR.\n" +
-      "   אם הפענוח תקין — לוחצים על 'שמור דיווח'.\n\n" +
-      "ו. לאחר השמירה: סוגרים את ההודעה 'דיווח נשלח בהצלחה' וחוזרים לדשבורד."
+    alert(
+      "שלבי העבודה:\n\n" +
+      "1. הזן מספר טלפון במסך הכניסה.\n" +
+      "2. בחר מחסן — חומרי גלם / תוצר גמר.\n" +
+      "3. במחסן תוצר גמר: בחר תת מחסן.\n" +
+      "4. במסך הדיווח: לחץ על אייקון המצלמה לצילום.\n" +
+      "5. לחץ 'פענח הכל' לשליחת התמונות ל־OCR.\n" +
+      "6. אם הפענוח תקין — לחץ 'שמור דיווח'."
     );
   }
 
-  /* ⭐ פתיחת טיקט ⭐ */
   function openGithub() {
     window.open("https://github.com/albilia/Forklift-Reports/issues", "_blank");
   }
