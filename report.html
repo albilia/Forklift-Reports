@@ -1,3 +1,138 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>צילום תווית</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #1a1a1a;
+      color: #f5f5f5;
+      text-align: center;
+      font-size: 22px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    h2 {
+      font-size: 40px;
+      margin-bottom: 25px;
+      font-weight: bold;
+      color: #ffffff;
+    }
+
+    #preview {
+      max-width: 100%;
+      margin-top: 20px;
+      display: none;
+      border-radius: 10px;
+      border: 6px solid black;
+    }
+
+    #loader {
+      display: none;
+      font-weight: bold;
+      margin-top: 25px;
+      font-size: 40px;
+      color: #ffeb3b;
+    }
+
+    .ocr-box {
+      background: #2b2b2b;
+      border: 3px solid #555;
+      padding: 28px;
+      margin: 25px auto;
+      border-radius: 14px;
+      width: 92%;
+      text-align: right;
+      font-size: 38px;
+      line-height: 1.45;
+      color: #ffffff;
+    }
+
+    button {
+      margin: 20px;
+      padding: 18px 32px;
+      font-size: 28px;
+      border: none;
+      border-radius: 10px;
+      background: #d32f2f;
+      color: white;
+      cursor: pointer;
+      animation: pulse 2s infinite;
+      width: 80%;
+      max-width: 350px;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+      100% { transform: scale(1); }
+    }
+
+    #flash {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: white;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease-out;
+      z-index: 9999;
+    }
+    #flash.active {
+      opacity: 1;
+    }
+
+    .camera-icon {
+      width: 200px;
+      margin-bottom: 30px;
+      cursor: pointer;
+      filter: brightness(1.2);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="flash"></div>
+
+  <audio id="clickSound" src="click.mp3" preload="auto"></audio>
+
+  <h2>צילום תווית</h2>
+
+  <img src="camera-icon.png"
+       alt="צלם"
+       class="camera-icon"
+       onclick="triggerCamera();">
+
+  <input id="cameraInput"
+         type="file"
+         accept="image/*"
+         capture="environment"
+         multiple
+         onchange="handleImage(this)"
+         style="display:none;">
+
+  <img id="preview">
+  <div id="loader">טוען...</div>
+  <div id="ocrList"></div>
+
+  <button id="processAllBtn" onclick="processAll()" style="display:none;">
+    פענח הכול
+  </button>
+
+  <button id="saveBtn" onclick="saveAll()"
+          style="display:none; margin: 20px auto; display:block;">
+    שמור דיווח
+  </button>
+
+  <button onclick="goBack()">חזור לדשבורד</button>
+
 <script>
   function triggerCamera() {
     const flash = document.getElementById("flash");
@@ -39,6 +174,7 @@
       pendingImages.push(file);
     }
 
+    // מציגים את התמונה האחרונה שצולמה בתצוגה מקדימה
     const lastFile = files[files.length - 1];
     const reader = new FileReader();
     reader.onload = function(e) {
@@ -141,69 +277,50 @@
     });
   }
 
-  /* ⭐ פונקציה חדשה — שמירת תוצר גמר בודד */
-  async function saveSingleFinishedReport(report) {
-    const payload = {
-      action: "saveReport",
-      token,
-      ocr: { reports: [report] },
-      finishedWarehouse: finished
-    };
-
-    await fetch(API_URL, {
-      method: "POST",
-      body: JSON.stringify(payload)
-    });
-  }
-
-  /* ⭐ שמירה — חומרי גלם כרגיל, תוצר גמר SHOT נפרד */
   async function saveAll() {
     document.getElementById("loader").innerText = "שומר דיווח...";
     document.getElementById("loader").style.display = "block";
 
+    let payload;
+
     if (main === "raw") {
-      const payload = {
+      payload = {
         action: "saveRawMaterialBatch",
         token,
         reports: rawReports
       };
-
-      try {
-        const response = await fetch(API_URL, {
-          method: "POST",
-          body: JSON.stringify(payload)
-        });
-
-        const data = await response.json();
-        document.getElementById("loader").style.display = "none";
-
-        if (!data.success) {
-          alert("שגיאה בשמירת הדיווח");
-          return;
-        }
-
-        alert("הדיווח נשמר בהצלחה!");
-        goBack();
-
-      } catch (err) {
-        alert("שגיאה בחיבור לשרת");
-        document.getElementById("loader").style.display = "none";
-      }
-
     } else {
-      try {
-        for (const report of finishedReports) {
-          await saveSingleFinishedReport(report);
-        }
+      payload = {
+        action: "saveReport",
+        token,
+        ocr: { reports: finishedReports },
+        finishedWarehouse: finished
+      };
+    }
 
-        document.getElementById("loader").style.display = "none";
-        alert("הדיווח נשמר בהצלחה!");
-        goBack();
+    try {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify(payload)
+      });
 
-      } catch (err) {
-        alert("שגיאה בחיבור לשרת");
-        document.getElementById("loader").style.display = "none";
+      const data = await response.json();
+      document.getElementById("loader").style.display = "none";
+
+      if (!data.success) {
+        alert("שגיאה בשמירת הדיווח");
+        return;
       }
+
+      alert("הדיווח נשמר בהצלחה!");
+      goBack();
+
+    } catch (err) {
+      alert("שגיאה בחיבור לשרת");
+      document.getElementById("loader").style.display = "none";
     }
   }
 </script>
+
+</body>
+</html>
