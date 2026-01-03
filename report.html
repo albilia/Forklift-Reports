@@ -3,17 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <title>צילום תווית</title>
+
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
       background: #f9f9f9;
       text-align: center;
+      font-size: 18px;
+      position: relative;
+      overflow-x: hidden;
+    }
+    h2 {
+      font-size: 26px;
+      margin-bottom: 15px;
     }
     #preview {
       max-width: 100%;
       margin-top: 20px;
       display: none;
+      border-radius: 10px;
     }
     #loader {
       display: none;
@@ -34,37 +43,94 @@
     }
     button {
       margin: 15px;
-      padding: 10px 20px;
-      font-size: 16px;
+      padding: 12px 22px;
+      font-size: 18px;
       border: none;
       border-radius: 6px;
       background: #d32f2f;
       color: white;
       cursor: pointer;
     }
+
+    /* ⭐ פלאש צילום */
+    #flash {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: white;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease-out;
+      z-index: 9999;
+    }
+    #flash.active {
+      opacity: 1;
+    }
   </style>
 </head>
+
 <body>
+
+  <div id="flash"></div>
+
+  <!-- ⭐ צליל קליק -->
+  <audio id="clickSound" src="click.mp3" preload="auto"></audio>
 
   <h2>צילום תווית</h2>
 
-  <input type="file" accept="image/*" onchange="handleImage(this)">
+  <!-- ⭐ אייקון מצלמה שמפעיל פלאש + קליק + רטט + מצלמה אחורית -->
+  <img src="camera-icon.png"
+       alt="צלם"
+       style="width:100px; margin-bottom:20px; cursor:pointer;"
+       onclick="triggerCamera();">
+
+  <!-- ⭐ קלט קובץ מוסתר לחלוטין -->
+  <input id="cameraInput"
+         type="file"
+         accept="image/*"
+         capture="environment"
+         onchange="handleImage(this)"
+         style="display:none;">
+
   <img id="preview">
   <div id="loader">טוען...</div>
   <div id="ocrList"></div>
+
   <button id="saveBtn" onclick="saveAll()" style="display:none;">שמור דיווח</button>
   <button onclick="goBack()">חזור לדשבורד</button>
 
-  <!-- הקוד שלך -->
   <script>
-    /* ⭐ API URL החדש ⭐ */
+    /* ⭐ פלאש + קליק + רטט + פתיחת מצלמה */
+    function triggerCamera() {
+      const flash = document.getElementById("flash");
+      const clickSound = document.getElementById("clickSound");
+
+      // פלאש
+      flash.classList.add("active");
+      setTimeout(() => flash.classList.remove("active"), 150);
+
+      // צליל קליק
+      clickSound.currentTime = 0;
+      clickSound.play().catch(() => {});
+
+      // רטט (אנדרואיד)
+      if (navigator.vibrate) {
+        navigator.vibrate(100);
+      }
+
+      // פתיחת מצלמה
+      document.getElementById("cameraInput").click();
+    }
+
+    /* ⭐ API URL */
     const API_URL = "https://script.google.com/macros/s/AKfycbyXMQiGqDvOV0IQnO5aQdeL8nsiGSDog9xbA9kfnz3lAvlBSunkYKvW8hbxlu5JLAGFiA/exec";
 
-    /* קבלת פרמטרים */
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
     const name = params.get("name");
-    const main = params.get("main"); // raw / finished
+    const main = params.get("main");
     const finished = params.get("finished");
 
     if (!token) {
@@ -88,6 +154,7 @@
         const img = document.getElementById("preview");
         img.src = e.target.result;
         img.style.display = "block";
+
         runOCR(e.target.result);
       };
       reader.readAsDataURL(file);
