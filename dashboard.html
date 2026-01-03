@@ -3,7 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>דשבורד דווחים</title>
+
+  <!-- ⭐ שם שיופיע בקיצור דרך באייפון ⭐ -->
+  <meta name="apple-mobile-web-app-title" content="Nis">
+
+  <!-- ⭐ כותרת הדף ⭐ -->
+  <title>Nis</title>
 
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#ffffff">
@@ -140,13 +145,11 @@
     document.getElementById("userGreeting").innerText = `שלום, ${userName}`;
   }
 
-  /* ⭐ איפוס בחירה רק אם new=1 */
   if (isNewLogin) {
     localStorage.removeItem("mainWarehouse");
     localStorage.removeItem("finishedWarehouse");
   }
 
-  /* ⭐ טעינת בחירה אחרונה */
   window.addEventListener("load", () => {
     const savedMain = localStorage.getItem("mainWarehouse");
     const savedFinished = localStorage.getItem("finishedWarehouse");
@@ -184,7 +187,6 @@
       `report.html?token=${token}&name=${encodeURIComponent(userName)}&main=${main}&finished=${finished}`;
   }
 
-  /* ⭐ יציאה — איפוס מלא */
   function logout() {
     localStorage.removeItem("mainWarehouse");
     localStorage.removeItem("finishedWarehouse");
