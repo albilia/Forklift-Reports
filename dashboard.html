@@ -143,7 +143,7 @@
   }
 
   /* ⭐ טעינת בחירה אחרונה */
-  window.onload = () => {
+  window.addEventListener("load", () => {
     const savedMain = localStorage.getItem("mainWarehouse");
     const savedFinished = localStorage.getItem("finishedWarehouse");
 
@@ -155,7 +155,7 @@
     if (savedFinished && savedMain === "finished") {
       document.getElementById("finishedWarehouse").value = savedFinished;
     }
-  };
+  });
 
   function handleMainWarehouse() {
     const main = document.getElementById("mainWarehouse").value;
