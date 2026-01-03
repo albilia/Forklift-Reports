@@ -5,11 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>דשבורד דווחים</title>
 
-  <!-- PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#ffffff">
 
-  <!-- Menu CSS -->
   <link rel="stylesheet" href="menu.css">
 
   <style>
@@ -83,7 +81,6 @@
 </head>
 <body>
 
-  <!-- ⭐ תפריט -->
   <div id="menuContainer"></div>
 
   <div class="top-bar">
@@ -132,6 +129,7 @@
   const params = new URLSearchParams(window.location.search);
   const userName = params.get("name");
   const token = params.get("token");
+  const isNewLogin = params.get("new") === "1";
 
   if (!token) {
     alert("שגיאה: אין טוקן זיהוי");
@@ -142,8 +140,8 @@
     document.getElementById("userGreeting").innerText = `שלום, ${userName}`;
   }
 
-  /* ⭐ איפוס בחירה רק אם מגיעים מה־index (כניסה חדשה) */
-  if (document.referrer.includes("index.html")) {
+  /* ⭐ איפוס בחירה רק אם new=1 */
+  if (isNewLogin) {
     localStorage.removeItem("mainWarehouse");
     localStorage.removeItem("finishedWarehouse");
   }
