@@ -10,51 +10,56 @@
       padding: 20px;
       background: #f9f9f9;
       text-align: center;
-      font-size: 20px;
+      font-size: 22px;
       position: relative;
       overflow-x: hidden;
     }
+
     h2 {
-      font-size: 32px;
-      margin-bottom: 20px;
+      font-size: 40px;
+      margin-bottom: 25px;
       font-weight: bold;
     }
+
     #preview {
       max-width: 100%;
       margin-top: 20px;
       display: none;
       border-radius: 10px;
     }
+
     #loader {
       display: none;
       font-weight: bold;
       margin-top: 20px;
-      font-size: 22px;
+      font-size: 26px;
     }
 
     /* תיבת דו"ח OCR */
     .ocr-box {
       background: #fff;
       border: 2px solid #ccc;
-      padding: 18px;
-      margin: 15px auto;
-      border-radius: 10px;
+      padding: 22px;
+      margin: 20px auto;
+      border-radius: 12px;
       width: 92%;
       text-align: right;
-      font-size: 20px;
+      font-size: 24px;
     }
 
     /* כפתורים */
     button {
       margin: 20px;
-      padding: 15px 28px;
-      font-size: 22px;
+      padding: 18px 32px;
+      font-size: 26px;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       background: #d32f2f;
       color: white;
       cursor: pointer;
       animation: pulse 2s infinite;
+      width: 80%;
+      max-width: 350px;
     }
 
     /* ⭐ אנימציית פולס */
@@ -80,6 +85,14 @@
     #flash.active {
       opacity: 1;
     }
+
+    /* אייקון מצלמה גדול */
+    .camera-icon {
+      width: 200px;
+      margin-bottom: 30px;
+      cursor: pointer;
+    }
+
   </style>
 </head>
 
@@ -95,7 +108,7 @@
   <!-- אייקון מצלמה גדול -->
   <img src="camera-icon.png"
        alt="צלם"
-       style="width:140px; margin-bottom:25px; cursor:pointer;"
+       class="camera-icon"
        onclick="triggerCamera();">
 
   <!-- קלט קובץ מוסתר -->
@@ -183,7 +196,7 @@
 
         /* ⭐ מניעת קריסה במקרה שאין נתונים */
         if (!data.parsed || !data.parsed.reports || data.parsed.reports.length === 0) {
-          return; // לא מציגים כלום ולא קורסים
+          return;
         }
 
         if (main === "raw") {
