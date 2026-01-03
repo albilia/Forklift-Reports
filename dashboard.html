@@ -142,8 +142,26 @@
     document.getElementById("userGreeting").innerText = `שלום, ${userName}`;
   }
 
+  /* ⭐ טעינת בחירה אחרונה */
+  window.onload = () => {
+    const savedMain = localStorage.getItem("mainWarehouse");
+    const savedFinished = localStorage.getItem("finishedWarehouse");
+
+    if (savedMain) {
+      document.getElementById("mainWarehouse").value = savedMain;
+      handleMainWarehouse(); // מציג את תת המחסן אם צריך
+    }
+
+    if (savedFinished && savedMain === "finished") {
+      document.getElementById("finishedWarehouse").value = savedFinished;
+    }
+  };
+
   function handleMainWarehouse() {
     const main = document.getElementById("mainWarehouse").value;
+
+    /* ⭐ שמירת בחירה */
+    localStorage.setItem("mainWarehouse", main);
 
     if (main === "finished") {
       document.getElementById("finishedSection").style.display = "block";
@@ -155,6 +173,11 @@
   function goToReport() {
     const main = document.getElementById("mainWarehouse").value;
     const finished = document.getElementById("finishedWarehouse").value;
+
+    /* ⭐ שמירת תת מחסן */
+    if (main === "finished") {
+      localStorage.setItem("finishedWarehouse", finished);
+    }
 
     window.location.href =
       `report.html?token=${token}&name=${encodeURIComponent(userName)}&main=${main}&finished=${finished}`;
