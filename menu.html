@@ -90,12 +90,12 @@
     מס' גרסה: ...
   </div>
 
-  <!-- ⭐ זכויות יוצרים — מודגש בלבד ⭐ -->
+  <!-- ⭐ זכויות יוצרים ⭐ -->
   <div style="text-align:center; margin-top:15px; font-size:16px; font-weight:bold;">
     © פותח על ידי ניסים אלביליה
   </div>
 
-  <!-- ⭐ התמונה המקורית ⭐ -->
+  <!-- ⭐ תמונה ⭐ -->
   <div style="text-align:center; margin-top:10px;">
     <img 
       src="https://raw.githubusercontent.com/albilia/Forklift-Reports/main/me.jpg"
@@ -111,37 +111,39 @@
 
 </div>
 
-<!-- ⭐ מודאל נקי להצגת טקסט ארוך ⭐ -->
+<!-- ⭐ מודאל מבודד ⭐ -->
 <div id="infoModal" style="
-  display:none;
-  position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  background:rgba(0,0,0,0.6);
-  z-index:99999;
-  padding:20px;
-  box-sizing:border-box;
+  display:none !important;
+  position:fixed !important;
+  top:0 !important;
+  left:0 !important;
+  width:100% !important;
+  height:100% !important;
+  background:rgba(0,0,0,0.6) !important;
+  z-index:999999 !important;
+  padding:20px !important;
+  box-sizing:border-box !important;
 ">
   <div style="
-    background:white;
-    color:black;
-    max-width:500px;
-    margin:60px auto;
-    padding:20px;
-    border-radius:10px;
-    box-shadow:0 0 10px rgba(0,0,0,0.3);
-    max-height:80%;
-    overflow-y:auto;
-    text-align:right;
-    direction:rtl;
+    background:white !important;
+    color:black !important;
+    max-width:500px !important;
+    margin:60px auto !important;
+    padding:20px !important;
+    border-radius:10px !important;
+    box-shadow:0 0 10px rgba(0,0,0,0.3) !important;
+    max-height:80% !important;
+    overflow-y:auto !important;
+    text-align:right !important;
+    direction:rtl !important;
+    font-size:18px !important;
+    line-height:1.6 !important;
   ">
-    <div style="text-align:left;">
-      <span onclick="closeModal()" style="cursor:pointer; font-size:26px;">✕</span>
+    <div style="text-align:left !important;">
+      <span onclick="closeModal()" style="cursor:pointer !important; font-size:26px !important;">✕</span>
     </div>
-    <h2 id="modalTitle" style="margin-top:0;"></h2>
-    <div id="modalBody" style="white-space:pre-line; font-size:18px; line-height:1.5;"></div>
+    <h2 id="modalTitle" style="margin-top:0 !important; font-size:24px !important; font-weight:bold !important;"></h2>
+    <div id="modalBody" style="white-space:pre-line !important;"></div>
   </div>
 </div>
 
