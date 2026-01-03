@@ -1,153 +1,210 @@
-<script>
-  /* ⭐ API URL החדש ⭐ */
-  const API_URL = "https://script.google.com/macros/s/AKfycbyXMQiGqDvOV0IQnO5aQdeL8nsiGSDog9xbA9kfnz3lAvlBSunkYKvW8hbxlu5JLAGFiA/exec";
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>צילום תווית</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f9f9f9;
+      text-align: center;
+    }
+    #preview {
+      max-width: 100%;
+      margin-top: 20px;
+      display: none;
+    }
+    #loader {
+      display: none;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+    .ocr-box {
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 15px;
+      margin: 10px auto;
+      border-radius: 8px;
+      width: 90%;
+      text-align: left;
+    }
+    .ocr-item {
+      margin-bottom: 5px;
+    }
+    button {
+      margin: 15px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      background: #d32f2f;
+      color: white;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
 
-  /* קבלת פרמטרים */
-  const params = new URLSearchParams(window.location.search);
-  const token = params.get("token");
-  const name = params.get("name");
-  const main = params.get("main"); // raw / finished
-  const finished = params.get("finished");
+  <h2>צילום תווית</h2>
 
-  if (!token) {
-    alert("שגיאה: אין טוקן זיהוי");
-    window.location.href = "index.html";
-  }
+  <input type="file" accept="image/*" onchange="handleImage(this)">
+  <img id="preview">
+  <div id="loader">טוען...</div>
+  <div id="ocrList"></div>
+  <button id="saveBtn" onclick="saveAll()" style="display:none;">שמור דיווח</button>
+  <button onclick="goBack()">חזור לדשבורד</button>
 
-  /* רשימת תוצאות OCR (לחומרי גלם) */
-  let rawReports = [];
+  <!-- הקוד שלך -->
+  <script>
+    /* ⭐ API URL החדש ⭐ */
+    const API_URL = "https://script.google.com/macros/s/AKfycbyXMQiGqDvOV0IQnO5aQdeL8nsiGSDog9xbA9kfnz3lAvlBSunkYKvW8hbxlu5JLAGFiA/exec";
 
-  /* תוצאות OCR לתוצר גמר */
-  let finishedReports = [];
+    /* קבלת פרמטרים */
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+    const name = params.get("name");
+    const main = params.get("main"); // raw / finished
+    const finished = params.get("finished");
 
-  function goBack() {
-    window.location.href = `dashboard.html?token=${token}&name=${encodeURIComponent(name)}`;
-  }
+    if (!token) {
+      alert("שגיאה: אין טוקן זיהוי");
+      window.location.href = "index.html";
+    }
 
-  function handleImage(input) {
-    const file = input.files[0];
-    if (!file) return;
+    let rawReports = [];
+    let finishedReports = [];
 
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const img = document.getElementById("preview");
-      img.src = e.target.result;
-      img.style.display = "block";
+    function goBack() {
+      window.location.href = `dashboard.html?token=${token}&name=${encodeURIComponent(name)}`;
+    }
 
-      runOCR(e.target.result);
-    };
-    reader.readAsDataURL(file);
-  }
+    function handleImage(input) {
+      const file = input.files[0];
+      if (!file) return;
 
-  async function runOCR(base64) {
-    document.getElementById("loader").style.display = "block";
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = document.getElementById("preview");
+        img.src = e.target.result;
+        img.style.display = "block";
+        runOCR(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
 
-    try {
-      const response = await fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify({
-          action: "processImage",
-          image: base64,
-          main: main
-        })
-      });
+    async function runOCR(base64) {
+      document.getElementById("loader").style.display = "block";
 
-      const data = await response.json();
-      document.getElementById("loader").style.display = "none";
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            action: "processImage",
+            image: base64,
+            main: main
+          })
+        });
 
-      if (!data.success) {
-        alert("שגיאה בפענוח התמונה");
-        return;
+        const data = await response.json();
+        document.getElementById("loader").style.display = "none";
+
+        if (!data.success) {
+          alert("שגיאה בפענוח התמונה");
+          return;
+        }
+
+        if (main === "raw") {
+          rawReports.push(data.parsed.reports[0]);
+          showRawList();
+        } else {
+          finishedReports = data.parsed.reports;
+          showFinishedList();
+        }
+
+        document.getElementById("saveBtn").style.display = "block";
+
+      } catch (err) {
+        alert("שגיאה בחיבור לשרת");
+        document.getElementById("loader").style.display = "none";
       }
+    }
+
+    function showRawList() {
+      const box = document.getElementById("ocrList");
+      box.innerHTML = "";
+
+      rawReports.forEach((r, i) => {
+        box.innerHTML += `
+          <div class="ocr-box">
+            <div class="ocr-item"><b>צילום ${i+1}:</b></div>
+            <div class="ocr-item">מק״ט: ${r.makat}</div>
+            <div class="ocr-item">כמות: ${r.qty}</div>
+          </div>
+        `;
+      });
+    }
+
+    function showFinishedList() {
+      const box = document.getElementById("ocrList");
+      box.innerHTML = "";
+
+      finishedReports.forEach((r, i) => {
+        box.innerHTML += `
+          <div class="ocr-box">
+            <div class="ocr-item"><b>תווית ${i+1}:</b></div>
+            <div class="ocr-item">מק״ט: ${r.makat}</div>
+            <div class="ocr-item">פק״ע: ${r.pka}</div>
+            <div class="ocr-item">כמות: ${r.qty}</div>
+          </div>
+        `;
+      });
+    }
+
+    async function saveAll() {
+      document.getElementById("loader").innerText = "שומר דיווח...";
+      document.getElementById("loader").style.display = "block";
+
+      let payload;
 
       if (main === "raw") {
-        rawReports.push(data.parsed.reports[0]);
-        showRawList();
+        payload = {
+          action: "saveRawMaterialBatch",
+          token,
+          reports: rawReports
+        };
       } else {
-        finishedReports = data.parsed.reports;
-        showFinishedList();
+        payload = {
+          action: "saveReport",
+          token,
+          ocr: { reports: finishedReports },
+          finishedWarehouse: finished
+        };
       }
 
-      document.getElementById("saveBtn").style.display = "block";
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          body: JSON.stringify(payload)
+        });
 
-    } catch (err) {
-      alert("שגיאה בחיבור לשרת");
-      document.getElementById("loader").style.display = "none";
-    }
-  }
+        const data = await response.json();
+        document.getElementById("loader").style.display = "none";
 
-  function showRawList() {
-    const box = document.getElementById("ocrList");
-    box.innerHTML = "";
+        if (!data.success) {
+          alert("שגיאה בשמירת הדיווח");
+          return;
+        }
 
-    rawReports.forEach((r, i) => {
-      box.innerHTML += `
-        <div class="ocr-box">
-          <div class="ocr-item"><b>צילום ${i+1}:</b></div>
-          <div class="ocr-item">מק״ט: ${r.makat}</div>
-          <div class="ocr-item">כמות: ${r.qty}</div>
-        </div>
-      `;
-    });
-  }
+        alert("הדיווח נשמר בהצלחה!");
+        goBack();
 
-  function showFinishedList() {
-    const box = document.getElementById("ocrList");
-    box.innerHTML = "";
-
-    finishedReports.forEach((r, i) => {
-      box.innerHTML += `
-        <div class="ocr-box">
-          <div class="ocr-item"><b>תווית ${i+1}:</b></div>
-          <div class="ocr-item">מק״ט: ${r.makat}</div>
-          <div class="ocr-item">פק״ע: ${r.pka}</div>
-          <div class="ocr-item">כמות: ${r.qty}</div>
-        </div>
-      `;
-    });
-  }
-
-  async function saveAll() {
-    document.getElementById("loader").innerText = "שומר דיווח...";
-    document.getElementById("loader").style.display = "block";
-
-    let payload;
-
-    if (main === "raw") {
-      payload = {
-        action: "saveRawMaterialBatch",
-        token,
-        reports: rawReports
-      };
-    } else {
-      payload = {
-        action: "saveReport",
-        token,
-        ocr: { reports: finishedReports },
-        finishedWarehouse: finished
-      };
-    }
-
-    try {
-      const response = await fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify(payload)
-      });
-
-      const data = await response.json();
-      document.getElementById("loader").style.display = "none";
-
-      if (!data.success) {
-        alert("שגיאה בשמירת הדיווח");
-        return;
+      } catch (err) {
+        alert("שגיאה בחיבור לשרת");
+        document.getElementById("loader").style.display = "none";
       }
-
-      alert("הדיווח נשמר בהצלחה!");
-      goBack();
-
-    } catch (err) {
-      alert("שגיאה בחיבור לשרת");
-      document.getElementById("loader").style.display = "none";
     }
-  }
-</script>
+  </script>
+
+</body>
+</html>
