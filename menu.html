@@ -90,12 +90,10 @@
     מס' גרסה: ...
   </div>
 
-  <!-- ⭐ זכויות יוצרים ⭐ -->
   <div style="text-align:center; margin-top:15px; font-size:16px; font-weight:bold;">
     © פותח על ידי ניסים אלביליה
   </div>
 
-  <!-- ⭐ תמונה ⭐ -->
   <div style="text-align:center; margin-top:10px;">
     <img 
       src="https://raw.githubusercontent.com/albilia/Forklift-Reports/main/me.jpg"
@@ -111,107 +109,38 @@
 
 </div>
 
-<!-- ⭐ מודאל מבודד ⭐ -->
+<!-- ⭐ מודאל להצגת טקסט ⭐ -->
 <div id="infoModal" style="
-  display:none !important;
-  position:fixed !important;
-  top:0 !important;
-  left:0 !important;
-  width:100% !important;
-  height:100% !important;
-  background:rgba(0,0,0,0.6) !important;
-  z-index:999999 !important;
-  padding:20px !important;
-  box-sizing:border-box !important;
+  display:none;
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.6);
+  z-index:999999;
+  padding:20px;
+  box-sizing:border-box;
 ">
   <div style="
-    background:white !important;
-    color:black !important;
-    max-width:500px !important;
-    margin:60px auto !important;
-    padding:20px !important;
-    border-radius:10px !important;
-    box-shadow:0 0 10px rgba(0,0,0,0.3) !important;
-    max-height:80% !important;
-    overflow-y:auto !important;
-    text-align:right !important;
-    direction:rtl !important;
-    font-size:18px !important;
-    line-height:1.6 !important;
+    background:white;
+    color:black;
+    max-width:500px;
+    margin:60px auto;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 0 10px rgba(0,0,0,0.3);
+    max-height:80%;
+    overflow-y:auto;
+    text-align:right;
+    direction:rtl;
+    font-size:18px;
+    line-height:1.6;
   ">
-    <div style="text-align:left !important;">
-      <span onclick="closeModal()" style="cursor:pointer !important; font-size:26px !important;">✕</span>
+    <div style="text-align:left;">
+      <span onclick="closeModal()" style="cursor:pointer; font-size:26px;">✕</span>
     </div>
-    <h2 id="modalTitle" style="margin-top:0 !important; font-size:24px !important; font-weight:bold !important;"></h2>
-    <div id="modalBody" style="white-space:pre-line !important;"></div>
+    <h2 id="modalTitle" style="margin-top:0; font-size:24px; font-weight:bold;"></h2>
+    <div id="modalBody" style="white-space:pre-line;"></div>
   </div>
 </div>
-
-<script>
-  /* פתיחה/סגירה של התפריט */
-  const menuBtn = document.getElementById("menuBtn");
-  const sideMenu = document.getElementById("sideMenu");
-
-  menuBtn.addEventListener("click", () => {
-    menuBtn.classList.toggle("active");
-    sideMenu.classList.toggle("open");
-    navigator.vibrate?.(20);
-  });
-
-  /* טעינת גרסה */
-  async function loadVersion() {
-    try {
-      const res = await fetch(
-        "https://raw.githubusercontent.com/albilia/Forklift-Reports/main/version.json?t=" + Date.now()
-      );
-      const data = await res.json();
-      document.getElementById("versionLine").textContent = "מס' גרסה: " + data.version;
-    } catch (e) {
-      console.log("Version fetch failed");
-    }
-  }
-  loadVersion();
-
-  /* ⭐ מודאל ⭐ */
-  function openModal(title, body) {
-    document.getElementById("modalTitle").innerText = title;
-    document.getElementById("modalBody").innerText = body;
-    document.getElementById("infoModal").style.display = "block";
-  }
-
-  function closeModal() {
-    document.getElementById("infoModal").style.display = "none";
-  }
-
-  /* ⭐ אודות ⭐ */
-  function openAbout() {
-    openModal(
-      "אודות המערכת",
-      "מערכת Nis רפורטר פותחה לתת מענה לסריקת תוויות ומדבקות במחסנים.\n" +
-      "לכל מחסן נכתב קוד מותאם למערכת Google Cloud Vision OCR.\n\n" +
-      "מחסן חומרי גלם משתמש בקוד לקריאת מדבקות.\n" +
-      "מחסן תוצר גמר משתמש בקוד לקריאת תוויות.\n\n" +
-      "הכניסה למערכת מתבצעת באמצעות זיהוי מספר הנייד של העובד שהורשה לכך.\n" +
-      "מנהל העבודה יכול להוסיף או למחוק משתמשים במערכת ניהול המשתמשים.\n\n" +
-      "© כל הזכויות שמורות — Nis רפורטר"
-    );
-  }
-
-  /* ⭐ שלבים ⭐ */
-  function openSteps() {
-    openModal(
-      "שלבי העבודה",
-      "1. הזן מספר טלפון במסך הכניסה.\n" +
-      "2. בחר מחסן — חומרי גלם / תוצר גמר.\n" +
-      "3. במחסן תוצר גמר: בחר תת מחסן.\n" +
-      "4. במסך הדיווח: לחץ על אייקון המצלמה לצילום.\n" +
-      "5. לחץ 'פענח הכל' לשליחת התמונות ל־OCR.\n" +
-      "6. אם הפענוח תקין — לחץ 'שמור דיווח'."
-    );
-  }
-
-  /* ⭐ פתיחת טיקט ⭐ */
-  function openGithub() {
-    window.open("https://github.com/albilia/Forklift-Reports/issues", "_blank");
-  }
-</script>
