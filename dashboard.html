@@ -1,3 +1,133 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>דשבורד דווחים</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ffffff">
+
+  <!-- Menu CSS -->
+  <link rel="stylesheet" href="menu.css">
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+    }
+
+    .top-bar {
+      background: #d32f2f;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
+      position: relative;
+    }
+
+    .logout-btn {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: white;
+      color: #d32f2f;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .content {
+      padding: 20px;
+      text-align: center;
+    }
+
+    label {
+      font-size: 20px;
+      font-weight: bold;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    select {
+      width: 85%;
+      padding: 12px;
+      font-size: 18px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 20px;
+    }
+
+    .report-box {
+      background: white;
+      padding: 20px;
+      margin: 15px auto;
+      width: 85%;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .report-box:hover {
+      background: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ⭐ תפריט נטען אוטומטית -->
+  <div id="menuContainer"></div>
+
+  <div class="top-bar">
+    דשבורד דווחים
+    <button class="logout-btn" onclick="logout()">יציאה</button>
+  </div>
+
+  <div class="content">
+
+    <div id="userGreeting" style="font-size:22px; font-weight:bold; margin-bottom:25px;"></div>
+
+    <label for="mainWarehouse">בחר מחסן:</label>
+    <select id="mainWarehouse" onchange="handleMainWarehouse()">
+      <option value="">-- בחר --</option>
+      <option value="raw">מחסן חומרי גלם</option>
+      <option value="finished">מחסן תוצר גמר</option>
+    </select>
+
+    <div id="finishedSection" style="display:none;">
+      <label for="finishedWarehouse">בחר תת מחסן:</label>
+      <select id="finishedWarehouse">
+        <option value="">-- בחר תת מחסן --</option>
+        <option>דנידין</option>
+        <option>בצק סוכר ימין</option>
+        <option>בצק סוכר שמאל</option>
+        <option>שדרה מרכזית רצפה</option>
+        <option>שדרה מרכזית ימין</option>
+        <option>שדרה מרכזית שמאל</option>
+        <option>שדרה שמאל</option>
+        <option>שדרה שמאל שמאל</option>
+        <option>שדרה שמאל תחת הגלריה</option>
+        <option>כניסה שמאל</option>
+        <option>כניסה ימין</option>
+        <option>קלוי קלוף</option>
+        <option>קלוי קלוף טור</option>
+      </select>
+    </div>
+
+    <button class="report-box" onclick="goToReport()">
+      המשך
+    </button>
+
+  </div>
+
 <script>
   const params = new URLSearchParams(window.location.search);
   const userName = params.get("name");
@@ -12,26 +142,8 @@
     document.getElementById("userGreeting").innerText = `שלום, ${userName}`;
   }
 
-  /* ⭐ טעינת בחירה אחרונה */
-  window.onload = () => {
-    const savedMain = localStorage.getItem("mainWarehouse");
-    const savedFinished = localStorage.getItem("finishedWarehouse");
-
-    if (savedMain) {
-      document.getElementById("mainWarehouse").value = savedMain;
-      handleMainWarehouse(); // מציג את תת המחסן אם צריך
-    }
-
-    if (savedFinished && savedMain === "finished") {
-      document.getElementById("finishedWarehouse").value = savedFinished;
-    }
-  };
-
   function handleMainWarehouse() {
     const main = document.getElementById("mainWarehouse").value;
-
-    /* ⭐ שמירת בחירה */
-    localStorage.setItem("mainWarehouse", main);
 
     if (main === "finished") {
       document.getElementById("finishedSection").style.display = "block";
@@ -44,11 +156,6 @@
     const main = document.getElementById("mainWarehouse").value;
     const finished = document.getElementById("finishedWarehouse").value;
 
-    /* ⭐ שמירת תת מחסן */
-    if (main === "finished") {
-      localStorage.setItem("finishedWarehouse", finished);
-    }
-
     window.location.href =
       `report.html?token=${token}&name=${encodeURIComponent(userName)}&main=${main}&finished=${finished}`;
   }
@@ -57,3 +164,66 @@
     window.location.href = "index.html";
   }
 </script>
+
+<!-- ⭐ טעינת תפריט -->
+<script src="menu.js"></script>
+
+<!-- ⭐ רישום Service Worker -->
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
+}
+</script>
+
+<!-- ⭐ סווייפ מהשוליים בלבד -->
+<script>
+let startX = 0;
+let endX = 0;
+const EDGE_SIZE = 40;
+
+document.addEventListener("touchstart", e => {
+  startX = e.changedTouches[0].clientX;
+});
+
+document.addEventListener("touchend", e => {
+  endX = e.changedTouches[0].clientX;
+  const diff = endX - startX;
+
+  if (startX < EDGE_SIZE && diff > 80) history.back();
+  if (startX > window.innerWidth - EDGE_SIZE && diff < -80) history.forward();
+});
+</script>
+
+<!-- ⭐ שלב 1: בדיקת טעינה -->
+<script>
+  console.log("Version check script loaded (dashboard)");
+</script>
+
+<!-- ⭐ שלב 2: מנגנון עדכון גרסה אוטומטי -->
+<script>
+async function checkVersion() {
+  try {
+    const res = await fetch("https://raw.githubusercontent.com/albilia/Forklift-Reports/main/version.json?t=" + Date.now());
+    const data = await res.json();
+
+    const localVersion = localStorage.getItem("app_version") || "0";
+
+    if (data.version !== localVersion) {
+      console.log("🔄 גרסה חדשה זוהתה — מרענן...");
+      localStorage.setItem("app_version", data.version);
+      location.reload(true);
+    }
+  } catch (e) {
+    console.log("Version check failed");
+  }
+}
+
+// בדיקה בטעינה
+checkVersion();
+
+// בדיקה כל 10 שניות
+setInterval(checkVersion, 10000);
+</script>
+
+</body>
+</html>
