@@ -5,11 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>דשבורד דווחים</title>
 
-  <!-- PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#ffffff">
 
-  <!-- Menu CSS -->
   <link rel="stylesheet" href="menu.css">
 
   <style>
@@ -83,7 +81,6 @@
 </head>
 <body>
 
-  <!-- ⭐ תפריט נטען אוטומטית -->
   <div id="menuContainer"></div>
 
   <div class="top-bar">
@@ -133,6 +130,12 @@
   const userName = params.get("name");
   const token = params.get("token");
 
+  /* ⭐ איפוס בחירה בכניסה חדשה */
+  if (!document.referrer.includes("dashboard.html")) {
+    localStorage.removeItem("mainWarehouse");
+    localStorage.removeItem("finishedWarehouse");
+  }
+
   if (!token) {
     alert("שגיאה: אין טוקן זיהוי");
     window.location.href = "index.html";
@@ -142,14 +145,13 @@
     document.getElementById("userGreeting").innerText = `שלום, ${userName}`;
   }
 
-  /* ⭐ טעינת בחירה אחרונה */
   window.addEventListener("load", () => {
     const savedMain = localStorage.getItem("mainWarehouse");
     const savedFinished = localStorage.getItem("finishedWarehouse");
 
     if (savedMain) {
       document.getElementById("mainWarehouse").value = savedMain;
-      handleMainWarehouse(); // מציג את תת המחסן אם צריך
+      handleMainWarehouse();
     }
 
     if (savedFinished && savedMain === "finished") {
@@ -159,8 +161,6 @@
 
   function handleMainWarehouse() {
     const main = document.getElementById("mainWarehouse").value;
-
-    /* ⭐ שמירת בחירה */
     localStorage.setItem("mainWarehouse", main);
 
     if (main === "finished") {
@@ -174,7 +174,6 @@
     const main = document.getElementById("mainWarehouse").value;
     const finished = document.getElementById("finishedWarehouse").value;
 
-    /* ⭐ שמירת תת מחסן */
     if (main === "finished") {
       localStorage.setItem("finishedWarehouse", finished);
     }
@@ -183,22 +182,22 @@
       `report.html?token=${token}&name=${encodeURIComponent(userName)}&main=${main}&finished=${finished}`;
   }
 
+  /* ⭐ איפוס מלא בלחיצה על יציאה */
   function logout() {
+    localStorage.removeItem("mainWarehouse");
+    localStorage.removeItem("finishedWarehouse");
     window.location.href = "index.html";
   }
 </script>
 
-<!-- ⭐ טעינת תפריט -->
 <script src="menu.js"></script>
 
-<!-- ⭐ רישום Service Worker -->
 <script>
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("service-worker.js");
 }
 </script>
 
-<!-- ⭐ סווייפ מהשוליים בלבד -->
 <script>
 let startX = 0;
 let endX = 0;
@@ -215,37 +214,6 @@ document.addEventListener("touchend", e => {
   if (startX < EDGE_SIZE && diff > 80) history.back();
   if (startX > window.innerWidth - EDGE_SIZE && diff < -80) history.forward();
 });
-</script>
-
-<!-- ⭐ שלב 1: בדיקת טעינה -->
-<script>
-  console.log("Version check script loaded (dashboard)");
-</script>
-
-<!-- ⭐ שלב 2: מנגנון עדכון גרסה אוטומטי -->
-<script>
-async function checkVersion() {
-  try {
-    const res = await fetch("https://raw.githubusercontent.com/albilia/Forklift-Reports/main/version.json?t=" + Date.now());
-    const data = await res.json();
-
-    const localVersion = localStorage.getItem("app_version") || "0";
-
-    if (data.version !== localVersion) {
-      console.log("🔄 גרסה חדשה זוהתה — מרענן...");
-      localStorage.setItem("app_version", data.version);
-      location.reload(true);
-    }
-  } catch (e) {
-    console.log("Version check failed");
-  }
-}
-
-// בדיקה בטעינה
-checkVersion();
-
-// בדיקה כל 10 שניות
-setInterval(checkVersion, 10000);
 </script>
 
 </body>
