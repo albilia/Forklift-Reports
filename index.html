@@ -4,9 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-  <!-- שם שיוצג במסך הבית באייפון -->
   <meta name="apple-mobile-web-app-title" content="Nis">
-
   <title>Nis</title>
 
   <!-- PWA -->
@@ -93,9 +91,10 @@
     }
   </style>
 </head>
+
 <body>
 
-  <!-- ⭐ תפריט נטען אוטומטית -->
+  <!-- תפריט -->
   <div id="menuContainer"></div>
 
   <div class="container">
@@ -112,9 +111,10 @@
   </div>
 
 <script>
-  /* ⭐ API URL — הוחלפה לכתובת החדשה */
+  /* ⭐ API URL — ודא שזה ה־URL החדש מה־Deploy האחרון */
   const API_URL = "https://script.google.com/macros/s/AKfycbyi4DpKBuQFvJGZt--n09oLZ46AHOke9P8UDB9y7kVya1V50p499c1hy2TM2jY85WU4EA/exec";
 
+  /* ⭐ פונקציית התחברות — גרסה מתוקנת עם POST */
   async function login() {
     const phone = document.getElementById("phone").value.trim();
     const loader = document.getElementById("loader");
@@ -127,32 +127,41 @@
     loader.style.display = "block";
 
     try {
-      const url = `${API_URL}?action=verifyOTP&phone=${phone}`;
-      const response = await fetch(url);
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "verifyOTP",
+          phone: phone
+        })
+      });
+
       const data = await response.json();
 
       if (!data.success) {
-        alert("מספר טלפון לא מורשה במערכת");
+        alert("המספר לא מורשה במערכת");
         loader.style.display = "none";
         return;
       }
 
       const name = data.name;
-      const token = data.token;
+      const token = data.token || "OK";
 
-      window.location.href = `dashboard.html?token=${token}&name=${encodeURIComponent(name)}`;
+      window.location.href =
+        `dashboard.html?token=${token}&name=${encodeURIComponent(name)}`;
 
     } catch (err) {
       alert("שגיאה בחיבור לשרת");
-      loader.style.display = "none";
     }
+
+    loader.style.display = "none";
   }
 </script>
 
 <!-- טעינת תפריט -->
 <script src="menu.js" defer></script>
 
-<!-- רישום Service Worker -->
+<!-- Service Worker -->
 <script>
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("service-worker.js")
@@ -160,7 +169,7 @@ if ("serviceWorker" in navigator) {
 }
 </script>
 
-<!-- סווייפ מהשוליים בלבד -->
+<!-- סווייפ מהשוליים -->
 <script>
 let startX = 0;
 let endX = 0;
