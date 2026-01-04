@@ -1,120 +1,7 @@
-<!DOCTYPE html>
-<html lang="he" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-
-  <meta name="apple-mobile-web-app-title" content="Nis">
-  <title>Nis</title>
-
-  <!-- PWA -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#ffffff">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-
-  <!-- Icons -->
-  <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <link rel="icon" type="image/png" href="apple-touch-icon.png">
-
-  <!-- Menu CSS -->
-  <link rel="stylesheet" href="menu.css">
-
-  <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      overflow-x: hidden;
-      overflow-y: auto;
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      text-align: center;
-    }
-
-    .container {
-      min-height: calc(100vh - 60px);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding-bottom: 40px;
-    }
-
-    .logo {
-      width: 140px;
-      margin-bottom: 25px;
-    }
-
-    .main-title {
-      font-size: 28px;
-      margin-bottom: 10px;
-      font-weight: bold;
-    }
-
-    .sub-title {
-      font-size: 20px;
-      margin-bottom: 20px;
-      color: #333;
-    }
-
-    input {
-      width: 240px;
-      padding: 14px;
-      font-size: 18px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      margin-bottom: 15px;
-      text-align: center;
-    }
-
-    button {
-      width: 260px;
-      padding: 14px;
-      font-size: 20px;
-      background: #d32f2f;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #b71c1c;
-    }
-
-    #loader {
-      display: none;
-      margin-top: 20px;
-      font-size: 18px;
-      color: #444;
-    }
-  </style>
-</head>
-
-<body>
-
-  <!-- תפריט -->
-  <div id="menuContainer"></div>
-
-  <div class="container">
-    <img src="logo.jpg" class="logo" alt="לוגו">
-
-    <div class="main-title">העברת דווחים</div>
-    <div class="sub-title">הזן מספר טלפון כדי להיכנס</div>
-
-    <input id="phone" type="tel" placeholder="05XXXXXXXX">
-
-    <button onclick="login()">כניסה</button>
-
-    <div id="loader">מתחבר...</div>
-  </div>
-
 <script>
-  /* ⭐ API URL — ודא שזה ה־URL החדש מה־Deploy האחרון */
+  // ⭐ כתובת ה־API שלך (Apps Script)
   const API_URL = "https://script.google.com/macros/s/AKfycbyi4DpKBuQFvJGZt--n09oLZ46AHOke9P8UDB9y7kVya1V50p499c1hy2TM2jY85WU4EA/exec";
 
-  /* ⭐ פונקציית התחברות — גרסה מתוקנת עם POST */
   async function login() {
     const phone = document.getElementById("phone").value.trim();
     const loader = document.getElementById("loader");
@@ -127,15 +14,19 @@
     loader.style.display = "block";
 
     try {
+      // ⭐ שליחת POST תקינה ל־Apps Script
       const response = await fetch(API_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify({
           action: "verifyOTP",
           phone: phone
         })
       });
 
+      // ⭐ קריאת JSON מהשרת
       const data = await response.json();
 
       if (!data.success) {
@@ -144,74 +35,18 @@
         return;
       }
 
-      const name = data.name;
+      const name = data.name || "";
       const token = data.token || "OK";
 
+      // ⭐ מעבר לדשבורד
       window.location.href =
         `dashboard.html?token=${token}&name=${encodeURIComponent(name)}`;
 
     } catch (err) {
+      console.log("שגיאה:", err);
       alert("שגיאה בחיבור לשרת");
     }
 
     loader.style.display = "none";
   }
 </script>
-
-<!-- טעינת תפריט -->
-<script src="menu.js" defer></script>
-
-<!-- Service Worker -->
-<script>
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("service-worker.js")
-    .catch(err => console.log("SW registration failed", err));
-}
-</script>
-
-<!-- סווייפ מהשוליים -->
-<script>
-let startX = 0;
-let endX = 0;
-const EDGE_SIZE = 40;
-
-document.addEventListener("touchstart", e => {
-  startX = e.changedTouches[0].clientX;
-});
-
-document.addEventListener("touchend", e => {
-  endX = e.changedTouches[0].clientX;
-  const diff = endX - startX;
-
-  if (startX < EDGE_SIZE && diff > 80) history.back();
-  if (startX > window.innerWidth - EDGE_SIZE && diff < -80) history.forward();
-});
-</script>
-
-<!-- בדיקת גרסה -->
-<script>
-async function checkVersion() {
-  try {
-    const res = await fetch("https://raw.githubusercontent.com/albilia/Forklift-Reports/main/version.json?t=" + Date.now(), {
-      cache: "no-store"
-    });
-
-    const data = await res.json();
-    const localVersion = localStorage.getItem("app_version") || "0";
-
-    if (data.version !== localVersion) {
-      console.log("🔄 גרסה חדשה זוהתה — מרענן...");
-      localStorage.setItem("app_version", data.version);
-      location.reload();
-    }
-  } catch (e) {
-    console.log("Version check failed");
-  }
-}
-
-checkVersion();
-setInterval(checkVersion, 15000);
-</script>
-
-</body>
-</html>
