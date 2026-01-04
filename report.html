@@ -122,8 +122,11 @@
   <div id="loader">טוען...</div>
   <div id="ocrList"></div>
 
-  <button id="processAllBtn" onclick="processAll()" style="display:none;">
-    פענח הכול
+  <!-- ⭐ כפתור חדש — שלח לסריקה -->
+  <button id="processAllBtn"
+          onclick="processAll()"
+          style="display:none; margin:20px auto; display:block;">
+    שלח לסריקה
   </button>
 
   <button id="saveBtn" onclick="saveAll()"
@@ -134,6 +137,7 @@
   <button onclick="goBack()">חזור לדשבורד</button>
 
 <script>
+
   function triggerCamera() {
     const flash = document.getElementById("flash");
     flash.classList.add("active");
@@ -144,7 +148,6 @@
     document.getElementById("cameraInput").click();
   }
 
-  /* ⭐ API URL — הכתובת החדשה */
   const API_URL = "https://script.google.com/macros/s/AKfycbxBV5P-ZFQy3KcgV95mIRPk1iz9GOFlzQBCIkE7QnrIJRmmIb9FBOpQ1rKYQuVMIqbBFA/exec";
 
   const params = new URLSearchParams(window.location.search);
@@ -186,6 +189,25 @@
     document.getElementById("processAllBtn").style.display = "block";
   }
 
+  /* ⭐ פונקציה להקטנת תמונה לפני שליחה */
+  async function resizeImage(base64, maxWidth = 1200) {
+    return new Promise(resolve => {
+      const img = new Image();
+      img.onload = function() {
+        const scale = maxWidth / img.width;
+        const canvas = document.createElement("canvas");
+        canvas.width = maxWidth;
+        canvas.height = img.height * scale;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        resolve(canvas.toDataURL("image/jpeg", 0.85));
+      };
+      img.src = base64;
+    });
+  }
+
   async function processAll() {
     if (pendingImages.length === 0) return;
 
@@ -208,11 +230,15 @@
 
       const reader = new FileReader();
       reader.onload = async function(e) {
-        const base64 = e.target.result;
+        let base64 = e.target.result;
+
+        /* ⭐ הקטנת תמונה לפני שליחה */
+        base64 = await resizeImage(base64, 1200);
 
         try {
           const response = await fetch(API_URL, {
             method: "POST",
+            headers: { "Content-Type": "application/json" },  // ⭐ חובה ⭐
             body: JSON.stringify({
               action: "processImage",
               image: base64,
@@ -300,6 +326,7 @@
     try {
       const response = await fetch(API_URL, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
 
