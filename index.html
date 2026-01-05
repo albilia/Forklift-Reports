@@ -112,8 +112,8 @@
   </div>
 
 <script>
-  /* ⭐ API URL */
-  const API_URL = "https://script.google.com/macros/s/AKfycbz2zZ_0uJ3r7dfGsLS8mQqUmQdfY-jR1VGEBegD-ANlHd1HACTkyGzBb87CuRP2quiifQ/exec";
+  /* ⭐ API URL החדש */
+  const API_URL = "https://script.google.com/macros/s/AKfycbyAhlU96lhHehUgbPvb1zRPah_nnlJF6ZgR2U3AY4LKnddiuoNifvYaSCWZey_5xc-6rw/exec";
 
   async function login() {
     const phone = document.getElementById("phone").value.trim();
@@ -127,8 +127,17 @@
     loader.style.display = "block";
 
     try {
-      const url = `${API_URL}?action=verifyOTP&phone=${phone}`;
-      const response = await fetch(url);
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          action: "verifyOTP",
+          phone: phone
+        })
+      });
+
       const data = await response.json();
 
       if (!data.success) {
@@ -137,10 +146,8 @@
         return;
       }
 
-      const name = data.name;
-      const token = data.token;
-
-      window.location.href = `dashboard.html?token=${token}&name=${encodeURIComponent(name)}`;
+      /* ⭐ זיהוי לפי מספר נייד בלבד */
+      window.location.href = `dashboard.html?phone=${encodeURIComponent(phone)}`;
 
     } catch (err) {
       alert("שגיאה בחיבור לשרת");
