@@ -128,17 +128,18 @@
   </div>
 
 <script>
-  /* ⭐ קליטת מספר הנייד מה־URL */
+  /* ⭐ קליטת מספר הנייד והשם מה־URL */
   const params = new URLSearchParams(window.location.search);
   const phone = params.get("phone");
+  const name = params.get("name");
 
   if (!phone) {
     alert("שגיאה: לא התקבל מספר נייד");
     window.location.href = "index.html";
   }
 
-  /* ⭐ הצגת ברכת שלום */
-  document.getElementById("userGreeting").innerText = `שלום, ${phone}`;
+  /* ⭐ הצגת ברכת שלום עם שם מלא */
+  document.getElementById("userGreeting").innerText = `שלום, ${name}`;
 
   /* ⭐ שחזור בחירות קודמות */
   window.addEventListener("load", () => {
@@ -166,7 +167,7 @@
     }
   }
 
-  /* ⭐ מעבר לדיווח — עם phone בלבד */
+  /* ⭐ מעבר לדיווח — כולל phone + main + finished */
   function goToReport() {
     const main = document.getElementById("mainWarehouse").value;
     const finished = document.getElementById("finishedWarehouse").value;
