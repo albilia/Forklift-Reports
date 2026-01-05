@@ -149,8 +149,10 @@
 
   const API_URL = "https://script.google.com/macros/s/AKfycbyAhlU96lhHehUgbPvb1zRPah_nnlJF6ZgR2U3AY4LKnddiuoNifvYaSCWZey_5xc-6rw/exec";
 
+  /* ⭐ קליטת כל הפרמטרים כולל name */
   const params = new URLSearchParams(window.location.search);
   const phone = params.get("phone");
+  const name = params.get("name");   // ⭐ חדש
   const main = params.get("main");
   const finished = params.get("finished");
 
@@ -159,8 +161,10 @@
     window.location.href = "index.html";
   }
 
+  /* ⭐ חזרה לדשבורד עם השם */
   function goBack() {
-    window.location.href = `dashboard.html?phone=${encodeURIComponent(phone)}`;
+    window.location.href =
+      `dashboard.html?phone=${encodeURIComponent(phone)}&name=${encodeURIComponent(name)}`;
   }
 
   let rawReports = [];
