@@ -154,7 +154,7 @@
       }
 
       // ⭐ זיהוי לפי מספר נייד בלבד
-      window.location.href = `dashboard.html?phone=${encodeURIComponent(phone)}`;
+      window.location.href = `dashboard.html?phone=${encodeURIComponent(phone)}&name=${encodeURIComponent(data.name)}`;
 
     } catch (err) {
       console.log("Login error:", err);
