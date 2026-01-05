@@ -3,11 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-
-  <!-- שם שיוצג במסך הבית באייפון -->
-  <meta name="apple-mobile-web-app-title" content="Nis">
-
-  <title>Nis</title>
+  <title>דווחים</title>
 
   <!-- PWA -->
   <link rel="manifest" href="manifest.json">
@@ -16,8 +12,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
 
   <!-- Icons -->
-  <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <link rel="icon" type="image/png" href="apple-touch-icon.png">
+  <link rel="apple-touch-icon" href="gilro-logo-v2.png">
+  <link rel="icon" type="image/png" href="gilro-logo-v2.png">
 
   <!-- Menu CSS -->
   <link rel="stylesheet" href="menu.css">
@@ -27,29 +23,27 @@
       height: 100%;
       margin: 0;
       padding: 0;
-      overflow-x: hidden;
-      overflow-y: auto;
+      overflow: hidden;
       font-family: Arial, sans-serif;
       background: #f5f5f5;
       text-align: center;
     }
 
     .container {
-      min-height: calc(100vh - 60px);
+      height: calc(100vh - 60px);
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      padding-bottom: 40px;
     }
 
     .logo {
-      width: 140px;
-      margin-bottom: 25px;
+      width: 120px;
+      margin-bottom: 20px;
     }
 
     .main-title {
-      font-size: 28px;
+      font-size: 26px;
       margin-bottom: 10px;
       font-weight: bold;
     }
@@ -61,8 +55,8 @@
     }
 
     input {
-      width: 240px;
-      padding: 14px;
+      width: 220px;
+      padding: 12px;
       font-size: 18px;
       border-radius: 8px;
       border: 1px solid #ccc;
@@ -71,9 +65,9 @@
     }
 
     button {
-      width: 260px;
-      padding: 14px;
-      font-size: 20px;
+      width: 240px;
+      padding: 12px;
+      font-size: 18px;
       background: #d32f2f;
       color: white;
       border: none;
@@ -112,7 +106,7 @@
   </div>
 
 <script>
-  /* ⭐ API URL */
+  /* ⭐ API URL ⭐ */
   const API_URL = "https://script.google.com/macros/s/AKfycbz2zZ_0uJ3r7dfGsLS8mQqUmQdfY-jR1VGEBegD-ANlHd1HACTkyGzBb87CuRP2quiifQ/exec";
 
   async function login() {
@@ -149,18 +143,17 @@
   }
 </script>
 
-<!-- טעינת תפריט -->
-<script src="menu.js" defer></script>
+<!-- ⭐ טעינת תפריט -->
+<script src="menu.js"></script>
 
-<!-- רישום Service Worker -->
+<!-- ⭐ רישום Service Worker -->
 <script>
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("service-worker.js")
-    .catch(err => console.log("SW registration failed", err));
+  navigator.serviceWorker.register("service-worker.js");
 }
 </script>
 
-<!-- סווייפ מהשוליים בלבד -->
+<!-- ⭐ סווייפ מהשוליים בלבד -->
 <script>
 let startX = 0;
 let endX = 0;
@@ -179,29 +172,35 @@ document.addEventListener("touchend", e => {
 });
 </script>
 
-<!-- בדיקת גרסה -->
+<!-- ⭐ שלב 1: בדיקת טעינה -->
+<script>
+  console.log("Version check script loaded");
+</script>
+
+<!-- ⭐ שלב 2: מנגנון עדכון גרסה אוטומטי -->
 <script>
 async function checkVersion() {
   try {
-    const res = await fetch("https://raw.githubusercontent.com/albilia/Forklift-Reports/main/version.json?t=" + Date.now(), {
-      cache: "no-store"
-    });
-
+    const res = await fetch("https://raw.githubusercontent.com/albilia/Forklift-Reports/main/version.json?t=" + Date.now());
     const data = await res.json();
+
     const localVersion = localStorage.getItem("app_version") || "0";
 
     if (data.version !== localVersion) {
       console.log("🔄 גרסה חדשה זוהתה — מרענן...");
       localStorage.setItem("app_version", data.version);
-      location.reload();
+      location.reload(true);
     }
   } catch (e) {
     console.log("Version check failed");
   }
 }
 
+// בדיקה בטעינה
 checkVersion();
-setInterval(checkVersion, 15000);
+
+// בדיקה כל 10 שניות
+setInterval(checkVersion, 10000);
 </script>
 
 </body>
