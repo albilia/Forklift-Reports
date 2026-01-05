@@ -1,4 +1,4 @@
-const CACHE_VERSION = "v4";
+const CACHE_VERSION = "v5";   // ← עדכון גרסה חובה
 const CACHE_NAME = `forklift-cache-${CACHE_VERSION}`;
 
 const CORE_ASSETS = [
@@ -20,7 +20,7 @@ self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(CORE_ASSETS))
   );
-  self.skipWaiting();
+  self.skipWaiting(); // ← מכריח התקנה מיידית
 });
 
 // הפעלה – ניקוי קאש ישן
@@ -34,7 +34,7 @@ self.addEventListener("activate", event => {
       )
     )
   );
-  self.clients.claim();
+  self.clients.claim(); // ← מכריח שימוש ב־SW החדש
 });
 
 // אסטרטגיית fetch חכמה
@@ -42,13 +42,9 @@ self.addEventListener("fetch", event => {
   const request = event.request;
   const url = request.url;
 
-  // דילוג על בקשות שלא אמורות להיכנס לקאש
-  if (
-    url.startsWith("chrome-extension://") ||
-    url.startsWith("moz-extension://") ||
-    url.startsWith("safari-extension://") ||
-    request.method !== "GET"
-  ) {
+  // ❗❗❗ תיקון קריטי:
+  // לא נוגעים בבקשות POST — נותנים להן לעבור לרשת
+  if (request.method !== "GET") {
     return;
   }
 
@@ -83,12 +79,10 @@ self.addEventListener("fetch", event => {
         })
         .catch(() => null);
 
-      // אם יש קאש – מחזירים מיד, ומעדכנים ברקע
       if (cachedResponse) {
         return cachedResponse;
       }
 
-      // אין קאש – מחכים לרשת, ואם אין – offline
       return fetchPromise.then(res => res || caches.match("offline.html"));
     })
   );
