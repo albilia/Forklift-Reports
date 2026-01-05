@@ -4,10 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-  <!-- ⭐ שם שיופיע בקיצור דרך באייפון ⭐ -->
   <meta name="apple-mobile-web-app-title" content="Nis">
-
-  <!-- ⭐ כותרת הדף ⭐ -->
   <title>Nis</title>
 
   <link rel="manifest" href="manifest.json">
@@ -131,25 +128,19 @@
   </div>
 
 <script>
+  /* ⭐ קליטת מספר הנייד מה־URL */
   const params = new URLSearchParams(window.location.search);
-  const userName = params.get("name");
-  const token = params.get("token");
-  const isNewLogin = params.get("new") === "1";
+  const phone = params.get("phone");
 
-  if (!token) {
-    alert("שגיאה: אין טוקן זיהוי");
+  if (!phone) {
+    alert("שגיאה: לא התקבל מספר נייד");
     window.location.href = "index.html";
   }
 
-  if (userName) {
-    document.getElementById("userGreeting").innerText = `שלום, ${userName}`;
-  }
+  /* ⭐ הצגת ברכת שלום */
+  document.getElementById("userGreeting").innerText = `שלום, ${phone}`;
 
-  if (isNewLogin) {
-    localStorage.removeItem("mainWarehouse");
-    localStorage.removeItem("finishedWarehouse");
-  }
-
+  /* ⭐ שחזור בחירות קודמות */
   window.addEventListener("load", () => {
     const savedMain = localStorage.getItem("mainWarehouse");
     const savedFinished = localStorage.getItem("finishedWarehouse");
@@ -175,6 +166,7 @@
     }
   }
 
+  /* ⭐ מעבר לדיווח — עם phone בלבד */
   function goToReport() {
     const main = document.getElementById("mainWarehouse").value;
     const finished = document.getElementById("finishedWarehouse").value;
@@ -184,7 +176,7 @@
     }
 
     window.location.href =
-      `report.html?token=${token}&name=${encodeURIComponent(userName)}&main=${main}&finished=${finished}`;
+      `report.html?phone=${encodeURIComponent(phone)}&main=${main}&finished=${finished}`;
   }
 
   function logout() {
