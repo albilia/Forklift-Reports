@@ -94,6 +94,17 @@
       cursor: pointer;
       filter: brightness(1.2);
     }
+
+    .delete-btn {
+      background: #b71c1c;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      font-size: 26px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-left: 15px;
+    }
   </style>
 </head>
 
@@ -147,12 +158,12 @@
     document.getElementById("cameraInput").click();
   }
 
-  const API_URL = "https://script.google.com/macros/s/AKfycbyAhlU96lhHehUgbPvb1zRPah_nnlJF6ZgR2U3AY4LKnddiuoNifvYaSCWZey_5xc-6rw/exec";
+  const API_URL =
+    "https://script.google.com/macros/s/AKfycbyAhlU96lhHehUgbPvb1zRPah_nnlJF6ZgR2U3AY4LKnddiuoNifvYaSCWZey_5xc-6rw/exec";
 
-  /* ⭐ קליטת כל הפרמטרים כולל name */
   const params = new URLSearchParams(window.location.search);
   const phone = params.get("phone");
-  const name = params.get("name");   // ⭐ חדש
+  const name = params.get("name");
   const main = params.get("main");
   const finished = params.get("finished");
 
@@ -161,7 +172,6 @@
     window.location.href = "index.html";
   }
 
-  /* ⭐ חזרה לדשבורד עם השם */
   function goBack() {
     window.location.href =
       `dashboard.html?phone=${encodeURIComponent(phone)}&name=${encodeURIComponent(name)}`;
@@ -300,18 +310,55 @@
     finishedReports.forEach((r, i) => {
       box.innerHTML += `
         <div class="ocr-box">
-          <b>תווית ${i+1}:</b><br>
-          מק״ט: ${r.makat}<br>
-          פק״ע: ${r.pka}<br>
-          כמות: ${r.qty}
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+
+            <div>
+              <b>תווית ${i+1}:</b><br>
+              מק״ט: ${r["מק\"ט"]}<br>
+              פק״ע: ${r["פק\"ע"]}<br>
+              כמות: ${r["כמות"]}
+            </div>
+
+            <div style="display:flex; flex-direction:column; align-items:center; gap:15px;">
+              <button class="delete-btn" onclick="deleteReport(${i})">מחק</button>
+              <input type="checkbox" class="report-check" data-index="${i}"
+                     style="width:40px; height:40px;">
+            </div>
+
+          </div>
         </div>
       `;
     });
   }
 
+  function deleteReport(index) {
+    finishedReports.splice(index, 1);
+    showFinishedList();
+  }
+
   async function saveAll() {
     document.getElementById("loader").innerText = "שומר דיווח...";
     document.getElementById("loader").style.display = "block";
+
+    let selectedReports = [];
+
+    if (main === "raw") {
+      selectedReports = rawReports;
+    } else {
+      const checks = document.querySelectorAll(".report-check");
+      checks.forEach(ch => {
+        if (ch.checked) {
+          const index = Number(ch.dataset.index);
+          selectedReports.push(finishedReports[index]);
+        }
+      });
+    }
+
+    if (selectedReports.length === 0) {
+      alert("לא נבחרו דו\"חות לשמירה");
+      document.getElementById("loader").style.display = "none";
+      return;
+    }
 
     let payload;
 
@@ -319,13 +366,13 @@
       payload = {
         action: "saveRawMaterialBatch",
         phone,
-        reports: rawReports
+        reports: selectedReports
       };
     } else {
       payload = {
         action: "saveReport",
         phone,
-        ocr: { reports: finishedReports },
+        ocr: { reports: selectedReports },
         finishedWarehouse: finished
       };
     }
