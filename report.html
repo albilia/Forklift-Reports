@@ -265,18 +265,21 @@
             return resolve();
           }
 
-          if (data.parsed && data.parsed.reports && data.parsed.reports.length > 0) {
+          /* ⭐⭐⭐ תיקון קריטי ⭐⭐⭐ */
+          if (data.reports && data.reports.length > 0) {
+
             if (main === "raw") {
-              const first = data.parsed.reports[0];
+              const first = data.reports[0];
               if (first) {
                 rawReports.push(first);
                 showRawList();
               }
             } else {
-              finishedReports.push(...data.parsed.reports);
+              finishedReports.push(...data.reports);
               showFinishedList();
             }
           }
+
         } catch (err) {
           console.log("OCR error", err);
         }
