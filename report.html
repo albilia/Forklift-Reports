@@ -166,6 +166,7 @@
   const name = params.get("name");
   const main = params.get("main");
   const finished = params.get("finished");
+  const warehouseName = params.get("warehouseName");   /* ⭐ חדש ⭐ */
 
   if (!phone) {
     alert("שגיאה: לא התקבל מספר נייד");
@@ -265,7 +266,6 @@
             return resolve();
           }
 
-          /* ⭐⭐⭐ תיקון קריטי ⭐⭐⭐ */
           if (data.reports && data.reports.length > 0) {
 
             if (main === "raw") {
@@ -376,7 +376,8 @@
         action: "saveReport",
         phone,
         ocr: { reports: selectedReports },
-        finishedWarehouse: finished
+        finishedWarehouse: finished,
+        warehouseName: warehouseName   /* ⭐ חדש ⭐ */
       };
     }
 
