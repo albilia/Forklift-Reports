@@ -10,37 +10,37 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#ffffff">
 
-  <!-- תפריט -->
   <link rel="stylesheet" href="menu.css">
-
-  <!-- כפתורים ירוקים -->
   <link rel="stylesheet" href="buttons.css">
 
   <style>
-    body {
+    html, body {
+      overscroll-behavior-y: contain;
       margin: 0;
       padding: 0;
       font-family: 'Segoe UI', sans-serif;
       background: #f5f5f5;
     }
 
-    /* פס עליון מעודכן */
+    /* פס עליון חדש */
     .top-bar {
       background: #8ecae6;
-      color: white;
-      padding: 6px 20px; /* הקטנת גובה */
+      padding: 10px 0;
       display: flex;
-      justify-content: center; /* מרכז את הלוגו */
+      justify-content: center;
       align-items: center;
       border-radius: 0 0 12px 12px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      height: 85px;
     }
 
-    .logo-img {
-      height: 38px; /* גובה מדויק לפס דק */
+    .logo-banner {
+      height: 100%;
+      max-height: 75px;
+      width: auto;
       object-fit: contain;
       display: block;
-      clip-path: inset(12% 8% 12% 8%); /* חיתוך שוליים לבנים */
+      clip-path: inset(5% 5% 5% 5%);
     }
 
     .content {
@@ -72,14 +72,13 @@
 
   <!-- פס עליון עם לוגו -->
   <div class="top-bar">
-    <img src="Nis Reporte.PNG" class="logo-img" alt="Nis Reporter">
+    <img src="Nis Reporte.PNG" class="logo-banner" alt="Nis Reporter">
   </div>
 
   <div class="content">
 
     <div id="userGreeting" style="font-size:22px; font-weight:bold; margin-bottom:25px;"></div>
 
-    <!-- שינוי טקסט + הוספת היסטוריית דווחים -->
     <label for="mainWarehouse">בחר קטגוריה:</label>
     <select id="mainWarehouse" onchange="handleMainWarehouse()">
       <option value="">-- בחר --</option>
@@ -108,20 +107,24 @@
       </select>
     </div>
 
-    <!-- כפתור ירוק מה-buttons.css -->
     <button onclick="goToReport()">המשך</button>
 
   </div>
 
 <script>
+  /* שמירת משתמש כדי שלא ייצא ברענון */
   const params = new URLSearchParams(window.location.search);
-  const phone = params.get("phone");
-  const name = params.get("name");
+
+  let phone = params.get("phone") || sessionStorage.getItem("phone");
+  let name = params.get("name") || sessionStorage.getItem("name");
 
   if (!phone) {
     alert("שגיאה: לא התקבל מספר נייד");
     window.location.href = "index.html";
   }
+
+  sessionStorage.setItem("phone", phone);
+  sessionStorage.setItem("name", name);
 
   document.getElementById("userGreeting").innerText = `שלום, ${name}`;
 
@@ -143,11 +146,8 @@
     const main = document.getElementById("mainWarehouse").value;
     localStorage.setItem("mainWarehouse", main);
 
-    if (main === "finished") {
-      document.getElementById("finishedSection").style.display = "block";
-    } else {
-      document.getElementById("finishedSection").style.display = "none";
-    }
+    document.getElementById("finishedSection").style.display =
+      main === "finished" ? "block" : "none";
   }
 
   const warehouseNames = {
@@ -175,8 +175,8 @@
   }
 
   function logout() {
-    localStorage.removeItem("mainWarehouse");
-    localStorage.removeItem("finishedWarehouse");
+    sessionStorage.clear();
+    localStorage.clear();
     window.location.href = "index.html";
   }
 </script>
@@ -187,24 +187,6 @@
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("service-worker.js");
 }
-</script>
-
-<script>
-let startX = 0;
-let endX = 0;
-const EDGE_SIZE = 40;
-
-document.addEventListener("touchstart", e => {
-  startX = e.changedTouches[0].clientX;
-});
-
-document.addEventListener("touchend", e => {
-  endX = e.changedTouches[0].clientX;
-  const diff = endX - startX;
-
-  if (startX < EDGE_SIZE && diff > 80) history.back();
-  if (startX > window.innerWidth - EDGE_SIZE && diff < -80) history.forward();
-});
 </script>
 
 </body>
