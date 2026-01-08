@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <title>צילום תווית</title>
 
+  <!-- כפתורים ירוקים -->
+  <link rel="stylesheet" href="buttons.css">
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -52,18 +55,25 @@
       color: #ffffff;
     }
 
-    button {
-      margin: 20px;
-      padding: 18px 32px;
-      font-size: 28px;
-      border: none;
-      border-radius: 10px;
-      background: #d32f2f;
+    /* כפתור מחיקה נשאר אדום */
+    .delete-btn {
+      background: #b71c1c;
       color: white;
+      border: none;
+      padding: 10px 18px;
+      font-size: 26px;
+      border-radius: 8px;
       cursor: pointer;
+      margin-left: 15px;
+    }
+
+    /* אנימציה רק על אייקון המצלמה */
+    .camera-icon {
+      width: 200px;
+      margin-bottom: 30px;
+      cursor: pointer;
+      filter: brightness(1.2);
       animation: pulse 2s infinite;
-      width: 80%;
-      max-width: 350px;
     }
 
     @keyframes pulse {
@@ -86,24 +96,6 @@
     }
     #flash.active {
       opacity: 1;
-    }
-
-    .camera-icon {
-      width: 200px;
-      margin-bottom: 30px;
-      cursor: pointer;
-      filter: brightness(1.2);
-    }
-
-    .delete-btn {
-      background: #b71c1c;
-      color: white;
-      border: none;
-      padding: 10px 18px;
-      font-size: 26px;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-left: 15px;
     }
   </style>
 </head>
@@ -140,23 +132,29 @@
   </button>
 
   <button id="saveBtn" onclick="saveAll()"
-          style="display:none; margin: 20px auto; display:block;">
+          style="display:none; margin:20px auto; display:block;">
     שמור דיווח
+  </button>
+
+  <!-- ⭐ כפתור סיום משטח -->
+  <button id="finishPalletBtn"
+          onclick="finishPallet()"
+          style="display:none; margin:20px auto; display:block;">
+    סיום משטח
   </button>
 
   <button onclick="goBack()">חזור לדשבורד</button>
 
 <script>
 
-  function triggerCamera() {
-    const flash = document.getElementById("flash");
-    flash.classList.add("active");
-    setTimeout(() => flash.classList.remove("active"), 150);
+  /* ---------------------- */
+  /* משתנים גלובליים */
+  /* ---------------------- */
 
-    if (navigator.vibrate) navigator.vibrate(120);
-
-    document.getElementById("cameraInput").click();
-  }
+  let rawReports = [];
+  let finishedReports = [];
+  let pendingImages = [];
+  let currentPallet = [];   /* ⭐ חדש — משטח נוכחי */
 
   const API_URL =
     "https://script.google.com/macros/s/AKfycbx4vmrLZkGpqCjVy9OZcxp9J0vpTleY_dE-n_nwrB8741LweHmIVecA9ZxS6JXHF12muQ/exec";
@@ -166,7 +164,7 @@
   const name = params.get("name");
   const main = params.get("main");
   const finished = params.get("finished");
-  const warehouseName = params.get("warehouseName");   /* ⭐ חדש ⭐ */
+  const warehouseName = params.get("warehouseName");
 
   if (!phone) {
     alert("שגיאה: לא התקבל מספר נייד");
@@ -178,9 +176,19 @@
       `dashboard.html?phone=${encodeURIComponent(phone)}&name=${encodeURIComponent(name)}`;
   }
 
-  let rawReports = [];
-  let finishedReports = [];
-  let pendingImages = [];
+  /* ---------------------- */
+  /* צילום */
+  /* ---------------------- */
+
+  function triggerCamera() {
+    const flash = document.getElementById("flash");
+    flash.classList.add("active");
+    setTimeout(() => flash.classList.remove("active"), 150);
+
+    if (navigator.vibrate) navigator.vibrate(120);
+
+    document.getElementById("cameraInput").click();
+  }
 
   function handleImage(input) {
     const files = input.files;
@@ -220,6 +228,10 @@
     });
   }
 
+  /* ---------------------- */
+  /* עיבוד תמונות */
+  /* ---------------------- */
+
   async function processAll() {
     if (pendingImages.length === 0) return;
 
@@ -233,6 +245,11 @@
     pendingImages = [];
     document.getElementById("loader").style.display = "none";
     document.getElementById("saveBtn").style.display = "block";
+
+    if (main === "finished") {
+      document.getElementById("finishPalletBtn").style.display = "block";
+    }
+
     document.getElementById("processAllBtn").style.display = "none";
   }
 
@@ -276,6 +293,7 @@
               }
             } else {
               finishedReports.push(...data.reports);
+              currentPallet.push(...data.reports);   /* ⭐ חדש */
               showFinishedList();
             }
           }
@@ -290,6 +308,10 @@
       reader.readAsDataURL(file);
     });
   }
+
+  /* ---------------------- */
+  /* הצגת רשימות */
+  /* ---------------------- */
 
   function showRawList() {
     const box = document.getElementById("ocrList");
@@ -336,8 +358,13 @@
 
   function deleteReport(index) {
     finishedReports.splice(index, 1);
+    currentPallet.splice(index, 1);
     showFinishedList();
   }
+
+  /* ---------------------- */
+  /* שמירת דיווח רגיל */
+  /* ---------------------- */
 
   async function saveAll() {
     document.getElementById("loader").innerText = "שומר דיווח...";
@@ -377,7 +404,7 @@
         phone,
         ocr: { reports: selectedReports },
         finishedWarehouse: finished,
-        warehouseName: warehouseName   /* ⭐ חדש ⭐ */
+        warehouseName: warehouseName
       };
     }
 
@@ -412,6 +439,86 @@
     } catch (err) {
       alert("שגיאה בחיבור לשרת");
       document.getElementById("loader").style.display = "none";
+    }
+  }
+
+  /* ---------------------- */
+  /* ⭐ פונקציה חדשה — סיום משטח */
+  /* ---------------------- */
+
+  async function finishPallet() {
+    if (currentPallet.length === 0) {
+      alert("לא נסרקו תוויות למשטח");
+      return;
+    }
+
+    // בדיקת מק״ט אחיד
+    const makats = currentPallet.map(r => r["מק\"ט"]);
+    const uniqueMakats = [...new Set(makats)];
+
+    if (uniqueMakats.length > 1) {
+      alert("שגיאה: נמצאו מספר מק״טים שונים במשטח");
+      return;
+    }
+
+    const makat = uniqueMakats[0];
+
+    // איחוד פק״עות
+    const pkaMap = {};
+    currentPallet.forEach(r => {
+      const pka = r["פק\"ע"];
+      const qty = Number(r["כמות"]) || 0;
+
+      if (!pkaMap[pka]) pkaMap[pka] = 0;
+      pkaMap[pka] += qty;
+    });
+
+    // יצירת אובייקט מסכם
+    const summary = {
+      makat: makat,
+      totalQty: Object.values(pkaMap).reduce((a, b) => a + b, 0),
+      pkaDetails: pkaMap,
+      warehouse: finished,
+      warehouseName: warehouseName,
+      phone: phone
+    };
+
+    // שליחה לשרת
+    try {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          action: "finalizePallet",
+          pallet: summary
+        })
+      });
+
+      const text = await response.text();
+      let data;
+
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        console.log("Finalize raw:", text);
+        alert("שגיאה בקריאת תשובת השרת");
+        return;
+      }
+
+      if (!data.success) {
+        alert("שגיאה בשמירת המשטח");
+        return;
+      }
+
+      alert("המשטח נשמר בהצלחה!");
+
+      // איפוס
+      currentPallet = [];
+      finishedReports = [];
+      document.getElementById("ocrList").innerHTML = "";
+      document.getElementById("finishPalletBtn").style.display = "none";
+
+    } catch (err) {
+      alert("שגיאה בחיבור לשרת");
     }
   }
 
