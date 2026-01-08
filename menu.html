@@ -1,146 +1,36 @@
-<!-- ⭐ תפריט צד — Nis רפורטר ⭐ -->
-
-<style>
-  .menu-button {
-    position: fixed;
-    top: 15px;
-    right: 15px;
-    width: 35px;
-    height: 30px;
-    cursor: pointer;
-    z-index: 1100;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-
-  .menu-button span {
-    display: block;
-    height: 4px;
-    background: #333;
-    border-radius: 4px;
-    transition: 0.35s;
-  }
-
-  .menu-button.active span:nth-child(1) {
-    transform: rotate(45deg) translate(6px, 6px);
-  }
-
-  .menu-button.active span:nth-child(2) {
-    opacity: 0;
-  }
-
-  .menu-button.active span:nth-child(3) {
-    transform: rotate(-45deg) translate(7px, -7px);
-  }
-
-  .side-menu {
-    position: fixed;
-    top: 0;
-    right: -260px;
-    width: 260px;
-    height: 100%;
-    background: white;
-    box-shadow: -3px 0 8px rgba(0,0,0,0.25);
-    transition: 0.35s ease;
-    padding-top: 70px;
-    z-index: 1050;
-    overflow-y: auto;
-  }
-
-  .side-menu.open {
-    right: 0;
-  }
-
-  .menu-item {
-    padding: 15px;
-    border-bottom: 1px solid #ddd;
-    font-size: 18px;
-    cursor: pointer;
-    text-align: right;
-    color: #000;
-  }
-
-  .menu-item:hover {
-    background: #f0f0f0;
-  }
-</style>
-
-<!-- כפתור המבורגר -->
-<div class="menu-button" id="menuBtn">
-  <span></span>
-  <span></span>
-  <span></span>
+<!-- כפתור פתיחת תפריט -->
+<div id="menuBtn" class="menu-btn">
+  <div></div>
+  <div></div>
+  <div></div>
 </div>
 
 <!-- תפריט צד -->
 <div id="sideMenu" class="side-menu">
 
-  <div class="menu-item" onclick="openAbout()">אודות</div>
-  <div class="menu-item" onclick="openSteps()">שלבים</div>
-
-  <div class="menu-item" onclick="openGithub()">
-    <img src="github-icon.png"
-         alt="icon"
-         style="width:24px; height:24px; vertical-align:middle; margin-left:8px;">
-    פתיחת טיקט
-  </div>
-
-  <div id="versionLine" class="menu-item" style="font-size:14px; color:#555; margin-top:10px;">
+  <!-- שורת גרסה -->
+  <div id="versionLine" class="menu-item version-line">
     מס' גרסה: ...
   </div>
 
-  <div style="text-align:center; margin-top:15px; font-size:16px; font-weight:bold;">
-    © פותח על ידי ניסים אלביליה
+  <!-- כפתור יציאה חדש -->
+  <div class="menu-item logout-item" onclick="logout()">
+    <span class="icon">↩️</span>
+    <span>יציאה</span>
   </div>
 
-  <div style="text-align:center; margin-top:10px;">
-    <img 
-      src="https://raw.githubusercontent.com/albilia/Forklift-Reports/main/me.jpg"
-      alt="תמונה"
-      style="
-        width:80px;
-        height:80px;
-        border-radius:50%;
-        object-fit:cover;
-      "
-    >
-  </div>
+  <!-- שאר פריטי התפריט -->
+  <div class="menu-item" onclick="openAbout()">אודות</div>
+  <div class="menu-item" onclick="openSteps()">שלבי עבודה</div>
+  <div class="menu-item" onclick="openGithub()">דיווח תקלה</div>
 
 </div>
 
-<!-- ⭐ מודאל להצגת טקסט ⭐ -->
-<div id="infoModal" style="
-  display:none;
-  position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  background:rgba(0,0,0,0.6);
-  z-index:999999;
-  padding:20px;
-  box-sizing:border-box;
-">
-  <div style="
-    background:white;
-    color:black;
-    max-width:500px;
-    margin:60px auto;
-    padding:20px;
-    border-radius:10px;
-    box-shadow:0 0 10px rgba(0,0,0,0.3);
-    max-height:80%;
-    overflow-y:auto;
-    text-align:right;
-    direction:rtl;
-    font-size:18px;
-    line-height:1.6;
-  ">
-    <div style="text-align:left;">
-      <span onclick="closeModal()" style="cursor:pointer; font-size:26px;">✕</span>
-    </div>
-    <h2 id="modalTitle" style="margin-top:0; font-size:24px; font-weight:bold;"></h2>
-    <div id="modalBody" style="white-space:pre-line;"></div>
+<!-- מודאל מידע -->
+<div id="infoModal" class="modal">
+  <div class="modal-content">
+    <h2 id="modalTitle"></h2>
+    <p id="modalBody"></p>
+    <button onclick="closeModal()">סגור</button>
   </div>
 </div>
