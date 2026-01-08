@@ -1,0 +1,21 @@
+button {
+  margin: 20px;
+  padding: 18px 32px;
+  font-size: 28px;
+  border: none;
+  border-radius: 10px;
+  background: #8fd19e; /* ירוק בהיר ועדין */
+  color: #ffffff;
+  cursor: pointer;
+  width: 80%;
+  max-width: 350px;
+  transition: 0.25s ease;
+}
+
+button:hover {
+  background: #7ac88e; /* כהה מעט בהובר */
+}
+
+button:active {
+  transform: scale(0.97);
+}
