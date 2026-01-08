@@ -33,7 +33,11 @@
       overflow-x: hidden;
       overflow-y: auto;
       font-family: Arial, sans-serif;
-      background: #f5f5f5;
+
+      /* ⭐ רקע הטפט החדש */
+      background: url('background.jpg') no-repeat center center fixed;
+      background-size: cover;
+
       text-align: center;
     }
 
@@ -44,6 +48,7 @@
       justify-content: center;
       align-items: center;
       padding-bottom: 40px;
+      backdrop-filter: blur(2px); /* אופציונלי – נותן מראה נקי יותר */
     }
 
     .logo {
@@ -55,12 +60,15 @@
       font-size: 28px;
       margin-bottom: 10px;
       font-weight: bold;
+      color: #fff;
+      text-shadow: 0 0 4px rgba(0,0,0,0.4);
     }
 
     .sub-title {
       font-size: 20px;
       margin-bottom: 20px;
-      color: #333;
+      color: #eee;
+      text-shadow: 0 0 4px rgba(0,0,0,0.4);
     }
 
     input {
@@ -77,7 +85,8 @@
       display: none;
       margin-top: 20px;
       font-size: 18px;
-      color: #444;
+      color: #fff;
+      text-shadow: 0 0 4px rgba(0,0,0,0.4);
     }
   </style>
 </head>
