@@ -12,6 +12,9 @@
 
   <link rel="stylesheet" href="menu.css">
 
+  <!-- כפתורים ירוקים -->
+  <link rel="stylesheet" href="buttons.css">
+
   <style>
     body {
       margin: 0;
@@ -121,14 +124,14 @@
       </select>
     </div>
 
-    <button class="report-box" onclick="goToReport()">
+    <!-- כפתור ירוק (באמצעות buttons.css) -->
+    <button onclick="goToReport()">
       המשך
     </button>
 
   </div>
 
 <script>
-  /* ⭐ קליטת מספר הנייד והשם מה־URL */
   const params = new URLSearchParams(window.location.search);
   const phone = params.get("phone");
   const name = params.get("name");
@@ -138,10 +141,8 @@
     window.location.href = "index.html";
   }
 
-  /* ⭐ הצגת ברכת שלום עם שם מלא */
   document.getElementById("userGreeting").innerText = `שלום, ${name}`;
 
-  /* ⭐ שחזור בחירות קודמות */
   window.addEventListener("load", () => {
     const savedMain = localStorage.getItem("mainWarehouse");
     const savedFinished = localStorage.getItem("finishedWarehouse");
@@ -167,13 +168,11 @@
     }
   }
 
-  /* ⭐ מיפוי שמות מחסן */
   const warehouseNames = {
     raw: "מחסן חומרי גלם",
     finished: "מחסן תוצר גמר"
   };
 
-  /* ⭐ מעבר לדיווח — כולל phone + name + main + finished + warehouseName */
   function goToReport() {
     const main = document.getElementById("mainWarehouse").value;
     const finished = document.getElementById("finishedWarehouse").value;
