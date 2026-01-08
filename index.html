@@ -22,6 +22,9 @@
   <!-- Menu CSS -->
   <link rel="stylesheet" href="menu.css">
 
+  <!-- כפתורים ירוקים -->
+  <link rel="stylesheet" href="buttons.css">
+
   <style>
     html, body {
       height: 100%;
@@ -70,21 +73,6 @@
       text-align: center;
     }
 
-    button {
-      width: 260px;
-      padding: 14px;
-      font-size: 20px;
-      background: #d32f2f;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #b71c1c;
-    }
-
     #loader {
       display: none;
       margin-top: 20px;
@@ -112,7 +100,6 @@
   </div>
 
 <script>
-  /* ⭐ API URL */
   const API_URL = "https://script.google.com/macros/s/AKfycbx4vmrLZkGpqCjVy9OZcxp9J0vpTleY_dE-n_nwrB8741LweHmIVecA9ZxS6JXHF12muQ/exec";
 
   async function login() {
@@ -136,8 +123,8 @@
       });
 
       const text = await response.text();
-
       let data;
+
       try {
         data = JSON.parse(text);
       } catch (e) {
@@ -153,8 +140,8 @@
         return;
       }
 
-      // ⭐ זיהוי לפי מספר נייד בלבד
-      window.location.href = `dashboard.html?phone=${encodeURIComponent(phone)}&name=${encodeURIComponent(data.name)}`;
+      window.location.href =
+        `dashboard.html?phone=${encodeURIComponent(phone)}&name=${encodeURIComponent(data.name)}`;
 
     } catch (err) {
       console.log("Login error:", err);
@@ -164,10 +151,8 @@
   }
 </script>
 
-<!-- טעינת תפריט -->
 <script src="menu.js" defer></script>
 
-<!-- רישום Service Worker -->
 <script>
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("service-worker.js")
@@ -175,7 +160,6 @@ if ("serviceWorker" in navigator) {
 }
 </script>
 
-<!-- סווייפ מהשוליים בלבד -->
 <script>
 let startX = 0;
 let endX = 0;
@@ -194,13 +178,13 @@ document.addEventListener("touchend", e => {
 });
 </script>
 
-<!-- בדיקת גרסה -->
 <script>
 async function checkVersion() {
   try {
-    const res = await fetch("https://raw.githubusercontent.com/albilia/Forklift-Reports/main/version.json?t=" + Date.now(), {
-      cache: "no-store"
-    });
+    const res = await fetch(
+      "https://raw.githubusercontent.com/albilia/Forklift-Reports/main/version.json?t=" + Date.now(),
+      { cache: "no-store" }
+    );
 
     const data = await res.json();
     const localVersion = localStorage.getItem("app_version") || "0";
