@@ -3,7 +3,7 @@
   position: fixed;
   top: 15px;
   right: 15px;
-  width: 40px;          /* גדול יותר – כמו בדשבורד */
+  width: 40px;          /* גודל זהה לדשבורד */
   height: 32px;
   cursor: pointer;
   z-index: 1100;
@@ -15,7 +15,7 @@
 /* קווים לבנים כברירת מחדל */
 .menu-button span {
   display: block;
-  height: 5px;          /* עבה יותר – כמו בדשבורד */
+  height: 5px;          /* עובי זהה לדשבורד */
   background: #fff !important;
   border-radius: 4px;
   transition: 0.35s;
@@ -41,13 +41,13 @@
 .side-menu {
   position: fixed;
   top: 0;
-  right: -300px;        /* רוחב גדול יותר – כמו בדשבורד */
+  right: -300px;        /* רוחב זהה לדשבורד */
   width: 300px;
   height: 100%;
   background: white;
   box-shadow: -3px 0 12px rgba(0,0,0,0.25);
   transition: 0.35s ease;
-  padding-top: 80px;    /* ריווח עליון גדול יותר */
+  padding-top: 80px;    /* ריווח זהה לדשבורד */
   z-index: 1050;
   overflow-y: auto;
 }
@@ -59,9 +59,9 @@
 
 /* פריטי תפריט */
 .menu-item {
-  padding: 18px 22px;   /* ריווח גדול יותר */
+  padding: 18px 22px;   /* ריווח זהה לדשבורד */
   border-bottom: 1px solid #ddd;
-  font-size: 20px;      /* טקסט גדול יותר */
+  font-size: 20px;      /* טקסט זהה לדשבורד */
   cursor: pointer;
   text-align: right;
   color: #000;
@@ -83,4 +83,13 @@
 .logout-item {
   color: #d9534f;
   font-weight: bold;
+}
+
+/* ⭐ ביטול מוחלט של השפעת report.html על התפריט ⭐ */
+.side-menu,
+.menu-button,
+.menu-button span {
+  transform: none !important;
+  zoom: 1 !important;
+  font-size: inherit !important;
 }
