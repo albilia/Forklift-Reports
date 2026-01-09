@@ -4,26 +4,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-  <!-- שם שיוצג במסך הבית באייפון -->
   <meta name="apple-mobile-web-app-title" content="Nis">
-
   <title>Nis</title>
 
-  <!-- PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#ffffff">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
 
-  <!-- Icons -->
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" href="apple-touch-icon.png">
 
-  <!-- Menu CSS -->
   <link rel="stylesheet" href="menu.css">
-
-  <!-- כפתורים ירוקים -->
   <link rel="stylesheet" href="buttons.css">
+
+  <!-- Lottie Player -->
+  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 
   <style>
     html, body {
@@ -33,11 +29,8 @@
       overflow-x: hidden;
       overflow-y: auto;
       font-family: Arial, sans-serif;
-
-      /* ⭐ רקע הטפט החדש */
       background: url('background.jpg') no-repeat center center fixed;
       background-size: cover;
-
       text-align: center;
     }
 
@@ -48,7 +41,7 @@
       justify-content: center;
       align-items: center;
       padding-bottom: 40px;
-      backdrop-filter: blur(2px); /* אופציונלי – נותן מראה נקי יותר */
+      backdrop-filter: blur(2px);
     }
 
     .logo {
@@ -61,14 +54,14 @@
       margin-bottom: 10px;
       font-weight: bold;
       color: #fff;
-      text-shadow: 0 0 4px rgba(0,0,0,0.4);
+      text-shadow: 0 0 6px rgba(0,0,0,0.8);
     }
 
     .sub-title {
       font-size: 20px;
       margin-bottom: 20px;
       color: #eee;
-      text-shadow: 0 0 4px rgba(0,0,0,0.4);
+      text-shadow: 0 0 6px rgba(0,0,0,0.8);
     }
 
     input {
@@ -81,18 +74,24 @@
       text-align: center;
     }
 
-    #loader {
+    /* ⭐ Loader חדש — מוסתר בהתחלה */
+    #loaderBox {
       display: none;
-      margin-top: 20px;
-      font-size: 18px;
-      color: #fff;
-      text-shadow: 0 0 4px rgba(0,0,0,0.4);
+      margin-top: 25px;
+    }
+
+    #loaderText {
+      color: #00e5ff;
+      font-size: 22px;
+      font-weight: bold;
+      margin-top: 10px;
+      text-shadow: 0 0 8px rgba(0,255,255,0.8);
     }
   </style>
 </head>
+
 <body>
 
-  <!-- ⭐ תפריט נטען אוטומטית -->
   <div id="menuContainer"></div>
 
   <div class="container">
@@ -105,22 +104,42 @@
 
     <button onclick="login()">כניסה</button>
 
-    <div id="loader">מתחבר...</div>
+    <!-- ⭐ Loader חדש -->
+    <div id="loaderBox">
+      <lottie-player
+        src="loader.json"
+        background="transparent"
+        speed="1"
+        style="width:140px; height:140px; margin:auto;"
+        loop
+        autoplay>
+      </lottie-player>
+
+      <div id="loaderText">מתחבר למערכת…</div>
+    </div>
   </div>
 
 <script>
   const API_URL = "https://script.google.com/macros/s/AKfycbx4vmrLZkGpqCjVy9OZcxp9J0vpTleY_dE-n_nwrB8741LweHmIVecA9ZxS6JXHF12muQ/exec";
 
+  /* ⭐ PREWARM — מעיר את השרת ברגע שהדף נטען */
+  window.addEventListener("load", () => {
+    fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "ping" })
+    }).catch(()=>{});
+  });
+
   async function login() {
     const phone = document.getElementById("phone").value.trim();
-    const loader = document.getElementById("loader");
+    const loaderBox = document.getElementById("loaderBox");
 
     if (phone.length < 10) {
       alert("מספר טלפון לא תקין");
       return;
     }
 
-    loader.style.display = "block";
+    loaderBox.style.display = "block";
 
     try {
       const response = await fetch(API_URL, {
@@ -137,15 +156,15 @@
       try {
         data = JSON.parse(text);
       } catch (e) {
-        console.log("Raw response from server:", text);
+        console.log("Raw response:", text);
         alert("שגיאה בקריאת תשובת השרת");
-        loader.style.display = "none";
+        loaderBox.style.display = "none";
         return;
       }
 
       if (!data.success) {
         alert("מספר טלפון לא מורשה במערכת");
-        loader.style.display = "none";
+        loaderBox.style.display = "none";
         return;
       }
 
@@ -155,7 +174,7 @@
     } catch (err) {
       console.log("Login error:", err);
       alert("שגיאה בחיבור לשרת");
-      loader.style.display = "none";
+      loaderBox.style.display = "none";
     }
   }
 </script>
