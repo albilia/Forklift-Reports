@@ -3,8 +3,8 @@
   position: fixed;
   top: 15px;
   right: 15px;
-  width: 35px;
-  height: 30px;
+  width: 40px;          /* גדול יותר – כמו בדשבורד */
+  height: 32px;
   cursor: pointer;
   z-index: 1100;
   display: flex;
@@ -15,7 +15,7 @@
 /* קווים לבנים כברירת מחדל */
 .menu-button span {
   display: block;
-  height: 4px;
+  height: 5px;          /* עבה יותר – כמו בדשבורד */
   background: #fff !important;
   border-radius: 4px;
   transition: 0.35s;
@@ -28,39 +28,40 @@
 
 /* אנימציית X */
 .menu-button.active span:nth-child(1) {
-  transform: rotate(45deg) translate(6px, 6px);
+  transform: rotate(45deg) translate(7px, 7px);
 }
 .menu-button.active span:nth-child(2) {
   opacity: 0;
 }
 .menu-button.active span:nth-child(3) {
-  transform: rotate(-45deg) translate(7px, -7px);
+  transform: rotate(-45deg) translate(8px, -8px);
 }
 
 /* תפריט צד */
 .side-menu {
   position: fixed;
   top: 0;
-  right: -260px;
-  width: 260px;
+  right: -300px;        /* רוחב גדול יותר – כמו בדשבורד */
+  width: 300px;
   height: 100%;
   background: white;
-  box-shadow: -3px 0 8px rgba(0,0,0,0.25);
+  box-shadow: -3px 0 12px rgba(0,0,0,0.25);
   transition: 0.35s ease;
-  padding-top: 70px;
+  padding-top: 80px;    /* ריווח עליון גדול יותר */
   z-index: 1050;
   overflow-y: auto;
 }
 
+/* כשהתפריט פתוח */
 .side-menu.open {
   right: 0;
 }
 
 /* פריטי תפריט */
 .menu-item {
-  padding: 15px;
+  padding: 18px 22px;   /* ריווח גדול יותר */
   border-bottom: 1px solid #ddd;
-  font-size: 18px;
+  font-size: 20px;      /* טקסט גדול יותר */
   cursor: pointer;
   text-align: right;
   color: #000;
@@ -68,4 +69,18 @@
 
 .menu-item:hover {
   background: #f0f0f0;
+}
+
+/* שורת גרסה */
+#versionLine {
+  font-size: 16px;
+  color: #555;
+  padding: 18px 22px;
+  font-weight: bold;
+}
+
+/* יציאה */
+.logout-item {
+  color: #d9534f;
+  font-weight: bold;
 }
