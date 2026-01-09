@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>צילום תווית</title>
 
-  <!-- כפתורים ירוקים -->
   <link rel="stylesheet" href="buttons.css">
 
   <!-- Lottie Player -->
@@ -16,11 +15,12 @@
       padding: 20px;
       background: url('background.jpg') no-repeat center center fixed;
       background-size: cover;
-      color: #f5f5f5;
+      color: #ffffff;
       text-align: center;
       font-size: 22px;
       position: relative;
       overflow-x: hidden;
+      text-shadow: 0 0 6px rgba(0,0,0,0.8);
     }
 
     h2 {
@@ -28,23 +28,29 @@
       margin-bottom: 25px;
       font-weight: bold;
       color: #ffffff;
-      text-shadow: 0 0 4px rgba(0,0,0,0.5);
+      text-shadow: 0 0 8px rgba(0,0,0,1);
     }
 
-    /* ⭐ לוטי – גדול פי 2 */
+    /* ⭐ לוטי – מסגרת זוהרת */
     .scan-animation {
       width: 350px;
       height: 350px;
       margin: 0 auto 30px auto;
       cursor: pointer;
+      border-radius: 20px;
+      box-shadow: 0 0 25px rgba(0,255,255,0.9), 0 0 45px rgba(0,255,255,0.6);
+      padding: 10px;
+      background: rgba(0,0,0,0.4);
     }
 
+    /* ⭐ תצוגת תמונה גדולה */
     #preview {
-      max-width: 100%;
-      margin-top: 20px;
+      width: 95%;
+      margin-top: 25px;
       display: none;
-      border-radius: 10px;
-      border: 6px solid black;
+      border-radius: 14px;
+      border: 8px solid #00e5ff;
+      box-shadow: 0 0 25px rgba(0,255,255,0.8);
     }
 
     #loader {
@@ -53,12 +59,12 @@
       margin-top: 25px;
       font-size: 40px;
       color: #ffeb3b;
-      text-shadow: 0 0 4px rgba(0,0,0,0.5);
+      text-shadow: 0 0 6px rgba(0,0,0,1);
     }
 
     .ocr-box {
-      background: rgba(0,0,0,0.55);
-      border: 3px solid #555;
+      background: rgba(0,0,0,0.65);
+      border: 3px solid #00e5ff;
       padding: 28px;
       margin: 25px auto;
       border-radius: 14px;
@@ -67,7 +73,8 @@
       font-size: 38px;
       line-height: 1.45;
       color: #ffffff;
-      backdrop-filter: blur(3px);
+      backdrop-filter: blur(4px);
+      box-shadow: 0 0 15px rgba(0,255,255,0.5);
     }
 
     .delete-btn {
@@ -80,6 +87,7 @@
       cursor: pointer;
       margin-left: 15px;
       font-weight: bold;
+      box-shadow: 0 0 10px rgba(0,0,0,0.8);
     }
 
     /* ⭐ כפתורים — גדולים פי 2 + מודגשים */
@@ -89,6 +97,15 @@
       font-weight: bold !important;
       border-radius: 14px !important;
       margin-top: 20px !important;
+      background: #1e88e5 !important;
+      color: #fff !important;
+      border: 3px solid #ffffff !important;
+      text-shadow: 0 0 4px rgba(0,0,0,0.8);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+
+    button:hover {
+      background: #1565c0 !important;
     }
 
     #flash {
@@ -117,7 +134,7 @@
 
   <h2>צילום תווית</h2>
 
-  <!-- ⭐ לוטי במקום אייקון מצלמה -->
+  <!-- ⭐ לוטי עם מסגרת זוהרת -->
   <lottie-player
       src="qr.json"
       background="transparent"
@@ -140,14 +157,14 @@
   <div id="loader">טוען...</div>
   <div id="ocrList"></div>
 
-  <!-- ⭐ סדר כפתורים חדש -->
+  <!-- ⭐ הכפתורים — בדיוק בסדר שביקשת -->
   <button id="processAllBtn" onclick="processAll()" style="display:none;">שלח לסריקה</button>
   <button id="finishPalletBtn" onclick="finishPallet()" style="display:none;">סיום משטח</button>
   <button id="saveBtn" onclick="saveAll()" style="display:none;">שמור דיווח</button>
   <button onclick="goBack()">חזור לדשבורד</button>
 
 <script>
-
+  /* כל הקוד המקורי שלך — לא נגעתי בו */
   let rawReports = [];
   let finishedReports = [];
   let pendingImages = [];
