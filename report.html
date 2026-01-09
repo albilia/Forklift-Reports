@@ -4,17 +4,18 @@
   <meta charset="UTF-8">
   <title>צילום תווית</title>
 
+  <!-- כפתורים ירוקים -->
   <link rel="stylesheet" href="buttons.css">
-  <link rel="stylesheet" href="menu.css">
+
+  <!-- Lottie Player -->
+  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
-
       background: url('background.jpg') no-repeat center center fixed;
       background-size: cover;
-
       color: #f5f5f5;
       text-align: center;
       font-size: 22px;
@@ -28,6 +29,14 @@
       font-weight: bold;
       color: #ffffff;
       text-shadow: 0 0 4px rgba(0,0,0,0.5);
+    }
+
+    /* ⭐ לוטי – גדול פי 2 */
+    .scan-animation {
+      width: 350px;
+      height: 350px;
+      margin: 0 auto 30px auto;
+      cursor: pointer;
     }
 
     #preview {
@@ -70,20 +79,16 @@
       border-radius: 8px;
       cursor: pointer;
       margin-left: 15px;
+      font-weight: bold;
     }
 
-    .camera-icon {
-      width: 200px;
-      margin-bottom: 30px;
-      cursor: pointer;
-      filter: brightness(1.2);
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.06); }
-      100% { transform: scale(1); }
+    /* ⭐ כפתורים — גדולים פי 2 + מודגשים */
+    button {
+      font-size: 36px !important;
+      padding: 22px 32px !important;
+      font-weight: bold !important;
+      border-radius: 14px !important;
+      margin-top: 20px !important;
     }
 
     #flash {
@@ -106,19 +111,22 @@
 
 <body>
 
-  <!-- ⭐ תפריט צד -->
-  <div id="menuContainer"></div>
-
   <div id="flash"></div>
 
   <audio id="clickSound" src="click.mp3" preload="auto"></audio>
 
   <h2>צילום תווית</h2>
 
-  <img src="camera-icon.png"
-       alt="צלם"
-       class="camera-icon"
-       onclick="triggerCamera();">
+  <!-- ⭐ לוטי במקום אייקון מצלמה -->
+  <lottie-player
+      src="qr.json"
+      background="transparent"
+      speed="1"
+      loop
+      autoplay
+      class="scan-animation"
+      onclick="triggerCamera();">
+  </lottie-player>
 
   <input id="cameraInput"
          type="file"
@@ -132,33 +140,361 @@
   <div id="loader">טוען...</div>
   <div id="ocrList"></div>
 
-  <button id="processAllBtn"
-          onclick="processAll()"
-          style="display:none; margin:20px auto; display:block;">
-    שלח לסריקה
-  </button>
-
-  <button id="saveBtn" onclick="saveAll()"
-          style="display:none; margin:20px auto; display:block;">
-    שמור דיווח
-  </button>
-
-  <button id="finishPalletBtn"
-          onclick="finishPallet()"
-          style="display:none; margin:20px auto; display:block;">
-    סיום משטח
-  </button>
-
+  <!-- ⭐ סדר כפתורים חדש -->
+  <button id="processAllBtn" onclick="processAll()" style="display:none;">שלח לסריקה</button>
+  <button id="finishPalletBtn" onclick="finishPallet()" style="display:none;">סיום משטח</button>
+  <button id="saveBtn" onclick="saveAll()" style="display:none;">שמור דיווח</button>
   <button onclick="goBack()">חזור לדשבורד</button>
 
-  <!-- ⭐ טעינת תפריט הצד -->
-  <script src="menu.js"></script>
+<script>
 
-  <!-- ⭐ כל ה‑JS המקורי שלך — לא נגעתי בו בכלל -->
-  <script>
-    /* כל הקוד שלך בדיוק כמו בגיבוי מאתמול */
-    /* ... (הקוד המלא שלך כפי ששלחת) ... */
-  </script>
+  let rawReports = [];
+  let finishedReports = [];
+  let pendingImages = [];
+  let currentPallet = [];
+
+  const API_URL =
+    "https://script.google.com/macros/s/AKfycbx4vmrLZkGpqCjVy9OZcxp9J0vpTleY_dE-n_nwrB8741LweHmIVecA9ZxS6JXHF12muQ/exec";
+
+  const params = new URLSearchParams(window.location.search);
+  const phone = params.get("phone");
+  const name = params.get("name");
+  const main = params.get("main");
+  const finished = params.get("finished");
+  const warehouseName = params.get("warehouseName");
+
+  if (!phone) {
+    alert("שגיאה: לא התקבל מספר נייד");
+    window.location.href = "index.html";
+  }
+
+  function goBack() {
+    window.location.href =
+      `dashboard.html?phone=${encodeURIComponent(phone)}&name=${encodeURIComponent(name)}`;
+  }
+
+  function triggerCamera() {
+    const flash = document.getElementById("flash");
+    flash.classList.add("active");
+    setTimeout(() => flash.classList.remove("active"), 150);
+
+    if (navigator.vibrate) navigator.vibrate(120);
+
+    document.getElementById("cameraInput").click();
+  }
+
+  function handleImage(input) {
+    const files = input.files;
+    if (!files || files.length === 0) return;
+
+    for (const file of files) {
+      pendingImages.push(file);
+    }
+
+    const lastFile = files[files.length - 1];
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = document.getElementById("preview");
+      img.src = e.target.result;
+      img.style.display = "block";
+    };
+    reader.readAsDataURL(lastFile);
+
+    document.getElementById("processAllBtn").style.display = "block";
+  }
+
+  async function resizeImage(base64, maxWidth = 1200) {
+    return new Promise(resolve => {
+      const img = new Image();
+      img.onload = function() {
+        const scale = maxWidth / img.width;
+        const canvas = document.createElement("canvas");
+        canvas.width = maxWidth;
+        canvas.height = img.height * scale;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        resolve(canvas.toDataURL("image/jpeg", 0.85));
+      };
+      img.src = base64;
+    });
+  }
+
+  async function processAll() {
+    if (pendingImages.length === 0) return;
+
+    document.getElementById("loader").innerText = "מעבד תמונות...";
+    document.getElementById("loader").style.display = "block";
+
+    for (const file of pendingImages) {
+      await processSingleImage(file);
+    }
+
+    pendingImages = [];
+    document.getElementById("loader").style.display = "none";
+    document.getElementById("saveBtn").style.display = "block";
+
+    if (main === "finished") {
+      document.getElementById("finishPalletBtn").style.display = "block";
+    }
+
+    document.getElementById("processAllBtn").style.display = "none";
+  }
+
+  async function processSingleImage(file) {
+    return new Promise(resolve => {
+      document.getElementById("clickSound").play().catch(()=>{});
+
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        let base64 = e.target.result;
+
+        base64 = await resizeImage(base64, 1200);
+
+        try {
+          const response = await fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify({
+              action: "processImage",
+              image: base64,
+              main: main
+            })
+          });
+
+          const text = await response.text();
+          let data;
+
+          try {
+            data = JSON.parse(text);
+          } catch (e) {
+            console.log("OCR raw response:", text);
+            return resolve();
+          }
+
+          if (data.reports && data.reports.length > 0) {
+
+            if (main === "raw") {
+              const first = data.reports[0];
+              if (first) {
+                rawReports.push(first);
+                showRawList();
+              }
+            } else {
+              finishedReports.push(...data.reports);
+              currentPallet.push(...data.reports);
+              showFinishedList();
+            }
+          }
+
+        } catch (err) {
+          console.log("OCR error", err);
+        }
+
+        resolve();
+      };
+
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function showRawList() {
+    const box = document.getElementById("ocrList");
+    box.innerHTML = "";
+
+    rawReports.forEach((r, i) => {
+      box.innerHTML += `
+        <div class="ocr-box">
+          <b>צילום ${i+1}:</b><br>
+          מק״ט: ${r.makat}<br>
+          כמות: ${r.qty}
+        </div>
+      `;
+    });
+  }
+
+  function showFinishedList() {
+    const box = document.getElementById("ocrList");
+    box.innerHTML = "";
+
+    finishedReports.forEach((r, i) => {
+      box.innerHTML += `
+        <div class="ocr-box">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+
+            <div>
+              <b>תווית ${i+1}:</b><br>
+              מק״ט: ${r["מק\"ט"]}<br>
+              פק״ע: ${r["פק\"ע"]}<br>
+              כמות: ${r["כמות"]}
+            </div>
+
+            <div style="display:flex; flex-direction:column; align-items:center; gap:15px;">
+              <button class="delete-btn" onclick="deleteReport(${i})">מחק</button>
+              <input type="checkbox" class="report-check" data-index="${i}"
+                     style="width:40px; height:40px;">
+            </div>
+
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  function deleteReport(index) {
+    finishedReports.splice(index, 1);
+    currentPallet.splice(index, 1);
+    showFinishedList();
+  }
+
+  async function saveAll() {
+    document.getElementById("loader").innerText = "שומר דיווח...";
+    document.getElementById("loader").style.display = "block";
+
+    let selectedReports = [];
+
+    if (main === "raw") {
+      selectedReports = rawReports;
+    } else {
+      const checks = document.querySelectorAll(".report-check");
+      checks.forEach(ch => {
+        if (ch.checked) {
+          const index = Number(ch.dataset.index);
+          selectedReports.push(finishedReports[index]);
+        }
+      });
+    }
+
+    if (selectedReports.length === 0) {
+      alert("לא נבחרו דו\"חות לשמירה");
+      document.getElementById("loader").style.display = "none";
+      return;
+    }
+
+    let payload;
+
+    if (main === "raw") {
+      payload = {
+        action: "saveRawMaterialBatch",
+        phone,
+        reports: selectedReports
+      };
+    } else {
+      payload = {
+        action: "saveReport",
+        phone,
+        ocr: { reports: selectedReports },
+        finishedWarehouse: finished,
+        warehouseName: warehouseName
+      };
+    }
+
+    try {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify(payload)
+      });
+
+      const text = await response.text();
+      let data;
+
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        console.log("Save raw response:", text);
+        alert("שגיאה בקריאת תשובת השרת");
+        document.getElementById("loader").style.display = "none";
+        return;
+      }
+
+      document.getElementById("loader").style.display = "none";
+
+      if (!data.success) {
+        alert("שגיאה בשמירת הדיווח");
+        return;
+      }
+
+      alert("הדיווח נשמר בהצלחה!");
+      goBack();
+
+    } catch (err) {
+      alert("שגיאה בחיבור לשרת");
+      document.getElementById("loader").style.display = "none";
+    }
+  }
+
+  async function finishPallet() {
+    if (currentPallet.length === 0) {
+      alert("לא נסרקו תוויות למשטח");
+      return;
+    }
+
+    const makats = currentPallet.map(r => r["מק\"ט"]);
+    const uniqueMakats = [...new Set(makats)];
+
+    if (uniqueMakats.length > 1) {
+      alert("שגיאה: נמצאו מספר מק״טים שונים במשטח");
+      return;
+    }
+
+    const makat = uniqueMakats[0];
+
+    const pkaMap = {};
+    currentPallet.forEach(r => {
+      const pka = r["פק\"ע"];
+      const qty = Number(r["כמות"]) || 0;
+
+      if (!pkaMap[pka]) pkaMap[pka] = 0;
+      pkaMap[pka] += qty;
+    });
+
+    const summary = {
+      makat: makat,
+      totalQty: Object.values(pkaMap).reduce((a, b) => a + b, 0),
+      pkaDetails: pkaMap,
+      warehouse: finished,
+      warehouseName: warehouseName,
+      phone: phone
+    };
+
+    try {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          action: "finalizePallet",
+          pallet: summary
+        })
+      });
+
+      const text = await response.text();
+      let data;
+
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        console.log("Finalize raw:", text);
+        alert("שגיאה בקריאת תשובת השרת");
+        return;
+      }
+
+      if (!data.success) {
+        alert("שגיאה בשמירת המשטח");
+        return;
+      }
+
+      alert("המשטח נשמר בהצלחה!");
+
+      currentPallet = [];
+      finishedReports = [];
+      document.getElementById("ocrList").innerHTML = "";
+      document.getElementById("finishPalletBtn").style.display = "none";
+
+    } catch (err) {
+      alert("שגיאה בחיבור לשרת");
+    }
+  }
+
+</script>
 
 </body>
 </html>
