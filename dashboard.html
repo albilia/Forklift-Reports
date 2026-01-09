@@ -28,55 +28,78 @@
       background-size: cover;
     }
 
-    /* פס עליון עם טקסט */
+    /* פס עליון */
     .top-bar {
-      background: #8ecae6;
-      height: 70px;
+      background: rgba(0,0,0,0.55);
+      height: 80px;
       display: flex;
       justify-content: center;
       align-items: center;
       border-radius: 0 0 12px 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+      backdrop-filter: blur(4px);
     }
 
     .logo-text {
       font-family: 'Nunito', sans-serif;
-      font-size: 32px;
+      font-size: 38px;
       font-weight: 700;
       letter-spacing: 1px;
       display: flex;
       gap: 6px;
+      color: #fff;
+      text-shadow: 0 0 6px rgba(0,0,0,0.8);
     }
 
-    .reporter {
-      color: #ff3b30; /* אדום */
-    }
-
-    .nis {
-      color: #ffffff; /* לבן */
-    }
+    .reporter { color: #ff3b30; }
+    .nis { color: #ffffff; }
 
     .content {
-      padding: 20px;
+      padding: 25px;
       text-align: center;
       color: #fff;
-      text-shadow: 0 0 4px rgba(0,0,0,0.4);
+      text-shadow: 0 0 6px rgba(0,0,0,0.8);
+      font-weight: bold;
     }
 
     label {
-      font-size: 20px;
+      font-size: 26px;
       font-weight: bold;
       display: block;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
+      text-shadow: 0 0 6px rgba(0,0,0,0.8);
     }
 
     select {
       width: 85%;
-      padding: 12px;
-      font-size: 18px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      margin-bottom: 20px;
+      padding: 16px;
+      font-size: 22px;
+      border-radius: 10px;
+      border: 2px solid #ffffff;
+      background: rgba(0,0,0,0.45);
+      color: #fff;
+      font-weight: bold;
+      text-shadow: 0 0 4px rgba(0,0,0,0.8);
+      margin-bottom: 25px;
+      backdrop-filter: blur(3px);
+    }
+
+    /* ⭐ כפתורים — גדולים פי 2 + ניגודיות חזקה */
+    button {
+      font-size: 36px !important;
+      padding: 22px 32px !important;
+      font-weight: bold !important;
+      border-radius: 14px !important;
+      margin-top: 25px !important;
+      background: #1e88e5 !important;
+      color: #fff !important;
+      border: 3px solid #ffffff !important;
+      text-shadow: 0 0 4px rgba(0,0,0,0.8);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+
+    button:hover {
+      background: #1565c0 !important;
     }
   </style>
 </head>
@@ -85,7 +108,7 @@
 
   <div id="menuContainer"></div>
 
-  <!-- פס עליון עם טקסט -->
+  <!-- פס עליון -->
   <div class="top-bar">
     <span class="logo-text">
       <span class="reporter">Reporter</span>
@@ -95,7 +118,7 @@
 
   <div class="content">
 
-    <div id="userGreeting" style="font-size:22px; font-weight:bold; margin-bottom:25px;"></div>
+    <div id="userGreeting" style="font-size:28px; margin-bottom:30px;"></div>
 
     <label for="mainWarehouse">בחר קטגוריה:</label>
     <select id="mainWarehouse" onchange="handleMainWarehouse()">
@@ -130,7 +153,7 @@
   </div>
 
 <script>
-  /* שמירת משתמש כדי שלא ייצא ברענון */
+  /* שמירת משתמש */
   const params = new URLSearchParams(window.location.search);
 
   let phone = params.get("phone") || sessionStorage.getItem("phone");
