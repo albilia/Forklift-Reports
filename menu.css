@@ -3,7 +3,7 @@
   position: fixed;
   top: 15px;
   right: 15px;
-  width: 40px;          /* גודל זהה לדשבורד */
+  width: 40px;
   height: 32px;
   cursor: pointer;
   z-index: 1100;
@@ -15,7 +15,7 @@
 /* קווים לבנים כברירת מחדל */
 .menu-button span {
   display: block;
-  height: 5px;          /* עובי זהה לדשבורד */
+  height: 5px;
   background: #fff !important;
   border-radius: 4px;
   transition: 0.35s;
@@ -41,13 +41,13 @@
 .side-menu {
   position: fixed;
   top: 0;
-  right: -300px;        /* רוחב זהה לדשבורד */
+  right: -300px;
   width: 300px;
   height: 100%;
   background: white;
   box-shadow: -3px 0 12px rgba(0,0,0,0.25);
   transition: 0.35s ease;
-  padding-top: 80px;    /* ריווח זהה לדשבורד */
+  padding-top: 80px;
   z-index: 1050;
   overflow-y: auto;
 }
@@ -59,9 +59,9 @@
 
 /* פריטי תפריט */
 .menu-item {
-  padding: 18px 22px;   /* ריווח זהה לדשבורד */
+  padding: 18px 22px;
   border-bottom: 1px solid #ddd;
-  font-size: 20px;      /* טקסט זהה לדשבורד */
+  font-size: 20px;
   cursor: pointer;
   text-align: right;
   color: #000;
@@ -86,10 +86,44 @@
 }
 
 /* ⭐ ביטול מוחלט של השפעת report.html על התפריט ⭐ */
-.side-menu,
-.menu-button,
-.menu-button span {
-  transform: none !important;
-  zoom: 1 !important;
-  font-size: inherit !important;
+#sideMenu,
+#menuBtn,
+#menuBtn span {
+  all: unset;
+}
+
+/* החזרת העיצוב המקורי אחרי reset */
+#menuBtn {
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  width: 40px;
+  height: 32px;
+  cursor: pointer;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+#menuBtn span {
+  display: block;
+  height: 5px;
+  background: #fff !important;
+  border-radius: 4px;
+  transition: 0.35s;
+}
+
+#sideMenu {
+  position: fixed;
+  top: 0;
+  right: -300px;
+  width: 300px;
+  height: 100%;
+  background: white;
+  box-shadow: -3px 0 12px rgba(0,0,0,0.25);
+  transition: 0.35s ease;
+  padding-top: 80px;
+  z-index: 1050;
+  overflow-y: auto;
 }
