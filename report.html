@@ -4,7 +4,11 @@
   <meta charset="UTF-8">
   <title>צילום תווית</title>
 
+  <!-- עיצוב כפתורים -->
   <link rel="stylesheet" href="buttons.css">
+
+  <!-- עיצוב תפריט צד -->
+  <link rel="stylesheet" href="menu.css">
 
   <!-- Lottie Player -->
   <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
@@ -39,7 +43,7 @@
       text-shadow: 0 0 8px rgba(0,0,0,1);
     }
 
-    /* ⭐ לוטי – מסגרת שחורה במקום זוהרת */
+    /* לוטי – מסגרת שחורה */
     .scan-animation {
       width: 350px;
       height: 350px;
@@ -52,7 +56,7 @@
       box-shadow: none;
     }
 
-    /* ⭐ תצוגת תמונה – מסגרת שחורה */
+    /* תצוגת תמונה – מסגרת שחורה */
     #preview {
       width: 95%;
       margin-top: 25px;
@@ -86,7 +90,7 @@
       box-shadow: none;
     }
 
-    /* ⭐ כפתור מחיקה ממורכז */
+    /* כפתור מחיקה ממורכז */
     .delete-btn {
       background: #b71c1c;
       color: white;
@@ -101,7 +105,7 @@
       box-shadow: none;
     }
 
-    /* ⭐ כפתורים ממורכזים */
+    /* כפתורים ממורכזים */
     button {
       font-size: 36px !important;
       padding: 22px 32px !important;
@@ -143,7 +147,7 @@
 
 <body>
 
-  <!-- ⭐ תפריט צדדי -->
+  <!-- תפריט צד נטען דינמית -->
   <div id="menuContainer"></div>
 
   <div id="flash"></div>
@@ -152,7 +156,7 @@
 
   <h2>צילום תווית</h2>
 
-  <!-- ⭐ לוטי עם מסגרת שחורה -->
+  <!-- לוטי -->
   <lottie-player
       src="qr.json"
       background="transparent"
@@ -175,7 +179,7 @@
   <div id="loader">טוען...</div>
   <div id="ocrList"></div>
 
-  <!-- ⭐ הכפתורים — בדיוק בסדר שביקשת -->
+  <!-- כפתורים -->
   <button id="processAllBtn" onclick="processAll()" style="display:none;">שלח לסריקה</button>
   <button id="finishPalletBtn" onclick="finishPallet()" style="display:none;">סיום משטח</button>
   <button id="saveBtn" onclick="saveAll()" style="display:none;">שמור דיווח</button>
@@ -530,7 +534,7 @@
 
 </script>
 
-<!-- ⭐ טעינת תפריט -->
+<!-- טעינת תפריט צד -->
 <script src="menu.js"></script>
 
 </body>
