@@ -7,7 +7,7 @@ fetch("menu.html")
     const menuBtn = document.getElementById("menuBtn");
     const sideMenu = document.getElementById("sideMenu");
 
-    // פתיחה/סגירה של התפריט — תיקון: onclick במקום addEventListener
+    // ✔ תיקון קריטי: לא addEventListener (שנרשם פעמיים)
     menuBtn.onclick = () => {
       menuBtn.classList.toggle("active");
       sideMenu.classList.toggle("open");
@@ -48,19 +48,14 @@ function closeModal() {
 function openAbout() {
   openModal(
     "אודות המערכת",
-    "מערכת Nis רפורטר פותחה לתת מענה לסריקת תוויות ומדבקות במחסנים.\n" +
-    "© כל הזכויות שמורות — Nis רפורטר"
+    "מערכת Nis רפורטר פותחה לתת מענה לסריקת תוויות ומדבקות במחסנים.\n© כל הזכויות שמורות — Nis רפורטר"
   );
 }
 
 function openSteps() {
   openModal(
     "שלבי העבודה",
-    "1. הזן מספר טלפון במסך הכניסה.\n" +
-    "2. בחר מחסן.\n" +
-    "3. לחץ על אייקון המצלמה לצילום.\n" +
-    "4. לחץ 'פענח הכל'.\n" +
-    "5. לחץ 'שמור דיווח'."
+    "1. הזן מספר טלפון במסך הכניסה.\n2. בחר מחסן.\n3. לחץ על אייקון המצלמה לצילום.\n4. לחץ 'פענח הכל'.\n5. לחץ 'שמור דיווח'."
   );
 }
 
