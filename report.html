@@ -90,7 +90,7 @@
       box-shadow: 0 0 10px rgba(0,0,0,0.8);
     }
 
-    /* ⭐ כפתורים — גדולים פי 2 + מודגשים */
+    /* ⭐ כפתורים — ממורכזים תמיד */
     button {
       font-size: 36px !important;
       padding: 22px 32px !important;
@@ -102,6 +102,10 @@
       border: 3px solid #ffffff !important;
       text-shadow: 0 0 4px rgba(0,0,0,0.8);
       box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+
+      display: block;
+      margin-left: auto !important;
+      margin-right: auto !important;
     }
 
     button:hover {
@@ -164,7 +168,6 @@
   <button onclick="goBack()">חזור לדשבורד</button>
 
 <script>
-  /* כל הקוד המקורי שלך — לא נגעתי בו */
   let rawReports = [];
   let finishedReports = [];
   let pendingImages = [];
