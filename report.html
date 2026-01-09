@@ -35,16 +35,12 @@
       text-shadow: 0 0 6px rgba(0,0,0,0.8);
     }
 
-    /* ⭐ ביטול השפעת העיצוב של report על התפריט ⭐ */
-    #menuContainer,
-    #sideMenu,
-    #menuBtn,
-    #menuBtn span {
-      transform: none !important;
-      zoom: 1 !important;
-      font-size: 1rem !important;
-      padding: 0 !important;
-      margin: 0 !important;
+    /* ⭐ התפריט לא מושפע מהגדרות הדף ⭐ */
+    #menuContainer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      z-index: 2000;
     }
 
     h2 {
