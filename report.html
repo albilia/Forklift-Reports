@@ -7,15 +7,15 @@
   <!-- כפתורים ירוקים -->
   <link rel="stylesheet" href="buttons.css">
 
+  <!-- Lottie Player -->
+  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
-
-      /* ⭐ רקע הטפט */
       background: url('background.jpg') no-repeat center center fixed;
       background-size: cover;
-
       color: #f5f5f5;
       text-align: center;
       font-size: 22px;
@@ -29,6 +29,14 @@
       font-weight: bold;
       color: #ffffff;
       text-shadow: 0 0 4px rgba(0,0,0,0.5);
+    }
+
+    /* ⭐ לוטי – גדול פי 2 */
+    .scan-animation {
+      width: 350px;
+      height: 350px;
+      margin: 0 auto 30px auto;
+      cursor: pointer;
     }
 
     #preview {
@@ -71,20 +79,16 @@
       border-radius: 8px;
       cursor: pointer;
       margin-left: 15px;
+      font-weight: bold;
     }
 
-    .camera-icon {
-      width: 200px;
-      margin-bottom: 30px;
-      cursor: pointer;
-      filter: brightness(1.2);
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.06); }
-      100% { transform: scale(1); }
+    /* ⭐ כפתורים — גדולים פי 2 + מודגשים */
+    button {
+      font-size: 36px !important;
+      padding: 22px 32px !important;
+      font-weight: bold !important;
+      border-radius: 14px !important;
+      margin-top: 20px !important;
     }
 
     #flash {
@@ -113,10 +117,16 @@
 
   <h2>צילום תווית</h2>
 
-  <img src="camera-icon.png"
-       alt="צלם"
-       class="camera-icon"
-       onclick="triggerCamera();">
+  <!-- ⭐ לוטי במקום אייקון מצלמה -->
+  <lottie-player
+      src="qr.json"
+      background="transparent"
+      speed="1"
+      loop
+      autoplay
+      class="scan-animation"
+      onclick="triggerCamera();">
+  </lottie-player>
 
   <input id="cameraInput"
          type="file"
@@ -130,23 +140,10 @@
   <div id="loader">טוען...</div>
   <div id="ocrList"></div>
 
-  <button id="processAllBtn"
-          onclick="processAll()"
-          style="display:none; margin:20px auto; display:block;">
-    שלח לסריקה
-  </button>
-
-  <button id="saveBtn" onclick="saveAll()"
-          style="display:none; margin:20px auto; display:block;">
-    שמור דיווח
-  </button>
-
-  <button id="finishPalletBtn"
-          onclick="finishPallet()"
-          style="display:none; margin:20px auto; display:block;">
-    סיום משטח
-  </button>
-
+  <!-- ⭐ סדר כפתורים חדש -->
+  <button id="processAllBtn" onclick="processAll()" style="display:none;">שלח לסריקה</button>
+  <button id="finishPalletBtn" onclick="finishPallet()" style="display:none;">סיום משטח</button>
+  <button id="saveBtn" onclick="saveAll()" style="display:none;">שמור דיווח</button>
   <button onclick="goBack()">חזור לדשבורד</button>
 
 <script>
