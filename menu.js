@@ -7,12 +7,12 @@ fetch("menu.html")
     const menuBtn = document.getElementById("menuBtn");
     const sideMenu = document.getElementById("sideMenu");
 
-    // פתיחה/סגירה של התפריט
-    menuBtn.addEventListener("click", () => {
-      menuBtn.classList.toggle("active");  // ← משנה צבע קווים
+    // פתיחה/סגירה של התפריט — תיקון: onclick במקום addEventListener
+    menuBtn.onclick = () => {
+      menuBtn.classList.toggle("active");
       sideMenu.classList.toggle("open");
       navigator.vibrate?.(20);
-    });
+    };
 
     loadVersion();
   });
