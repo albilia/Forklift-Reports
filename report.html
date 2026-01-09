@@ -4,13 +4,9 @@
   <meta charset="UTF-8">
   <title>צילום תווית</title>
 
-  <!-- עיצוב כפתורים -->
   <link rel="stylesheet" href="buttons.css">
-
-  <!-- עיצוב תפריט צד -->
   <link rel="stylesheet" href="menu.css">
 
-  <!-- Lottie Player -->
   <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 
   <style>
@@ -35,7 +31,7 @@
       text-shadow: 0 0 6px rgba(0,0,0,0.8);
     }
 
-    /* ⭐ התפריט לא מושפע מהגדרות הדף ⭐ */
+    /* ⭐ בידוד התפריט מהדף */
     #menuContainer {
       position: fixed;
       top: 0;
@@ -43,7 +39,7 @@
       z-index: 2000;
     }
 
-    /* ⭐ הגדלת תפריט הצד במסך report ⭐ */
+    /* ⭐ הגדלת תפריט במסך report */
     #sideMenu, #menuBtn {
       transform: scale(1.25);
       transform-origin: top right;
@@ -66,7 +62,6 @@
       border: 4px solid #000;
       padding: 10px;
       background: rgba(0,0,0,0.4);
-      box-shadow: none;
     }
 
     #preview {
@@ -75,7 +70,6 @@
       display: none;
       border-radius: 14px;
       border: 4px solid #000;
-      box-shadow: none;
     }
 
     #loader {
@@ -84,7 +78,6 @@
       margin-top: 25px;
       font-size: 40px;
       color: #ffeb3b;
-      text-shadow: 0 0 6px rgba(0,0,0,1);
     }
 
     .ocr-box {
@@ -98,8 +91,6 @@
       font-size: 38px;
       line-height: 1.45;
       color: #ffffff;
-      backdrop-filter: blur(4px);
-      box-shadow: none;
     }
 
     .delete-btn {
@@ -113,7 +104,6 @@
       min-width: 140px;
       text-align: center;
       font-weight: bold;
-      box-shadow: none;
     }
 
     button {
@@ -125,31 +115,9 @@
       background: #1e88e5 !important;
       color: #fff !important;
       border: 3px solid #ffffff !important;
-      text-shadow: 0 0 4px rgba(0,0,0,0.8);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
       display: block;
       margin-left: auto !important;
       margin-right: auto !important;
-    }
-
-    button:hover {
-      background: #1565c0 !important;
-    }
-
-    #flash {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: white;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.15s ease-out;
-      z-index: 9999;
-    }
-    #flash.active {
-      opacity: 1;
     }
   </style>
 </head>
@@ -157,10 +125,6 @@
 <body>
 
   <div id="menuContainer"></div>
-
-  <div id="flash"></div>
-
-  <audio id="clickSound" src="click.mp3" preload="auto"></audio>
 
   <h2>צילום תווית</h2>
 
@@ -192,9 +156,7 @@
   <button onclick="goBack()">חזור לדשבורד</button>
 
 <script>
-  /* כל ה־JS שלך נשאר בדיוק כמו שהוא */
-  /* לא נגעתי בכלום */
-  /* ... */
+  /* JS שלך נשאר כמו שהוא */
 </script>
 
 <script src="menu.js"></script>
