@@ -1,71 +1,5 @@
 <!-- ⭐ תפריט צד — Nis רפורטר ⭐ -->
 
-<style>
-  .menu-button {
-    position: fixed;
-    top: 15px;
-    right: 15px;
-    width: 35px;
-    height: 30px;
-    cursor: pointer;
-    z-index: 1100;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-
-  .menu-button span {
-    display: block;
-    height: 4px;
-    background: #333;
-    border-radius: 4px;
-    transition: 0.35s;
-  }
-
-  .menu-button.active span:nth-child(1) {
-    transform: rotate(45deg) translate(6px, 6px);
-  }
-
-  .menu-button.active span:nth-child(2) {
-    opacity: 0;
-  }
-
-  .menu-button.active span:nth-child(3) {
-    transform: rotate(-45deg) translate(7px, -7px);
-  }
-
-  .side-menu {
-    position: fixed;
-    top: 0;
-    right: -260px;
-    width: 260px;
-    height: 100%;
-    background: white;
-    box-shadow: -3px 0 8px rgba(0,0,0,0.25);
-    transition: 0.35s ease;
-    padding-top: 70px;
-    z-index: 1050;
-    overflow-y: auto;
-  }
-
-  .side-menu.open {
-    right: 0;
-  }
-
-  .menu-item {
-    padding: 15px;
-    border-bottom: 1px solid #ddd;
-    font-size: 18px;
-    cursor: pointer;
-    text-align: right;
-    color: #000;
-  }
-
-  .menu-item:hover {
-    background: #f0f0f0;
-  }
-</style>
-
 <!-- כפתור המבורגר -->
 <div class="menu-button" id="menuBtn">
   <span></span>
@@ -86,12 +20,16 @@
     פתיחת טיקט
   </div>
 
-  <div id="versionLine" class="menu-item" style="font-size:14px; color:#555; margin-top:10px;">
+  <div id="versionLine"
+       class="menu-item"
+       style="font-size:16px; color:#555; font-weight:bold;">
     מס' גרסה: ...
   </div>
 
-  <!-- ⭐ יציאה — אייקון בצד שמאל ⭐ -->
-  <div class="menu-item" onclick="logout()" style="display:flex; justify-content:flex-start; align-items:center; gap:10px;">
+  <!-- יציאה -->
+  <div class="menu-item logout-item"
+       onclick="logout()"
+       style="display:flex; justify-content:flex-start; align-items:center; gap:10px;">
     <span>יציאה</span>
     <span style="font-size:20px;">↩️</span>
   </div>
