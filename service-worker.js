@@ -1,4 +1,4 @@
-const CACHE_VERSION = "v5";   // ← עדכון גרסה חובה
+const CACHE_VERSION = "v6";   // ← עדכון גרסה חובה
 const CACHE_NAME = `forklift-cache-${CACHE_VERSION}`;
 
 const CORE_ASSETS = [
@@ -20,7 +20,7 @@ self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(CORE_ASSETS))
   );
-  self.skipWaiting(); // ← מכריח התקנה מיידית
+  self.skipWaiting();
 });
 
 // הפעלה – ניקוי קאש ישן
@@ -34,17 +34,20 @@ self.addEventListener("activate", event => {
       )
     )
   );
-  self.clients.claim(); // ← מכריח שימוש ב־SW החדש
+  self.clients.claim();
 });
 
 // אסטרטגיית fetch חכמה
 self.addEventListener("fetch", event => {
   const request = event.request;
-  const url = request.url;
 
-  // ❗❗❗ תיקון קריטי:
-  // לא נוגעים בבקשות POST — נותנים להן לעבור לרשת
+  // ❗ לא נוגעים בבקשות POST
   if (request.method !== "GET") {
+    return;
+  }
+
+  // ❗ לא נוגעים בבקשות chrome-extension
+  if (!request.url.startsWith("http")) {
     return;
   }
 
@@ -57,10 +60,16 @@ self.addEventListener("fetch", event => {
             return caches.match(request);
           }
           const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
+          caches.open(CACHE_NAME).then(cache => {
+            if (request.url.startsWith("http")) {
+              cache.put(request, clone);
+            }
+          });
           return response;
         })
-        .catch(() => caches.match(request).then(res => res || caches.match("offline.html")))
+        .catch(() =>
+          caches.match(request).then(res => res || caches.match("offline.html"))
+        )
     );
     return;
   }
@@ -74,7 +83,11 @@ self.addEventListener("fetch", event => {
             return response;
           }
           const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
+          caches.open(CACHE_NAME).then(cache => {
+            if (request.url.startsWith("http")) {
+              cache.put(request, clone);
+            }
+          });
           return response;
         })
         .catch(() => null);
@@ -92,5 +105,9 @@ self.addEventListener("fetch", event => {
 function isCoreAsset(request) {
   const url = new URL(request.url);
   const path = url.pathname.replace(/^\//, "");
-  return CORE_ASSETS.includes(path) || CORE_ASSETS.includes("./" + path) || CORE_ASSETS.includes(url.pathname);
+  return (
+    CORE_ASSETS.includes(path) ||
+    CORE_ASSETS.includes("./" + path) ||
+    CORE_ASSETS.includes(url.pathname)
+  );
 }
