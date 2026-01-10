@@ -152,7 +152,9 @@
   <button id="saveBtn" onclick="saveAll()" style="display:none;">שמור דיווח</button>
   <button onclick="goBack()">חזור לדשבורד</button>
 
-<script>  let rawReports = [];
+<script>
+
+  let rawReports = [];
   let finishedReports = [];
   let pendingImages = [];
   let currentPallet = [];
@@ -225,35 +227,67 @@
     });
   }
 
-  // ⭐ פונקציה חדשה — זיהוי תוויות מרובות
-  async function extractLabelsFromImage(base64) {
+  // ⭐ קרופ אמיתי
+  async function cropLabel(base64) {
     return new Promise(resolve => {
       const img = new Image();
-      img.onload = function() {
+      img.onload = function () {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
 
-        const LABEL_W = 880;
-        const LABEL_H = 620;
+        const x = 100;
+        const y = 0;
+        const w = img.width - 200;
+        const h = img.height;
+
+        canvas.width = w;
+        canvas.height = h;
+
+        ctx.drawImage(img, x, y, w, h, 0, 0, w, h);
+
+        resolve(canvas.toDataURL("image/jpeg", 0.9));
+      };
+      img.src = base64;
+    });
+  }
+
+  // ⭐ בדיקת בהירות – כדי לא לשלוח חתיכות ריקות
+  function getBrightness(ctx, w, h) {
+    const data = ctx.getImageData(0, 0, w, h).data;
+    let sum = 0;
+    for (let i = 0; i < data.length; i += 4) {
+      sum += data[i] + data[i + 1] + data[i + 2];
+    }
+    return sum / (data.length / 4);
+  }
+
+  // ⭐ זיהוי תוויות אמיתיות בלבד
+  async function extractRealLabels(base64) {
+    return new Promise(resolve => {
+      const img = new Image();
+      img.onload = function () {
+
+        const LABEL_H = img.height / 2;
+        const LABEL_W = img.width;
 
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
 
         const labels = [];
 
-        let y = 0;
-        while (y + LABEL_H < img.height) {
+        for (let i = 0; i < 2; i++) {
+          const sy = i * LABEL_H;
 
           canvas.width = LABEL_W;
           canvas.height = LABEL_H;
 
-          ctx.drawImage(
-            img,
-            100, y, LABEL_W, LABEL_H,
-            0, 0, LABEL_W, LABEL_H
-          );
+          ctx.drawImage(img, 0, sy, LABEL_W, LABEL_H, 0, 0, LABEL_W, LABEL_H);
 
-          labels.push(canvas.toDataURL("image/jpeg", 0.9));
+          const piece = canvas.toDataURL("image/jpeg", 0.9);
 
-          y += LABEL_H + 80;
+          const brightness = getBrightness(ctx, LABEL_W, LABEL_H);
+
+          if (brightness < 240) labels.push(piece);
         }
 
         resolve(labels);
@@ -263,7 +297,7 @@
     });
   }
 
-  // ⭐ פונקציה חדשה — שליחת תווית אחת ל־Gemini
+  // ⭐ שליחת תווית ל־Gemini
   async function sendToGemini(base64) {
     try {
       const response = await fetch(API_URL, {
@@ -323,7 +357,7 @@
     document.getElementById("processAllBtn").style.display = "none";
   }
 
-  // ⭐ שינינו רק את הקרופ — עכשיו יש זיהוי תוויות מרובות
+  // ⭐ הפונקציה הראשית — עכשיו עובדת כמו שצריך
   async function processSingleImage(file) {
     return new Promise(resolve => {
       document.getElementById("clickSound").play().catch(()=>{});
@@ -333,12 +367,11 @@
         let base64 = e.target.result;
 
         base64 = await resizeImage(base64, 1200);
+        base64 = await cropLabel(base64);
 
-        // ⭐ זיהוי תוויות מרובות
-        const labelImages = await extractLabelsFromImage(base64);
+        const labels = await extractRealLabels(base64);
 
-        // ⭐ שליחה של כל תווית בנפרד
-        for (const label of labelImages) {
+        for (const label of labels) {
           await sendToGemini(label);
         }
 
@@ -347,7 +380,9 @@
 
       reader.readAsDataURL(file);
     });
-  }  function showRawList() {
+  }
+
+  function showRawList() {
     const box = document.getElementById("ocrList");
     box.innerHTML = "";
 
