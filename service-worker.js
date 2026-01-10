@@ -1,4 +1,4 @@
-const CACHE_VERSION = "v6";   // ← עדכון גרסה חובה
+const CACHE_VERSION = "v7";   // ← עדכון גרסה חובה
 const CACHE_NAME = `forklift-cache-${CACHE_VERSION}`;
 
 const CORE_ASSETS = [
@@ -9,7 +9,6 @@ const CORE_ASSETS = [
   "menu.js",
   "menu.css",
   "manifest.json",
-  "gilro-logo-v2.png",
   "logo.jpg",
   "camera-icon.png",
   "offline.html"
@@ -18,7 +17,9 @@ const CORE_ASSETS = [
 // התקנה – קאש ראשוני
 self.addEventListener("install", event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(CORE_ASSETS))
+    caches.open(CACHE_NAME).then(cache =>
+      cache.addAll(CORE_ASSETS)
+    )
   );
   self.skipWaiting();
 });
