@@ -152,15 +152,13 @@
   <button id="saveBtn" onclick="saveAll()" style="display:none;">שמור דיווח</button>
   <button onclick="goBack()">חזור לדשבורד</button>
 
-<script>
-
-  let rawReports = [];
+<script>  let rawReports = [];
   let finishedReports = [];
   let pendingImages = [];
   let currentPallet = [];
 
   const API_URL =
-    "https://script.google.com/macros/s/AKfycbx4vmrLZkGpqCjVy9OZcxp9J0vpTleY_dE-n_nwrB8741LweHmIVecA9ZxS6JXHF12muQ/exec";
+    "YOUR_APPSCRIPT_URL_HERE";
 
   const params = new URLSearchParams(window.location.search);
   const phone = params.get("phone");
@@ -283,11 +281,11 @@
 
           ctx.drawImage(img, 0, sy, LABEL_W, LABEL_H, 0, 0, LABEL_W, LABEL_H);
 
-          const piece = canvas.toDataURL("image/jpeg", 0.9);
-
           const brightness = getBrightness(ctx, LABEL_W, LABEL_H);
 
-          if (brightness < 240) labels.push(piece);
+          if (brightness < 240) {
+            labels.push(canvas.toDataURL("image/jpeg", 0.9));
+          }
         }
 
         resolve(labels);
@@ -295,9 +293,15 @@
 
       img.src = base64;
     });
+  }  function isValidReport(report) {
+    if (!report) return false;
+    if (main === "raw") {
+      return report.makat && report.qty;
+    } else {
+      return report["מק\"ט"] && report["פק\"ע"] && report["כמות"];
+    }
   }
 
-  // ⭐ שליחת תווית ל־Gemini
   async function sendToGemini(base64) {
     try {
       const response = await fetch(API_URL, {
@@ -320,13 +324,16 @@
       }
 
       if (data.reports && data.reports.length > 0) {
+        const validReports = data.reports.filter(isValidReport);
 
         if (main === "raw") {
-          rawReports.push(data.reports[0]);
-          showRawList();
+          if (validReports.length > 0) {
+            rawReports.push(validReports[0]);
+            showRawList();
+          }
         } else {
-          finishedReports.push(...data.reports);
-          currentPallet.push(...data.reports);
+          finishedReports.push(...validReports);
+          currentPallet.push(...validReports);
           showFinishedList();
         }
       }
@@ -357,7 +364,6 @@
     document.getElementById("processAllBtn").style.display = "none";
   }
 
-  // ⭐ הפונקציה הראשית — עכשיו עובדת כמו שצריך
   async function processSingleImage(file) {
     return new Promise(resolve => {
       document.getElementById("clickSound").play().catch(()=>{});
@@ -380,9 +386,7 @@
 
       reader.readAsDataURL(file);
     });
-  }
-
-  function showRawList() {
+  }  function showRawList() {
     const box = document.getElementById("ocrList");
     box.innerHTML = "";
 
