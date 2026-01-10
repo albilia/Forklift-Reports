@@ -35,16 +35,17 @@
       cursor: pointer;
     }
 
-    /* ⭐ התמונה לרוחב */
+    /* ⭐ התמונה לרוחב, ישרה, ומקצה לקצה */
     #preview {
-      max-width: 100%;
-      margin-top: 20px;
-      display: none;
+      width: 100vw;          /* רוחב מלא */
+      height: auto;          /* שמירה על פרופורציות */
+      max-width: 100vw;      /* לא לחרוג */
+      display: block;        /* ביטול רווחים */
+      margin: 20px auto 0;   /* מרכז + רווח עליון */
       border-radius: 10px;
       border: 6px solid black;
-      transform: rotate(90deg);
-      width: 100%;
-      height: auto;
+      transform: rotate(-90deg); /* כיוון נכון */
+      object-fit: contain;   /* שלא ייחתך */
     }
 
     #loader {
@@ -88,6 +89,15 @@
       font-weight: bold !important;
       border-radius: 14px !important;
       margin-top: 20px !important;
+    }
+
+    /* ⭐ שלושת הכפתורים ממורכזים */
+    #processAllBtn,
+    #finishPalletBtn,
+    #saveBtn {
+      display: block !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
     }
 
     #flash {
@@ -138,7 +148,6 @@
   <div id="loader">טוען...</div>
   <div id="ocrList"></div>
 
-  <!-- ⭐ שלושת הכפתורים ממורכזים -->
   <div style="text-align:center;">
     <button id="processAllBtn" onclick="processAll()" style="display:none;">שלח לסריקה</button>
     <button id="finishPalletBtn" onclick="finishPallet()" style="display:none;">סיום משטח</button>
