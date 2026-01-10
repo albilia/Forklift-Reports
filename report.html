@@ -1,164 +1,11 @@
-<!DOCTYPE html>
-<html lang="he" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <title>צילום תווית</title>
-
-  <link rel="stylesheet" href="buttons.css">
-  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background: url('background.jpg') no-repeat center center fixed;
-      background-size: cover;
-      color: #f5f5f5;
-      text-align: center;
-      font-size: 22px;
-      position: relative;
-      overflow-x: hidden;
-    }
-
-    h2 {
-      font-size: 40px;
-      margin-bottom: 25px;
-      font-weight: bold;
-      color: #ffffff;
-      text-shadow: 0 0 4px rgba(0,0,0,0.5);
-    }
-
-    .scan-animation {
-      width: 350px;
-      height: 350px;
-      margin: 0 auto 30px auto;
-      cursor: pointer;
-    }
-
-    #preview {
-      height: 100vh;
-      width: auto;
-      max-height: 100vh;
-      display: none;
-      margin: 20px auto 0;
-      border-radius: 10px;
-      border: 6px solid black;
-      transform: rotate(-90deg);
-      object-fit: contain;
-      background: transparent;
-    }
-
-    #loader {
-      display: none;
-      font-weight: bold;
-      margin-top: 25px;
-      font-size: 40px;
-      color: #ffeb3b;
-      text-shadow: 0 0 4px rgba(0,0,0,0.5);
-    }
-
-    .ocr-box {
-      background: rgba(0,0,0,0.55);
-      border: 3px solid #555;
-      padding: 28px;
-      margin: 25px auto;
-      border-radius: 14px;
-      width: 92%;
-      text-align: right;
-      font-size: 38px;
-      line-height: 1.45;
-      color: #ffffff;
-      backdrop-filter: blur(3px);
-    }
-
-    .delete-btn {
-      background: #b71c1c;
-      color: white;
-      border: none;
-      padding: 10px 18px;
-      font-size: 26px;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-left: 15px;
-      font-weight: bold;
-    }
-
-    button {
-      font-size: 36px !important;
-      padding: 22px 32px !important;
-      font-weight: bold !important;
-      border-radius: 14px !important;
-      margin-top: 20px !important;
-    }
-
-    #processAllBtn,
-    #finishPalletBtn,
-    #saveBtn {
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    #flash {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: white;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.15s ease-out;
-      z-index: 9999;
-    }
-    #flash.active {
-      opacity: 1;
-    }
-  </style>
-</head>
-
-<body>
-
-  <div id="flash"></div>
-
-  <audio id="clickSound" src="click.mp3" preload="auto"></audio>
-
-  <h2>צילום תווית</h2>
-
-  <lottie-player
-      src="qr.json"
-      background="transparent"
-      speed="1"
-      loop
-      autoplay
-      class="scan-animation"
-      onclick="triggerCamera();">
-  </lottie-player>
-
-  <input id="cameraInput"
-         type="file"
-         accept="image/*"
-         capture="environment"
-         multiple
-         onchange="handleImage(this)"
-         style="display:none;">
-
-  <img id="preview">
-  <div id="loader">טוען...</div>
-  <div id="ocrList"></div>
-
-  <button id="processAllBtn" onclick="processAll()" style="display:none;">שלח לסריקה</button>
-  <button id="finishPalletBtn" onclick="finishPallet()" style="display:none;">סיום משטח</button>
-  <button id="saveBtn" onclick="saveAll()" style="display:none;">שמור דיווח</button>
-  <button onclick="goBack()">חזור לדשבורד</button>
-
-<script>  let rawReports = [];
+<script>
+  let rawReports = [];
   let finishedReports = [];
   let pendingImages = [];
   let currentPallet = [];
 
   const API_URL =
-    "YOUR_APPSCRIPT_URL_HERE";
+    "https://script.google.com/macros/s/AKfycbx4vmrLZkGpqCjVy9OZcxp9J0vpTleY_dE-n_nwrB8741LweHmIVecA9ZxS6JXHF12muQ/exec";
 
   const params = new URLSearchParams(window.location.search);
   const phone = params.get("phone");
@@ -225,75 +72,158 @@
     });
   }
 
-  // ⭐ קרופ אמיתי
-  async function cropLabel(base64) {
-    return new Promise(resolve => {
-      const img = new Image();
-      img.onload = function () {
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
+  // ------ זיהוי תוויות חכם לפי תוכן התמונה ------
 
-        const x = 100;
-        const y = 0;
-        const w = img.width - 200;
-        const h = img.height;
+  // פונקציה שעושה גרייסקייל ומחזירה ImageData
+  function getGrayImageData(img, maxWidth = 800) {
+    const scale = img.width > maxWidth ? maxWidth / img.width : 1;
+    const w = Math.round(img.width * scale);
+    const h = Math.round(img.height * scale);
 
-        canvas.width = w;
-        canvas.height = h;
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0, w, h);
 
-        ctx.drawImage(img, x, y, w, h, 0, 0, w, h);
+    const imageData = ctx.getImageData(0, 0, w, h);
+    const data = imageData.data;
 
-        resolve(canvas.toDataURL("image/jpeg", 0.9));
-      };
-      img.src = base64;
-    });
-  }
-
-  // ⭐ בדיקת בהירות – כדי לא לשלוח חתיכות ריקות
-  function getBrightness(ctx, w, h) {
-    const data = ctx.getImageData(0, 0, w, h).data;
-    let sum = 0;
+    // RGB -> Gray
     for (let i = 0; i < data.length; i += 4) {
-      sum += data[i] + data[i + 1] + data[i + 2];
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+      const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+      data[i] = data[i + 1] = data[i + 2] = gray;
     }
-    return sum / (data.length / 4);
+
+    ctx.putImageData(imageData, 0, 0);
+    return { canvas, ctx, imageData, scale };
   }
 
-  // ⭐ זיהוי תוויות אמיתיות בלבד
-  async function extractRealLabels(base64) {
+  // צפיפות טקסט במלבן (כמה פיקסלים כהים יש שם)
+  function textDensity(imageData, x, y, w, h, darkThresh = 160) {
+    const data = imageData.data;
+    const width = imageData.width;
+    let dark = 0;
+    let total = 0;
+
+    for (let j = y; j < y + h; j++) {
+      if (j < 0 || j >= imageData.height) continue;
+      for (let i = x; i < x + w; i++) {
+        if (i < 0 || i >= width) continue;
+        const idx = (j * width + i) * 4;
+        const gray = data[idx]; // אחרי גרייסקייל R=G=B
+        if (gray < darkThresh) dark++;
+        total++;
+      }
+    }
+
+    if (total === 0) return 0;
+    return dark / total;
+  }
+
+  // זיהוי אזורים שנראים כמו תווית (לבנה עם טקסט כהה)
+  function detectLabelRegions(img) {
+    const { canvas, ctx, imageData, scale } = getGrayImageData(img, 800);
+    const w = canvas.width;
+    const h = canvas.height;
+
+    // יחסים משוערים של תווית (רוחב/גובה)
+    const labelAspect = 3.0;       // תווית מלבנית רחבה יותר מגבוהה
+    const relWidth = 0.4;          // בערך 40% מרוחב התמונה
+    const relHeight = relWidth / labelAspect;
+
+    const labelW = Math.round(w * relWidth);
+    const labelH = Math.round(h * relHeight);
+
+    const stepX = Math.round(labelW * 0.3); // צעדים חופפים כדי לא לפספס
+    const stepY = Math.round(labelH * 0.3);
+
+    const candidates = [];
+
+    for (let y = 0; y <= h - labelH; y += stepY) {
+      for (let x = 0; x <= w - labelW; x += stepX) {
+        const density = textDensity(imageData, x, y, labelW, labelH, 160);
+
+        // מחפש חלון עם כמות סבירה של טקסט (לא לבן לגמרי, לא שחור לגמרי)
+        if (density > 0.02 && density < 0.35) {
+          candidates.push({ x, y, w: labelW, h: labelH, density });
+        }
+      }
+    }
+
+    // מיזוג אזורים חופפים כדי לא לקבל 100 תיבות על אותה תווית
+    const merged = [];
+    candidates.sort((a, b) => b.density - a.density); // צפופים יותר קודם
+
+    function iou(a, b) {
+      const x1 = Math.max(a.x, b.x);
+      const y1 = Math.max(a.y, b.y);
+      const x2 = Math.min(a.x + a.w, b.x + b.w);
+      const y2 = Math.min(a.y + a.h, b.y + b.h);
+      const inter = Math.max(0, x2 - x1) * Math.max(0, y2 - y1);
+      if (inter === 0) return 0;
+      const areaA = a.w * a.h;
+      const areaB = b.w * b.h;
+      return inter / (areaA + areaB - inter);
+    }
+
+    for (const cand of candidates) {
+      let overlap = false;
+      for (const m of merged) {
+        if (iou(cand, m) > 0.4) {
+          overlap = true;
+          break;
+        }
+      }
+      if (!overlap) merged.push(cand);
+    }
+
+    // החזרת הקואורדינטות בסקייל המקורי
+    return merged.map(r => ({
+      x: Math.round(r.x / scale),
+      y: Math.round(r.y / scale),
+      w: Math.round(r.w / scale),
+      h: Math.round(r.h / scale)
+    }));
+  }
+
+  // חותך מתוך התמונה המקורית את האזורים שזוהו כתוויות
+  async function extractLabelsFromImage(base64) {
     return new Promise(resolve => {
       const img = new Image();
-      img.onload = function () {
+      img.onload = function() {
 
-        const LABEL_H = img.height / 2;
-        const LABEL_W = img.width;
-
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-
+        const regions = detectLabelRegions(img);
         const labels = [];
 
-        for (let i = 0; i < 2; i++) {
-          const sy = i * LABEL_H;
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
 
-          canvas.width = LABEL_W;
-          canvas.height = LABEL_H;
+        for (const r of regions) {
+          canvas.width = r.w;
+          canvas.height = r.h;
+          ctx.clearRect(0, 0, r.w, r.h);
+          ctx.drawImage(
+            img,
+            r.x, r.y, r.w, r.h,
+            0, 0, r.w, r.h
+          );
 
-          ctx.drawImage(img, 0, sy, LABEL_W, LABEL_H, 0, 0, LABEL_W, LABEL_H);
-
-          const brightness = getBrightness(ctx, LABEL_W, LABEL_H);
-
-          if (brightness < 240) {
-            labels.push(canvas.toDataURL("image/jpeg", 0.9));
-          }
+          labels.push(canvas.toDataURL("image/jpeg", 0.9));
         }
 
         resolve(labels);
       };
-
       img.src = base64;
     });
-  }  function isValidReport(report) {
+  }
+
+  // ------ שליחה ל־Gemini + לוגיקת דו"חות ------
+
+  function isValidReport(report) {
     if (!report) return false;
     if (main === "raw") {
       return report.makat && report.qty;
@@ -373,9 +303,9 @@
         let base64 = e.target.result;
 
         base64 = await resizeImage(base64, 1200);
-        base64 = await cropLabel(base64);
 
-        const labels = await extractRealLabels(base64);
+        // זיהוי תוויות מכל מקום בתמונה
+        const labels = await extractLabelsFromImage(base64);
 
         for (const label of labels) {
           await sendToGemini(label);
@@ -386,7 +316,11 @@
 
       reader.readAsDataURL(file);
     });
-  }  function showRawList() {
+  }
+
+  // ------ הצגה, שמירה וסיום משטח ------
+
+  function showRawList() {
     const box = document.getElementById("ocrList");
     box.innerHTML = "";
 
@@ -581,8 +515,4 @@
       alert("שגיאה בחיבור לשרת");
     }
   }
-
 </script>
-
-</body>
-</html>
