@@ -4,10 +4,7 @@
   <meta charset="UTF-8">
   <title>צילום תווית</title>
 
-  <!-- כפתורים ירוקים -->
   <link rel="stylesheet" href="buttons.css">
-
-  <!-- Lottie Player -->
   <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 
   <style>
@@ -31,7 +28,6 @@
       text-shadow: 0 0 4px rgba(0,0,0,0.5);
     }
 
-    /* ⭐ לוטי – גדול פי 2 */
     .scan-animation {
       width: 350px;
       height: 350px;
@@ -39,20 +35,18 @@
       cursor: pointer;
     }
 
-    /* ⭐ התמונה לרוחב, ישרה, מקצה לקצה */
+    /* ⭐ התמונה לרוחב, ישרה, מקצה לקצה, בלי קווים שחורים */
     #preview {
-      width: 100vw;
-      max-width: 100vw;
-      height: auto;
-      margin-top: 20px;
+      height: 100vh;          /* מתאים לגובה המסך */
+      width: auto;            /* שומר על פרופורציות */
+      max-height: 100vh;
       display: none;
+      margin: 20px auto 0;
       border-radius: 10px;
       border: 6px solid black;
       transform: rotate(-90deg);
       object-fit: contain;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
+      background: transparent;
     }
 
     #loader {
@@ -90,7 +84,6 @@
       font-weight: bold;
     }
 
-    /* ⭐ כפתורים — גדולים פי 2 + מודגשים */
     button {
       font-size: 36px !important;
       padding: 22px 32px !important;
@@ -99,13 +92,13 @@
       margin-top: 20px !important;
     }
 
-    /* ⭐ הכפתורים ממורכזים — בלי לשנות HTML */
+    /* ⭐ הכפתורים ממורכזים — בלי לשנות לוגיקה */
     #processAllBtn,
     #finishPalletBtn,
     #saveBtn {
-      display: block !important;
-      margin-left: auto !important;
-      margin-right: auto !important;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     #flash {
@@ -134,7 +127,6 @@
 
   <h2>צילום תווית</h2>
 
-  <!-- ⭐ לוטי במקום אייקון מצלמה -->
   <lottie-player
       src="qr.json"
       background="transparent"
@@ -157,7 +149,7 @@
   <div id="loader">טוען...</div>
   <div id="ocrList"></div>
 
-  <!-- ⭐ סדר כפתורים — בדיוק כמו המקור -->
+  <!-- ⭐ הכפתורים — בדיוק כמו במקור -->
   <button id="processAllBtn" onclick="processAll()" style="display:none;">שלח לסריקה</button>
   <button id="finishPalletBtn" onclick="finishPallet()" style="display:none;">סיום משטח</button>
   <button id="saveBtn" onclick="saveAll()" style="display:none;">שמור דיווח</button>
