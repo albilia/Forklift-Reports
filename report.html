@@ -35,10 +35,9 @@
       cursor: pointer;
     }
 
-    /* ⭐ התמונה לרוחב, ישרה, מקצה לקצה, בלי קווים שחורים */
     #preview {
-      height: 100vh;          /* מתאים לגובה המסך */
-      width: auto;            /* שומר על פרופורציות */
+      height: 100vh;
+      width: auto;
       max-height: 100vh;
       display: none;
       margin: 20px auto 0;
@@ -92,7 +91,6 @@
       margin-top: 20px !important;
     }
 
-    /* ⭐ הכפתורים ממורכזים — בלי לשנות לוגיקה */
     #processAllBtn,
     #finishPalletBtn,
     #saveBtn {
@@ -149,15 +147,12 @@
   <div id="loader">טוען...</div>
   <div id="ocrList"></div>
 
-  <!-- ⭐ הכפתורים — בדיוק כמו במקור -->
   <button id="processAllBtn" onclick="processAll()" style="display:none;">שלח לסריקה</button>
   <button id="finishPalletBtn" onclick="finishPallet()" style="display:none;">סיום משטח</button>
   <button id="saveBtn" onclick="saveAll()" style="display:none;">שמור דיווח</button>
   <button onclick="goBack()">חזור לדשבורד</button>
 
-<script>
-
-  let rawReports = [];
+<script>  let rawReports = [];
   let finishedReports = [];
   let pendingImages = [];
   let currentPallet = [];
@@ -230,6 +225,83 @@
     });
   }
 
+  // ⭐ פונקציה חדשה — זיהוי תוויות מרובות
+  async function extractLabelsFromImage(base64) {
+    return new Promise(resolve => {
+      const img = new Image();
+      img.onload = function() {
+
+        const LABEL_W = 880;
+        const LABEL_H = 620;
+
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        const labels = [];
+
+        let y = 0;
+        while (y + LABEL_H < img.height) {
+
+          canvas.width = LABEL_W;
+          canvas.height = LABEL_H;
+
+          ctx.drawImage(
+            img,
+            100, y, LABEL_W, LABEL_H,
+            0, 0, LABEL_W, LABEL_H
+          );
+
+          labels.push(canvas.toDataURL("image/jpeg", 0.9));
+
+          y += LABEL_H + 80;
+        }
+
+        resolve(labels);
+      };
+
+      img.src = base64;
+    });
+  }
+
+  // ⭐ פונקציה חדשה — שליחת תווית אחת ל־Gemini
+  async function sendToGemini(base64) {
+    try {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          action: "processImage",
+          image: base64,
+          main: main
+        })
+      });
+
+      const text = await response.text();
+      let data;
+
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        console.log("OCR raw response:", text);
+        return;
+      }
+
+      if (data.reports && data.reports.length > 0) {
+
+        if (main === "raw") {
+          rawReports.push(data.reports[0]);
+          showRawList();
+        } else {
+          finishedReports.push(...data.reports);
+          currentPallet.push(...data.reports);
+          showFinishedList();
+        }
+      }
+
+    } catch (err) {
+      console.log("OCR error", err);
+    }
+  }
+
   async function processAll() {
     if (pendingImages.length === 0) return;
 
@@ -251,6 +323,7 @@
     document.getElementById("processAllBtn").style.display = "none";
   }
 
+  // ⭐ שינינו רק את הקרופ — עכשיו יש זיהוי תוויות מרובות
   async function processSingleImage(file) {
     return new Promise(resolve => {
       document.getElementById("clickSound").play().catch(()=>{});
@@ -261,43 +334,12 @@
 
         base64 = await resizeImage(base64, 1200);
 
-        try {
-          const response = await fetch(API_URL, {
-            method: "POST",
-            body: JSON.stringify({
-              action: "processImage",
-              image: base64,
-              main: main
-            })
-          });
+        // ⭐ זיהוי תוויות מרובות
+        const labelImages = await extractLabelsFromImage(base64);
 
-          const text = await response.text();
-          let data;
-
-          try {
-            data = JSON.parse(text);
-          } catch (e) {
-            console.log("OCR raw response:", text);
-            return resolve();
-          }
-
-          if (data.reports && data.reports.length > 0) {
-
-            if (main === "raw") {
-              const first = data.reports[0];
-              if (first) {
-                rawReports.push(first);
-                showRawList();
-              }
-            } else {
-              finishedReports.push(...data.reports);
-              currentPallet.push(...data.reports);
-              showFinishedList();
-            }
-          }
-
-        } catch (err) {
-          console.log("OCR error", err);
+        // ⭐ שליחה של כל תווית בנפרד
+        for (const label of labelImages) {
+          await sendToGemini(label);
         }
 
         resolve();
@@ -305,9 +347,7 @@
 
       reader.readAsDataURL(file);
     });
-  }
-
-  function showRawList() {
+  }  function showRawList() {
     const box = document.getElementById("ocrList");
     box.innerHTML = "";
 
