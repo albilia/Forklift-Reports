@@ -4,10 +4,7 @@
   <meta charset="UTF-8">
   <title>צילום תווית</title>
 
-  <!-- כפתורים ירוקים -->
   <link rel="stylesheet" href="buttons.css">
-
-  <!-- Lottie Player -->
   <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 
   <style>
@@ -31,7 +28,6 @@
       text-shadow: 0 0 4px rgba(0,0,0,0.5);
     }
 
-    /* ⭐ לוטי – גדול פי 2 */
     .scan-animation {
       width: 350px;
       height: 350px;
@@ -39,12 +35,16 @@
       cursor: pointer;
     }
 
+    /* ⭐ התמונה לרוחב */
     #preview {
       max-width: 100%;
       margin-top: 20px;
       display: none;
       border-radius: 10px;
       border: 6px solid black;
+      transform: rotate(90deg);
+      width: 100%;
+      height: auto;
     }
 
     #loader {
@@ -82,7 +82,6 @@
       font-weight: bold;
     }
 
-    /* ⭐ כפתורים — גדולים פי 2 + מודגשים */
     button {
       font-size: 36px !important;
       padding: 22px 32px !important;
@@ -117,7 +116,6 @@
 
   <h2>צילום תווית</h2>
 
-  <!-- ⭐ לוטי במקום אייקון מצלמה -->
   <lottie-player
       src="qr.json"
       background="transparent"
@@ -140,10 +138,13 @@
   <div id="loader">טוען...</div>
   <div id="ocrList"></div>
 
-  <!-- ⭐ סדר כפתורים חדש -->
-  <button id="processAllBtn" onclick="processAll()" style="display:none;">שלח לסריקה</button>
-  <button id="finishPalletBtn" onclick="finishPallet()" style="display:none;">סיום משטח</button>
-  <button id="saveBtn" onclick="saveAll()" style="display:none;">שמור דיווח</button>
+  <!-- ⭐ שלושת הכפתורים ממורכזים -->
+  <div style="text-align:center;">
+    <button id="processAllBtn" onclick="processAll()" style="display:none;">שלח לסריקה</button>
+    <button id="finishPalletBtn" onclick="finishPallet()" style="display:none;">סיום משטח</button>
+    <button id="saveBtn" onclick="saveAll()" style="display:none;">שמור דיווח</button>
+  </div>
+
   <button onclick="goBack()">חזור לדשבורד</button>
 
 <script>
