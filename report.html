@@ -246,19 +246,19 @@
 
   // ---------- לוגיקה מול Gemini ----------
 
-  // ✅ תיקון: תמיכה גם במפתחות באנגלית וגם בעברית
+  // ✅ תיקון: תמיכה גם במפתחות בעברית, גם באנגלית וגם בשמות האמיתיים של Gemini (sku, work_order_short, quantity)
   function isValidReport(report) {
     if (!report) return false;
 
     if (main === "raw") {
-      const makat = report.makat || report["מק\"ט"];
-      const qty   = report.qty   || report["כמות"];
+      const makat = report.makat || report["מק\"ט"] || report.sku;
+      const qty   = report.qty   || report["כמות"] || report.quantity;
       return !!(makat && qty);
     }
 
-    const makat = report["מק\"ט"] || report.makat;
-    const pka   = report["פק\"ע"] || report.pka;
-    const qty   = report["כמות"] || report.qty;
+    const makat = report["מק\"ט"] || report.makat || report.sku;
+    const pka   = report["פק\"ע"] || report.pka   || report.work_order_short;
+    const qty   = report["כמות"] || report.qty   || report.quantity;
 
     return !!(makat && pka && qty);
   }
@@ -545,8 +545,8 @@
     box.innerHTML = "";
 
     rawReports.forEach((r, i) => {
-      const makat = r.makat || r["מק\"ט"] || "";
-      const qty   = r.qty   || r["כמות"] || "";
+      const makat = r.makat || r["מק\"ט"] || r.sku || "";
+      const qty   = r.qty   || r["כמות"] || r.quantity || "";
       box.innerHTML += `
         <div class="ocr-box">
           <b>צילום ${i+1}:</b><br>
@@ -562,9 +562,9 @@
     box.innerHTML = "";
 
     finishedReports.forEach((r, i) => {
-      const makat = r["מק\"ט"] || r.makat || "";
-      const pka   = r["פק\"ע"] || r.pka   || "";
-      const qty   = r["כמות"] || r.qty   || "";
+      const makat = r["מק\"ט"] || r.makat || r.sku || "";
+      const pka   = r["פק\"ע"] || r.pka   || r.work_order_short || "";
+      const qty   = r["כמות"] || r.qty   || r.quantity || "";
 
       box.innerHTML += `
         <div class="ocr-box">
@@ -733,7 +733,9 @@
       return;
     }
 
-    const makats = currentPallet.map(r => r["מק\"ט"] || r.makat);
+    const makats = currentPallet.map(r =>
+      r["מק\"ט"] || r.makat || r.sku
+    );
     const uniqueMakats = [...new Set(makats)];
 
     if (uniqueMakats.length > 1) {
@@ -755,8 +757,8 @@
 
     const pkaMap = {};
     currentPallet.forEach(r => {
-      const pka = r["פק\"ע"] || r.pka;
-      const qty = Number(r["כמות"] || r.qty) || 0;
+      const pka = r["פק\"ע"] || r.pka || r.work_order_short;
+      const qty = Number(r["כמות"] || r.qty || r.quantity) || 0;
 
       if (!pkaMap[pka]) pkaMap[pka] = 0;
       pkaMap[pka] += qty;
