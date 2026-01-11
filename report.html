@@ -20,13 +20,12 @@
     }
     h2 { font-size: 40px; margin-bottom: 20px; font-weight: bold; color: #ffffff; text-shadow: 0 0 4px rgba(0,0,0,0.5); }
     
-    /* שורת סטטוס משופרת */
     #statusLine {
       background: rgba(0, 229, 255, 0.25);
       border: 2px solid #00e5ff;
       border-radius: 50px;
       padding: 10px 25px;
-      display: none; /* מתחיל מוסתר לחלוטין */
+      display: none;
       margin: 0 auto 20px auto;
       font-size: 22px;
       color: #00e5ff;
@@ -81,6 +80,7 @@
   let pendingImages = [];
   let isProcessing = false;
 
+  // וודא שהכתובת הזו מעודכנת ל-Deployment הפעיל שלך
   const API_URL = "https://script.google.com/macros/s/AKfycbzQ9ruGsRd83gKZSV1IlCssvfruulyDhcYtV3N0UwOS-cmLGeGVyQHJeOD7nTmsV-PgKA/exec";
 
   const params = new URLSearchParams(window.location.search);
@@ -107,7 +107,7 @@
       img.src = e.target.result;
       img.style.display = "block";
       document.getElementById("processAllBtn").style.display = "block";
-      document.getElementById("statusLine").style.display = "none"; // איפוס בצילום חדש
+      document.getElementById("statusLine").style.display = "none";
     };
     reader.readAsDataURL(file);
   }
@@ -128,7 +128,10 @@
   }
 
   async function processSingleImage(file) {
-    document.getElementById("clickSound").play().catch(()=>{});
+    try {
+      document.getElementById("clickSound").play().catch(()=>{});
+    } catch(e) {}
+    
     return new Promise(resolve => {
       const reader = new FileReader();
       reader.onload = async e => {
@@ -142,14 +145,25 @@
 
   async function sendToGemini(base64) {
     try {
+      // תיקון קריטי: הגדרת ה-Fetch כ-POST מפורש עם Header תקין לגוגל סקריפט
       const res = await fetch(API_URL, {
         method: "POST",
-        body: JSON.stringify({ action: "processImage", image: base64, main: main })
+        mode: "cors",
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8" 
+        },
+        body: JSON.stringify({ 
+          action: "processImage", 
+          image: base64, 
+          main: main,
+          phone: phone 
+        })
       });
+
       const data = await res.json();
+      console.log("Gemini response:", data);
       
       if (data.reports && data.reports.length > 0) {
-        // הצגת שורת הסטטוס
         const statusBox = document.getElementById("statusLine");
         statusBox.style.display = "inline-block";
         document.getElementById("labelsCount").innerText = data.reports.length;
@@ -159,11 +173,11 @@
         });
         showList();
       } else {
-        alert("לא זוהו נתונים בתמונה.");
+        alert("לא זוהו נתונים בתמונה. וודא שהתווית ברורה.");
       }
     } catch (e) { 
-      console.error("Gemini Error:", e);
-      alert("שגיאה בתקשורת עם השרת.");
+      console.error("Fetch Error:", e);
+      alert("שגיאה בתקשורת עם השרת. בדוק חיבור אינטרנט או API Logs.");
     }
   }
 
@@ -197,12 +211,16 @@
     try {
       const res = await fetch(API_URL, {
         method: "POST",
+        mode: "cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({ action: "saveReport", phone, reports: finishedReports })
       });
       const data = await res.json();
       if (data.success) { 
         alert("הנתונים נשמרו בהצלחה!"); 
         goBack(); 
+      } else {
+        alert("שגיאת שרת: " + (data.error || "לא ידוע"));
       }
     } catch (e) {
       alert("שגיאה בשמירה.");
