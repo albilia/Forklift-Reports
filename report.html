@@ -75,7 +75,7 @@
   let pendingFile = null;
   let isProcessing = false;
 
-  // וודא שהכתובת הזו מעודכנת ל-Deployment האחרון שלך
+  // הכתובת המעודכנת שלך
   const API_URL = "https://script.google.com/macros/s/AKfycbzQ9ruGsRd83gKZSV1IlCssvfruulyDhcYtV3N0UwOS-cmLGeGVyQHJeOD7nTmsV-PgKA/exec";
 
   const params = new URLSearchParams(window.location.search);
@@ -111,9 +111,8 @@
 
     const reader = new FileReader();
     reader.onload = async e => {
-      // הקטנת התמונה ל-1000 פיקסלים כדי למנוע קריסה של גוגל
-      const resizedBase64 = await resizeImage(e.target.result, 1000);
-      await sendToGemini(resizedBase64);
+      // שולחים את התמונה המקורית (e.target.result) בלי כיווץ
+      await sendToGemini(e.target.result);
     };
     reader.readAsDataURL(pendingFile);
   }
@@ -122,8 +121,6 @@
     try {
       const res = await fetch(API_URL, {
         method: "POST",
-        mode: "cors",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({ 
           action: "processImage", 
           image: base64, 
@@ -145,7 +142,7 @@
         showList();
         document.getElementById("saveBtn").style.display = "block";
       } else {
-        alert("ג'מיני לא זיהה נתונים. נסה לצלם ברור יותר.");
+        alert("לא זוהו נתונים בתמונה. וודא שהתווית ברורה וישרה.");
       }
     } catch (e) { 
       alert("שגיאת תקשורת: " + e.message);
@@ -185,25 +182,12 @@
         body: JSON.stringify({ action: "saveReport", phone, reports: finishedReports })
       });
       const data = await res.json();
-      if (data.success) { alert("נשמר!"); goBack(); }
+      if (data.success) { alert("נשמר בהצלחה!"); goBack(); }
       else { alert("שגיאה בשמירה: " + data.error); }
-    } catch (e) { alert("שגיאה"); }
-  }
-
-  function resizeImage(base64, maxWidth) {
-    return new Promise(resolve => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        const scale = maxWidth / img.width;
-        canvas.width = maxWidth;
-        canvas.height = img.height * scale;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL("image/jpeg", 0.7));
-      };
-      img.src = base64;
-    });
+    } catch (e) { alert("שגיאה בחיבור"); }
+    finally {
+      document.getElementById("loader").style.display = "none";
+    }
   }
 </script>
 </body>
