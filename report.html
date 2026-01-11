@@ -15,10 +15,9 @@
       background-size: cover;
       color: #f5f5f5;
       text-align: center;
-      font-size: 22px;
       margin: 0;
     }
-    h2 { font-size: 40px; margin-bottom: 20px; font-weight: bold; color: #ffffff; text-shadow: 0 0 4px rgba(0,0,0,0.5); }
+    h2 { font-size: 32px; margin-bottom: 20px; text-shadow: 0 0 4px rgba(0,0,0,0.5); }
     
     #statusLine {
       background: rgba(0, 229, 255, 0.25);
@@ -26,31 +25,27 @@
       border-radius: 50px;
       padding: 10px 25px;
       display: none;
-      margin: 0 auto 20px auto;
-      font-size: 22px;
+      margin: 20px auto;
+      font-size: 20px;
       color: #00e5ff;
-      font-weight: bold;
-      box-shadow: 0 0 15px rgba(0,229,255,0.4);
       width: fit-content;
     }
 
-    .scan-animation { width: 300px; height: 300px; margin: 0 auto 20px auto; cursor: pointer; }
-    #preview { max-width: 85%; display: none; margin: 15px auto; border-radius: 12px; border: 4px solid #fff; }
-    #loader { display: none; font-weight: bold; margin-top: 20px; font-size: 35px; color: #ffeb3b; text-shadow: 0 0 10px rgba(0,0,0,0.5); }
+    .scan-animation { width: 250px; height: 250px; margin: 0 auto; cursor: pointer; }
+    #preview { max-width: 80%; display: none; margin: 15px auto; border-radius: 12px; border: 3px solid #fff; }
+    #loader { display: none; font-weight: bold; margin-top: 20px; font-size: 24px; color: #ffeb3b; }
     
-    .ocr-box { background: rgba(0,0,0,0.85); border-right: 8px solid #00e5ff; padding: 20px; margin: 15px auto; border-radius: 12px; width: 92%; text-align: right; box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
-    .delete-btn { background: #b71c1c; color: white; border: none; padding: 12px 18px; font-size: 18px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-    button { font-size: 28px !important; padding: 15px 20px !important; border-radius: 15px !important; margin-top: 12px !important; width: 90%; font-weight: bold !important; cursor: pointer; }
+    .ocr-box { background: rgba(0,0,0,0.8); border-right: 6px solid #00e5ff; padding: 15px; margin: 10px auto; border-radius: 8px; width: 90%; text-align: right; }
+    .delete-btn { background: #ff5252; color: white; border: none; padding: 8px 12px; border-radius: 5px; }
     
-    #flash { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: white; opacity: 0; pointer-events: none; z-index: 9999; transition: opacity 0.1s; }
-    #flash.active { opacity: 1; }
+    button { 
+      font-size: 22px; padding: 12px; border-radius: 10px; margin-top: 10px; width: 90%; 
+      cursor: pointer; border: none; font-weight: bold;
+    }
   </style>
 </head>
 
 <body>
-  <div id="flash"></div>
-  <audio id="clickSound" src="click.mp3" preload="auto"></audio>
-
   <h2>דיווח תווית</h2>
 
   <div id="statusLine">זיהוי אחרון: <span id="labelsCount">0</span> תוויות</div>
@@ -68,116 +63,96 @@
   <input id="cameraInput" type="file" accept="image/*" capture="environment" onchange="handleImage(this)" style="display:none;">
 
   <img id="preview">
-  <div id="loader">ה-AI מנתח את התמונה...</div>
+  <div id="loader">מעבד נתונים...</div>
   <div id="ocrList"></div>
 
-  <button id="processAllBtn" onclick="processAll()" style="display:none; background-color: #00c853; color: white; border:none;">שלח לסריקה</button>
-  <button id="saveBtn" onclick="saveAll()" style="display:none; background-color: #ff6d00; color: white; border:none;">שמור דיווחים</button>
-  <button onclick="goBack()" style="background-color: #455a64; color: white; border:none;">חזור לדשבורד</button>
+  <button id="processAllBtn" onclick="processAll()" style="display:none; background-color: #00c853; color: white;">שלח לניתוח AI</button>
+  <button id="saveBtn" onclick="saveAll()" style="display:none; background-color: #ff6d00; color: white;">שמור בגיליון</button>
+  <button onclick="goBack()" style="background-color: #607d8b; color: white;">חזור</button>
 
 <script>
   let finishedReports = [];
-  let pendingImages = [];
+  let pendingFile = null;
   let isProcessing = false;
 
-  // וודא שהכתובת הזו מעודכנת ל-Deployment הפעיל שלך
+  // וודא שהכתובת הזו מעודכנת ל-Deployment האחרון שלך
   const API_URL = "https://script.google.com/macros/s/AKfycbzQ9ruGsRd83gKZSV1IlCssvfruulyDhcYtV3N0UwOS-cmLGeGVyQHJeOD7nTmsV-PgKA/exec";
 
   const params = new URLSearchParams(window.location.search);
   const phone = params.get("phone");
   const name = params.get("name");
-  const main = params.get("main");
 
   function goBack() { window.location.href = `dashboard.html?phone=${phone}&name=${name}`; }
 
   function triggerCamera() {
     if (isProcessing) return;
-    document.getElementById("flash").classList.add("active");
-    setTimeout(() => document.getElementById("flash").classList.remove("active"), 100);
     document.getElementById("cameraInput").click();
   }
 
   function handleImage(input) {
     const file = input.files[0];
     if (!file) return;
-    pendingImages = [file];
+    pendingFile = file;
     const reader = new FileReader();
     reader.onload = e => {
       const img = document.getElementById("preview");
       img.src = e.target.result;
       img.style.display = "block";
       document.getElementById("processAllBtn").style.display = "block";
-      document.getElementById("statusLine").style.display = "none";
     };
     reader.readAsDataURL(file);
   }
 
   async function processAll() {
-    if (isProcessing || pendingImages.length === 0) return;
+    if (isProcessing || !pendingFile) return;
     isProcessing = true;
     document.getElementById("loader").style.display = "block";
     document.getElementById("processAllBtn").style.display = "none";
 
-    for (const file of pendingImages) {
-      await processSingleImage(file);
-    }
-
-    isProcessing = false;
-    document.getElementById("loader").style.display = "none";
-    document.getElementById("saveBtn").style.display = "block";
-  }
-
-  async function processSingleImage(file) {
-    try {
-      document.getElementById("clickSound").play().catch(()=>{});
-    } catch(e) {}
-    
-    return new Promise(resolve => {
-      const reader = new FileReader();
-      reader.onload = async e => {
-        let base64 = await resizeImage(e.target.result, 1200);
-        await sendToGemini(base64);
-        resolve();
-      };
-      reader.readAsDataURL(file);
-    });
+    const reader = new FileReader();
+    reader.onload = async e => {
+      // הקטנת התמונה ל-1000 פיקסלים כדי למנוע קריסה של גוגל
+      const resizedBase64 = await resizeImage(e.target.result, 1000);
+      await sendToGemini(resizedBase64);
+    };
+    reader.readAsDataURL(pendingFile);
   }
 
   async function sendToGemini(base64) {
     try {
-      // תיקון קריטי: הגדרת ה-Fetch כ-POST מפורש עם Header תקין לגוגל סקריפט
       const res = await fetch(API_URL, {
         method: "POST",
         mode: "cors",
-        headers: {
-          "Content-Type": "text/plain;charset=utf-8" 
-        },
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({ 
           action: "processImage", 
           image: base64, 
-          main: main,
           phone: phone 
         })
       });
 
       const data = await res.json();
-      console.log("Gemini response:", data);
       
-      if (data.reports && data.reports.length > 0) {
-        const statusBox = document.getElementById("statusLine");
-        statusBox.style.display = "inline-block";
-        document.getElementById("labelsCount").innerText = data.reports.length;
+      if (data.error) {
+        alert("שגיאת שרת: " + data.error);
+        return;
+      }
 
-        data.reports.forEach(r => {
-          finishedReports.push(r);
-        });
+      if (data.reports && data.reports.length > 0) {
+        document.getElementById("statusLine").style.display = "inline-block";
+        document.getElementById("labelsCount").innerText = data.reports.length;
+        data.reports.forEach(r => finishedReports.push(r));
         showList();
+        document.getElementById("saveBtn").style.display = "block";
       } else {
-        alert("לא זוהו נתונים בתמונה. וודא שהתווית ברורה.");
+        alert("ג'מיני לא זיהה נתונים. נסה לצלם ברור יותר.");
       }
     } catch (e) { 
-      console.error("Fetch Error:", e);
-      alert("שגיאה בתקשורת עם השרת. בדוק חיבור אינטרנט או API Logs.");
+      alert("שגיאת תקשורת: " + e.message);
+    } finally {
+      isProcessing = false;
+      document.getElementById("loader").style.display = "none";
+      pendingFile = null;
     }
   }
 
@@ -186,12 +161,12 @@
     box.innerHTML = finishedReports.map((r, i) => `
       <div class="ocr-box">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-          <div style="font-size:26px; line-height:1.4;">
+          <div>
             <b>מק"ט:</b> ${r.makat || "---"}<br>
             <b>פק"ע:</b> ${r.pka || "---"}<br>
             <b>כמות:</b> ${r.qty || "0"}
           </div>
-          <button class="delete-btn" onclick="deleteItem(${i})">מחק</button>
+          <button class="delete-btn" onclick="deleteItem(${i})">X</button>
         </div>
       </div>`).join("");
   }
@@ -199,37 +174,23 @@
   function deleteItem(i) {
     finishedReports.splice(i, 1);
     showList();
-    if (finishedReports.length === 0) document.getElementById("statusLine").style.display = "none";
   }
 
   async function saveAll() {
-    if (finishedReports.length === 0) return;
-    document.getElementById("loader").innerText = "שומר נתונים...";
+    document.getElementById("loader").innerText = "שומר...";
     document.getElementById("loader").style.display = "block";
-    document.getElementById("saveBtn").disabled = true;
-
     try {
       const res = await fetch(API_URL, {
         method: "POST",
-        mode: "cors",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({ action: "saveReport", phone, reports: finishedReports })
       });
       const data = await res.json();
-      if (data.success) { 
-        alert("הנתונים נשמרו בהצלחה!"); 
-        goBack(); 
-      } else {
-        alert("שגיאת שרת: " + (data.error || "לא ידוע"));
-      }
-    } catch (e) {
-      alert("שגיאה בשמירה.");
-      document.getElementById("loader").style.display = "none";
-      document.getElementById("saveBtn").disabled = false;
-    }
+      if (data.success) { alert("נשמר!"); goBack(); }
+      else { alert("שגיאה בשמירה: " + data.error); }
+    } catch (e) { alert("שגיאה"); }
   }
 
-  async function resizeImage(base64, maxWidth) {
+  function resizeImage(base64, maxWidth) {
     return new Promise(resolve => {
       const img = new Image();
       img.onload = () => {
@@ -239,7 +200,7 @@
         canvas.height = img.height * scale;
         const ctx = canvas.getContext("2d");
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL("image/jpeg", 0.8));
+        resolve(canvas.toDataURL("image/jpeg", 0.7));
       };
       img.src = base64;
     });
