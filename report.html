@@ -279,6 +279,8 @@
 
       try {
         data = JSON.parse(text);
+        window.lastReport = data.reports ? data.reports[0] : null;
+console.log("Gemini returned:", data.reports);
       } catch (e) {
         console.log("OCR raw response:", text);
         await sendReportLog({
