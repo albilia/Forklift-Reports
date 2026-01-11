@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-
   <meta name="apple-mobile-web-app-title" content="Nis">
   <title>Nis</title>
 
@@ -18,7 +17,6 @@
   <link rel="stylesheet" href="menu.css">
   <link rel="stylesheet" href="buttons.css">
 
-  <!-- Lottie Player -->
   <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 
   <style>
@@ -33,7 +31,6 @@
       background-size: cover;
       text-align: center;
     }
-
     .container {
       min-height: calc(100vh - 60px);
       display: flex;
@@ -43,68 +40,25 @@
       padding-bottom: 40px;
       backdrop-filter: blur(2px);
     }
-
-    .logo {
-      width: 140px;
-      margin-bottom: 25px;
-    }
-
-    .main-title {
-      font-size: 28px;
-      margin-bottom: 10px;
-      font-weight: bold;
-      color: #fff;
-      text-shadow: 0 0 6px rgba(0,0,0,0.8);
-    }
-
-    .sub-title {
-      font-size: 20px;
-      margin-bottom: 20px;
-      color: #eee;
-      text-shadow: 0 0 6px rgba(0,0,0,0.8);
-    }
-
-    input {
-      width: 240px;
-      padding: 14px;
-      font-size: 18px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      margin-bottom: 15px;
-      text-align: center;
-    }
-
-    /* ⭐ Loader חדש — מוסתר בהתחלה */
-    #loaderBox {
-      display: none;
-      margin-top: 25px;
-    }
-
-    #loaderText {
-      color: #00e5ff;
-      font-size: 22px;
-      font-weight: bold;
-      margin-top: 10px;
-      text-shadow: 0 0 8px rgba(0,255,255,0.8);
-    }
+    .logo { width: 140px; margin-bottom: 25px; }
+    .main-title { font-size: 28px; margin-bottom: 10px; font-weight: bold; color: #fff; text-shadow: 0 0 6px rgba(0,0,0,0.8); }
+    .sub-title { font-size: 20px; margin-bottom: 20px; color: #eee; text-shadow: 0 0 6px rgba(0,0,0,0.8); }
+    input { width: 240px; padding: 14px; font-size: 18px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 15px; text-align: center; }
+    #loaderBox { display: none; margin-top: 25px; }
+    #loaderText { color: #00e5ff; font-size: 22px; font-weight: bold; margin-top: 10px; text-shadow: 0 0 8px rgba(0,255,255,0.8); }
   </style>
 </head>
 
 <body>
-
   <div id="menuContainer"></div>
 
   <div class="container">
     <img src="logo.jpg" class="logo" alt="לוגו">
-
     <div class="main-title">העברת דווחים</div>
     <div class="sub-title">הזן מספר טלפון כדי להיכנס</div>
-
     <input id="phone" type="tel" placeholder="05XXXXXXXX">
-
     <button onclick="login()">כניסה</button>
 
-    <!-- ⭐ Loader חדש -->
     <div id="loaderBox">
       <lottie-player
         src="loader.json"
@@ -114,20 +68,23 @@
         loop
         autoplay>
       </lottie-player>
-
       <div id="loaderText">מתחבר למערכת…</div>
     </div>
   </div>
 
 <script>
+  // --- הכנס כאן את כתובת ה-Web App שלך (זו שמסתיימת ב-/exec) ---
   const API_URL = "https://script.google.com/macros/s/AKfycbyi-TEPppliXtOmVRgCHFToj_lNC1N-lRGwBre13uPFeAOcSygdpkZUI7pc7fCBaOsROw/exec";
 
-  /* ⭐ PREWARM — מעיר את השרת ברגע שהדף נטען */
+  /* PREWARM - מעיר את גוגל סקריפט ברגע שהדף נפתח כדי שהכניסה תהיה מהירה */
   window.addEventListener("load", () => {
-    fetch(API_URL, {
-      method: "POST",
-      body: JSON.stringify({ action: "ping" })
-    }).catch(()=>{});
+    if (API_URL) {
+      fetch(API_URL, {
+        method: "POST",
+        mode: "no-cors",
+        body: JSON.stringify({ action: "ping" })
+      }).catch(() => {});
+    }
   });
 
   async function login() {
@@ -144,23 +101,10 @@
     try {
       const response = await fetch(API_URL, {
         method: "POST",
-        body: JSON.stringify({
-          action: "verifyOTP",
-          phone: phone
-        })
+        body: JSON.stringify({ action: "verifyOTP", phone: phone })
       });
 
-      const text = await response.text();
-      let data;
-
-      try {
-        data = JSON.parse(text);
-      } catch (e) {
-        console.log("Raw response:", text);
-        alert("שגיאה בקריאת תשובת השרת");
-        loaderBox.style.display = "none";
-        return;
-      }
+      const data = await response.json();
 
       if (!data.success) {
         alert("מספר טלפון לא מורשה במערכת");
@@ -168,68 +112,42 @@
         return;
       }
 
-      window.location.href =
-        `dashboard.html?phone=${encodeURIComponent(phone)}&name=${encodeURIComponent(data.name)}`;
+      window.location.href = `dashboard.html?phone=${encodeURIComponent(phone)}&name=${encodeURIComponent(data.name)}`;
 
     } catch (err) {
-      console.log("Login error:", err);
-      alert("שגיאה בחיבור לשרת");
+      console.error("Login error:", err);
+      alert("שגיאה בחיבור לשרת. וודא שכתובת ה-API תקינה.");
       loaderBox.style.display = "none";
     }
   }
-</script>
 
-<script src="menu.js" defer></script>
-
-<script>
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("service-worker.js")
-    .catch(err => console.log("SW registration failed", err));
-}
-</script>
-
-<script>
-let startX = 0;
-let endX = 0;
-const EDGE_SIZE = 40;
-
-document.addEventListener("touchstart", e => {
-  startX = e.changedTouches[0].clientX;
-});
-
-document.addEventListener("touchend", e => {
-  endX = e.changedTouches[0].clientX;
-  const diff = endX - startX;
-
-  if (startX < EDGE_SIZE && diff > 80) history.back();
-  if (startX > window.innerWidth - EDGE_SIZE && diff < -80) history.forward();
-});
-</script>
-
-<script>
-async function checkVersion() {
-  try {
-    const res = await fetch(
-      "https://raw.githubusercontent.com/albilia/Forklift-Reports/main/version.json?t=" + Date.now(),
-      { cache: "no-store" }
-    );
-
-    const data = await res.json();
-    const localVersion = localStorage.getItem("app_version") || "0";
-
-    if (data.version !== localVersion) {
-      console.log("🔄 גרסה חדשה זוהתה — מרענן...");
-      localStorage.setItem("app_version", data.version);
-      location.reload();
-    }
-  } catch (e) {
-    console.log("Version check failed");
+  // שירותים נוספים (Service Worker, Swipe וכו')
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js").catch(err => console.log(err));
   }
-}
 
-checkVersion();
-setInterval(checkVersion, 15000);
+  // חזרה אחורה בסוויפ
+  let startX = 0;
+  document.addEventListener("touchstart", e => { startX = e.changedTouches[0].clientX; });
+  document.addEventListener("touchend", e => {
+    const diff = e.changedTouches[0].clientX - startX;
+    if (startX < 40 && diff > 80) history.back();
+  });
+
+  // בדיקת גרסה אוטומטית
+  async function checkVersion() {
+    try {
+      const res = await fetch("https://raw.githubusercontent.com/albilia/Forklift-Reports/main/version.json?t=" + Date.now());
+      const data = await res.json();
+      const localVersion = localStorage.getItem("app_version") || "0";
+      if (data.version !== localVersion) {
+        localStorage.setItem("app_version", data.version);
+        location.reload();
+      }
+    } catch (e) {}
+  }
+  setInterval(checkVersion, 15000);
 </script>
-
+<script src="menu.js" defer></script>
 </body>
 </html>
