@@ -159,7 +159,7 @@
   let currentPallet = [];
 
   const API_URL =
-    "https://script.google.com/macros/s/AKfycbx4vmrLZkGpqCjVy9OZcxp9J0vpTleY_dE-n_nwrB8741LweHmIVecA9ZxS6JXHF12muQ/exec"; // תחליף לכתובת האמיתית שלך
+    "https://script.google.com/macros/s/AKfycbx4vmrLZkGpqCjVy9OZcxp9J0vpTleY_dE-n_nwrB8741LweHmIVecA9ZxS6JXHF12muQ/exec";
 
   const params = new URLSearchParams(window.location.search);
   const phone = params.get("phone");
@@ -224,6 +224,24 @@
       };
       img.src = base64;
     });
+  }
+
+  // ---------- פונקציית לוג ל-Report Log ----------
+
+  async function sendReportLog(logData) {
+    try {
+      await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          action: "logEvent",
+          phone: phone || "",
+          workerName: name || "",
+          ...logData
+        })
+      });
+    } catch (e) {
+      console.log("ReportLog error:", e);
+    }
   }
 
   // ---------- עיבוד תמונה לזיהוי תוויות ----------
@@ -393,11 +411,33 @@
         data = JSON.parse(text);
       } catch (e) {
         console.log("OCR raw response:", text);
+        await sendReportLog({
+          event: "OCR",
+          step: "parseResponse",
+          status: "error",
+          details: "JSON parse error from OCR",
+          imageSize: base64.length,
+          labelsFound: 0,
+          reportsCount: 0,
+          errorMessage: String(e)
+        });
         return;
       }
 
       if (data.reports && data.reports.length > 0) {
         const validReports = data.reports.filter(isValidReport);
+
+        // לוג ל-Report Log על תוצאות ה-OCR
+        await sendReportLog({
+          event: "OCR",
+          step: "processImage",
+          status: validReports.length > 0 ? "success" : "no_valid_reports",
+          details: `reports: ${data.reports.length}, valid: ${validReports.length}`,
+          imageSize: base64.length,
+          labelsFound: data.reports.length,
+          reportsCount: validReports.length,
+          errorMessage: ""
+        });
 
         if (main === "raw") {
           if (validReports.length > 0) {
@@ -409,9 +449,31 @@
           currentPallet.push(...validReports);
           showFinishedList();
         }
+      } else {
+        // OCR לא החזיר דו"חות
+        await sendReportLog({
+          event: "OCR",
+          step: "processImage",
+          status: "no_reports",
+          details: "No reports returned from OCR",
+          imageSize: base64.length,
+          labelsFound: 0,
+          reportsCount: 0,
+          errorMessage: ""
+        });
       }
     } catch (err) {
       console.log("OCR error", err);
+      await sendReportLog({
+        event: "OCR",
+        step: "processImage",
+        status: "error",
+        details: "Exception during OCR request",
+        imageSize: base64.length,
+        labelsFound: 0,
+        reportsCount: 0,
+        errorMessage: String(err)
+      });
     }
   }
 
@@ -447,6 +509,18 @@
         base64 = await resizeImage(base64, 1200);
 
         const labels = await extractLabelsFromImage(base64);
+
+        // לוג על כמות התוויות שנמצאו בתמונה אחת
+        await sendReportLog({
+          event: "labelDetection",
+          step: "extractLabels",
+          status: "done",
+          details: `labels found in image: ${labels.length}`,
+          imageSize: base64.length,
+          labelsFound: labels.length,
+          reportsCount: 0,
+          errorMessage: ""
+        });
 
         for (const label of labels) {
           await sendToGemini(label);
@@ -533,6 +607,16 @@
     if (selectedReports.length === 0) {
       alert("לא נבחרו דו\"חות לשמירה");
       document.getElementById("loader").style.display = "none";
+      await sendReportLog({
+        event: "saveReport",
+        step: "validateSelection",
+        status: "error",
+        details: "No reports selected for save",
+        imageSize: "",
+        labelsFound: 0,
+        reportsCount: 0,
+        errorMessage: "No reports selected"
+      });
       return;
     }
 
@@ -569,10 +653,33 @@
         console.log("Save raw response:", text);
         alert("שגיאה בקריאת תשובת השרת");
         document.getElementById("loader").style.display = "none";
+
+        await sendReportLog({
+          event: "saveReport",
+          step: "parseResponse",
+          status: "error",
+          details: "JSON parse error on save",
+          imageSize: "",
+          labelsFound: selectedReports.length,
+          reportsCount: selectedReports.length,
+          errorMessage: String(e)
+        });
+
         return;
       }
 
       document.getElementById("loader").style.display = "none";
+
+      await sendReportLog({
+        event: "saveReport",
+        step: "save",
+        status: data.success ? "success" : "error",
+        details: main === "raw" ? "Save raw material batch" : "Save finished reports",
+        imageSize: "",
+        labelsFound: selectedReports.length,
+        reportsCount: selectedReports.length,
+        errorMessage: data.success ? "" : (data.error || "")
+      });
 
       if (!data.success) {
         alert("שגיאה בשמירת הדיווח");
@@ -585,12 +692,33 @@
     } catch (err) {
       alert("שגיאה בחיבור לשרת");
       document.getElementById("loader").style.display = "none";
+
+      await sendReportLog({
+        event: "saveReport",
+        step: "request",
+        status: "error",
+        details: "Network or server error on save",
+        imageSize: "",
+        labelsFound: selectedReports.length,
+        reportsCount: selectedReports.length,
+        errorMessage: String(err)
+      });
     }
   }
 
   async function finishPallet() {
     if (currentPallet.length === 0) {
       alert("לא נסרקו תוויות למשטח");
+      await sendReportLog({
+        event: "finalizePallet",
+        step: "validate",
+        status: "error",
+        details: "No labels scanned for pallet",
+        imageSize: "",
+        labelsFound: 0,
+        reportsCount: 0,
+        errorMessage: "No labels for pallet"
+      });
       return;
     }
 
@@ -599,6 +727,16 @@
 
     if (uniqueMakats.length > 1) {
       alert("שגיאה: נמצאו מספר מק״טים שונים במשטח");
+      await sendReportLog({
+        event: "finalizePallet",
+        step: "validate",
+        status: "error",
+        details: "Multiple different makats in pallet",
+        imageSize: "",
+        labelsFound: currentPallet.length,
+        reportsCount: currentPallet.length,
+        errorMessage: "Multiple makats"
+      });
       return;
     }
 
@@ -639,8 +777,31 @@
       } catch (e) {
         console.log("Finalize raw:", text);
         alert("שגיאה בקריאת תשובת השרת");
+
+        await sendReportLog({
+          event: "finalizePallet",
+          step: "parseResponse",
+          status: "error",
+          details: "JSON parse error on finalize",
+          imageSize: "",
+          labelsFound: currentPallet.length,
+          reportsCount: currentPallet.length,
+          errorMessage: String(e)
+        });
+
         return;
       }
+
+      await sendReportLog({
+        event: "finalizePallet",
+        step: "finish",
+        status: data.success ? "success" : "error",
+        details: `Pallet finalized for makat ${makat}`,
+        imageSize: "",
+        labelsFound: currentPallet.length,
+        reportsCount: currentPallet.length,
+        errorMessage: data.success ? "" : (data.error || "")
+      });
 
       if (!data.success) {
         alert("שגיאה בשמירת המשטח");
@@ -656,6 +817,17 @@
 
     } catch (err) {
       alert("שגיאה בחיבור לשרת");
+
+      await sendReportLog({
+        event: "finalizePallet",
+        step: "request",
+        status: "error",
+        details: "Network or server error on finalize",
+        imageSize: "",
+        labelsFound: currentPallet.length,
+        reportsCount: currentPallet.length,
+        errorMessage: String(err)
+      });
     }
   }
 </script>
