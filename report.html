@@ -264,88 +264,108 @@
   }
 
   async function sendToGemini(base64) {
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "processImage",
+        image: base64,
+        main: main
+      })
+    });
+
+    const text = await response.text();
+    let data;
+
     try {
-      const response = await fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify({
-          action: "processImage",
-          image: base64,
-          main: main
-        })
-      });
+      data = JSON.parse(text);
 
-      const text = await response.text();
-      let data;
+      // לוג – לראות מה ג'מיני מחזיר
+      window.lastReport = data.reports ? data.reports[0] : null;
+      console.log("Gemini returned:", data.reports);
 
-      try {
-        data = JSON.parse(text);
-        window.lastReport = data.reports ? data.reports[0] : null;
-console.log("Gemini returned:", data.reports);
-      } catch (e) {
-        console.log("OCR raw response:", text);
-        await sendReportLog({
-          event: "OCR",
-          step: "parseResponse",
-          status: "error",
-          details: "JSON parse error from OCR",
-          imageSize: base64.length,
-          labelsFound: 0,
-          reportsCount: 0,
-          errorMessage: String(e)
-        });
-        return;
-      }
-
-      if (data.reports && data.reports.length > 0) {
-        const validReports = data.reports.filter(isValidReport);
-
-        await sendReportLog({
-          event: "OCR",
-          step: "processImage",
-          status: validReports.length > 0 ? "success" : "no_valid_reports",
-          details: `reports: ${data.reports.length}, valid: ${validReports.length}`,
-          imageSize: base64.length,
-          labelsFound: data.reports.length,
-          reportsCount: validReports.length,
-          errorMessage: ""
-        });
-
-        if (main === "raw") {
-          if (validReports.length > 0) {
-            rawReports.push(validReports[0]);
-            showRawList();
-          }
-        } else {
-          finishedReports.push(...validReports);
-          currentPallet.push(...validReports);
-          showFinishedList();
-        }
-      } else {
-        await sendReportLog({
-          event: "OCR",
-          step: "processImage",
-          status: "no_reports",
-          details: "No reports returned from OCR",
-          imageSize: base64.length,
-          labelsFound: 0,
-          reportsCount: 0,
-          errorMessage: ""
-        });
-      }
-    } catch (err) {
-      console.log("OCR error", err);
+    } catch (e) {
+      console.log("OCR raw response:", text);
       await sendReportLog({
         event: "OCR",
-        step: "processImage",
+        step: "parseResponse",
         status: "error",
-        details: "Exception during OCR request",
+        details: "JSON parse error from OCR",
         imageSize: base64.length,
         labelsFound: 0,
         reportsCount: 0,
-        errorMessage: String(err)
+        errorMessage: String(e)
+      });
+      return;
+    }
+
+    if (data.reports && data.reports.length > 0) {
+      let validReports = data.reports.filter(isValidReport);
+
+      // ⭐ עיבוד דו"ח – כאן מתבצע התיקון
+      validReports.forEach(r => {
+        // חילוץ פק"ע מלא → רק 3 ספרות אחרונות
+        const fullPka =
+          r.pka ||
+          r["פק\"ע"] ||
+          r.work_order_short ||
+          "";
+
+        r.pka = fullPka ? fullPka.slice(-3) : "";
+
+        // מחיקת שדות שלא צריך
+        delete r.barcode;
+        delete r.product_name;
+      });
+
+      await sendReportLog({
+        event: "OCR",
+        step: "processImage",
+        status: validReports.length > 0 ? "success" : "no_valid_reports",
+        details: `reports: ${data.reports.length}, valid: ${validReports.length}`,
+        imageSize: base64.length,
+        labelsFound: data.reports.length,
+        reportsCount: validReports.length,
+        errorMessage: ""
+      });
+
+      if (main === "raw") {
+        if (validReports.length > 0) {
+          rawReports.push(validReports[0]);
+          showRawList();
+        }
+      } else {
+        finishedReports.push(...validReports);
+        currentPallet.push(...validReports);
+        showFinishedList();
+      }
+
+    } else {
+      await sendReportLog({
+        event: "OCR",
+        step: "processImage",
+        status: "no_reports",
+        details: "No reports returned from OCR",
+        imageSize: base64.length,
+        labelsFound: 0,
+        reportsCount: 0,
+        errorMessage: ""
       });
     }
+  } catch (err) {
+    console.log("OCR error", err);
+    await sendReportLog({
+      event: "OCR",
+      step: "processImage",
+      status: "error",
+      details: "Exception during OCR request",
+      imageSize: base64.length,
+      labelsFound: 0,
+      reportsCount: 0,
+      errorMessage: String(err)
+    });
   }
+}
 
   async function processAll() {
     if (pendingImages.length === 0) return;
