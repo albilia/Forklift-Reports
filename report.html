@@ -16,28 +16,27 @@
       color: #f5f5f5;
       text-align: center;
       font-size: 22px;
-      position: relative;
       margin: 0;
     }
     h2 { font-size: 40px; margin-bottom: 20px; font-weight: bold; color: #ffffff; text-shadow: 0 0 4px rgba(0,0,0,0.5); }
     
-    /* ⭐ שורת סטטוס חדשה ⭐ */
+    /* שורת סטטוס משופרת */
     #statusLine {
-      background: rgba(0, 229, 255, 0.2);
-      border: 1px solid #00e5ff;
+      background: rgba(0, 229, 255, 0.25);
+      border: 2px solid #00e5ff;
       border-radius: 50px;
       padding: 10px 25px;
-      display: inline-block;
-      margin-bottom: 20px;
-      font-size: 20px;
+      display: none; /* מתחיל מוסתר לחלוטין */
+      margin: 0 auto 20px auto;
+      font-size: 22px;
       color: #00e5ff;
       font-weight: bold;
-      visibility: hidden; /* מוסתר עד שיש זיהוי */
-      box-shadow: 0 0 10px rgba(0,229,255,0.3);
+      box-shadow: 0 0 15px rgba(0,229,255,0.4);
+      width: fit-content;
     }
 
     .scan-animation { width: 300px; height: 300px; margin: 0 auto 20px auto; cursor: pointer; }
-    #preview { max-width: 85%; display: none; margin: 15px auto; border-radius: 12px; border: 4px solid #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+    #preview { max-width: 85%; display: none; margin: 15px auto; border-radius: 12px; border: 4px solid #fff; }
     #loader { display: none; font-weight: bold; margin-top: 20px; font-size: 35px; color: #ffeb3b; text-shadow: 0 0 10px rgba(0,0,0,0.5); }
     
     .ocr-box { background: rgba(0,0,0,0.85); border-right: 8px solid #00e5ff; padding: 20px; margin: 15px auto; border-radius: 12px; width: 92%; text-align: right; box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
@@ -82,7 +81,6 @@
   let pendingImages = [];
   let isProcessing = false;
 
-  // הכתובת המעודכנת שלך
   const API_URL = "https://script.google.com/macros/s/AKfycbyi-TEPppliXtOmVRgCHFToj_lNC1N-lRGwBre13uPFeAOcSygdpkZUI7pc7fCBaOsROw/exec";
 
   const params = new URLSearchParams(window.location.search);
@@ -109,7 +107,7 @@
       img.src = e.target.result;
       img.style.display = "block";
       document.getElementById("processAllBtn").style.display = "block";
-      document.getElementById("statusLine").style.visibility = "hidden"; // איפוס סטטוס בצילום חדש
+      document.getElementById("statusLine").style.display = "none"; // איפוס בצילום חדש
     };
     reader.readAsDataURL(file);
   }
@@ -151,8 +149,9 @@
       const data = await res.json();
       
       if (data.reports && data.reports.length > 0) {
-        // עדכון סטטוס זיהוי
-        document.getElementById("statusLine").style.visibility = "visible";
+        // הצגת שורת הסטטוס
+        const statusBox = document.getElementById("statusLine");
+        statusBox.style.display = "inline-block";
         document.getElementById("labelsCount").innerText = data.reports.length;
 
         data.reports.forEach(r => {
@@ -160,10 +159,10 @@
         });
         showList();
       } else {
-        alert("לא זוהו תוויות בתמונה. נסה לצלם שוב מקרוב ובצורה ישרה.");
+        alert("לא זוהו נתונים בתמונה.");
       }
     } catch (e) { 
-      console.error(e);
+      console.error("Gemini Error:", e);
       alert("שגיאה בתקשורת עם השרת.");
     }
   }
@@ -186,11 +185,12 @@
   function deleteItem(i) {
     finishedReports.splice(i, 1);
     showList();
+    if (finishedReports.length === 0) document.getElementById("statusLine").style.display = "none";
   }
 
   async function saveAll() {
     if (finishedReports.length === 0) return;
-    document.getElementById("loader").innerText = "שומר נתונים במערכת...";
+    document.getElementById("loader").innerText = "שומר נתונים...";
     document.getElementById("loader").style.display = "block";
     document.getElementById("saveBtn").disabled = true;
 
@@ -201,11 +201,11 @@
       });
       const data = await res.json();
       if (data.success) { 
-        alert("הנתונים נשמרו בהצלחה בטבלה!"); 
+        alert("הנתונים נשמרו בהצלחה!"); 
         goBack(); 
       }
     } catch (e) {
-      alert("שגיאה בשמירת הנתונים.");
+      alert("שגיאה בשמירה.");
       document.getElementById("loader").style.display = "none";
       document.getElementById("saveBtn").disabled = false;
     }
