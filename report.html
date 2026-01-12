@@ -50,11 +50,29 @@
       width: 90%; 
       text-align: right; 
     }
-    .delete-btn { background: #ff5252; color: white; border: none; padding: 8px 12px; border-radius: 5px; }
+    .delete-btn { 
+      background: #ff5252; 
+      color: white; 
+      border: none; 
+      padding: 8px 12px; 
+      border-radius: 5px; 
+      font-weight: bold;
+    }
     
     button { 
-      font-size: 22px; padding: 12px; border-radius: 10px; margin-top: 10px; width: 90%; 
-      cursor: pointer; border: none; font-weight: bold;
+      font-size: 22px; 
+      padding: 12px; 
+      border-radius: 10px; 
+      margin-top: 10px; 
+      width: 90%; 
+      cursor: pointer; 
+      border: none; 
+      font-weight: bold;
+    }
+
+    #saveBtn {
+      margin: 0 auto;
+      display: none;
     }
 
     #totalBox {
@@ -94,9 +112,9 @@
   <div id="ocrList"></div>
   <div id="totalBox" style="display:none;"></div>
 
-  <button id="processAllBtn" onclick="processAll()" style="display:none; background-color: #00c853; color: white;">שלח לניתוח AI</button>
-  <button id="saveBtn" onclick="saveAll()" style="display:none; background-color: #ff6d00; color: white;">שמור בגיליון</button>
-  <button onclick="goBack()" style="background-color: #607d8b; color: white;">חזור</button>
+  <button id="processAllBtn" onclick="processAll()" style="display:none; background-color: #00c853; color: white;">שלח לסריקת AI</button>
+  <button id="saveBtn" onclick="saveAll()" style="background-color: #ff6d00; color: white;">שגר דווח</button>
+  <button onclick="goBack()" style="background-color: #607d8b; color: white;">חזור לדשבורד</button>
 
 <script>
   let finishedReports = [];
@@ -226,7 +244,7 @@
             <b>כמות:</b> ${r.qty || "0"}<br>
             <b>מספר משטח:</b> ${r.palletId || "---"}
           </div>
-          <button class="delete-btn" onclick="deleteItem(${i})">X</button>
+          <button class="delete-btn" onclick="deleteItem(${i})">מחיקה</button>
         </div>
       </div>`).join("");
 
