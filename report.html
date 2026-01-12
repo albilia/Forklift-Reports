@@ -103,7 +103,6 @@
   let pendingFile = null;
   let isProcessing = false;
 
-  // הכתובת המעודכנת שלך
   const API_URL = "https://script.google.com/macros/s/AKfycbxzNj0wvC-Tb5wquuuAWvOfkxf_H4YRKzl3vijRlyi2nvkkH8VgDcL438RBKg5QeanrTg/exec";
 
   const params = new URLSearchParams(window.location.search);
@@ -117,7 +116,6 @@
     window.location.href = `dashboard.html?phone=${phone}&name=${name}`; 
   }
 
-  // הצגת פרטי מחסן בראש המסך
   const warehouseInfoDiv = document.getElementById("warehouseInfo");
   let warehouseText = "";
   if (warehouseName) {
@@ -183,10 +181,9 @@
         document.getElementById("statusLine").style.display = "inline-block";
         document.getElementById("labelsCount").innerText = data.reports.length;
 
-        // הוספת התוצאות לרשימת הדוחות, עם פק"ע 3 ספרות אחרונות
         data.reports.forEach(r => {
           const makat = r.makat || "---";
-          const pka = (r.pka || "").toString().slice(-3);    // 3 ספרות אחרונות
+          const pka = (r.pka || "").toString().slice(-3);
           const qty = Number(r.qty) || 0;
 
           finishedReports.push({ makat, pka, qty });
@@ -214,7 +211,6 @@
       return;
     }
 
-    // חישוב סה"כ כמות
     let totalQty = 0;
     finishedReports.forEach(r => {
       totalQty += Number(r.qty) || 0;
@@ -255,10 +251,10 @@
         method: "POST",
         body: JSON.stringify({ 
           action: "saveReport", 
-          phone,           // נשאר לוגי לשרת, לא נשמר בשיט
-          name,            // שם מלגזן
-          main,            // מחסן העברה
-          finished,        // תת-מחסן
+          phone,
+          name,
+          main: encodeURIComponent(main),
+          finished: encodeURIComponent(finished),
           reports: finishedReports 
         })
       });
@@ -281,4 +277,3 @@
 </script>
 </body>
 </html>
-<!-- retry -->
