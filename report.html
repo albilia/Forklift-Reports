@@ -185,8 +185,9 @@
           const makat = r.makat || "---";
           const pka = (r.pka || "").toString().slice(-3);
           const qty = Number(r.qty) || 0;
+          const palletId = r.palletId || "---";
 
-          finishedReports.push({ makat, pka, qty });
+          finishedReports.push({ makat, pka, qty, palletId });
         });
 
         showList();
@@ -222,7 +223,8 @@
           <div>
             <b>מק"ט:</b> ${r.makat || "---"}<br>
             <b>פק"ע:</b> ${r.pka || "---"}<br>
-            <b>כמות:</b> ${r.qty || "0"}
+            <b>כמות:</b> ${r.qty || "0"}<br>
+            <b>מספר משטח:</b> ${r.palletId || "---"}
           </div>
           <button class="delete-btn" onclick="deleteItem(${i})">X</button>
         </div>
