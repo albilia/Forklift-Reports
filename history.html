@@ -140,8 +140,9 @@
     th.sort-asc::after { content: " ▲"; font-size: 10px; }
     th.sort-desc::after { content: " ▼"; font-size: 10px; }
 
-    @media (max-width: 768px) { table { display: none; } }
-    @media (min-width: 769px) { #mobileContainer { display: none; } }
+    @media (max-width: 768px) {
+      table { font-size: 11px; }
+    }
   </style>
 </head>
 
@@ -164,7 +165,7 @@
         <input type="date" id="endDate">
       </div>
       <div class="field" style="flex:1;">
-        <label>חיפוש חכם:</label>
+        <label>חיפוש חכם (מק״ט / פק״ע / עובד / תת־מחסן):</label>
         <input type="text" id="searchInput" placeholder="הקלד כדי לסנן בזמן אמת">
       </div>
       <button class="main" onclick="loadHistory()">טען דווחים</button>
@@ -195,8 +196,6 @@
       </thead>
       <tbody></tbody>
     </table>
-
-    <div id="mobileContainer"></div>
 
   </div>
 
@@ -239,7 +238,7 @@
 
   function parseDate(d) {
     if (!d) return null;
-    const parts = d.trim().split("/");
+    const parts = d.toString().trim().split("/");
     if (parts.length !== 3) return null;
     const [day, month, year] = parts;
     return new Date(Number(year), Number(month) - 1, Number(day));
@@ -249,7 +248,7 @@
     const grouped = {};
 
     rows.forEach(r => {
-      const key = `${r.date}|${r.time}|${r.worker}|${r.subWarehouse}`;
+      const key = `${r.date}|${r.time}|${r.worker}|${r.subWarehouse}|${r.warehouse}`;
 
       if (!grouped[key]) {
         grouped[key] = {
@@ -259,15 +258,17 @@
           subWarehouse: r.subWarehouse,
           warehouse: r.warehouse,
           labels: [],
-          rowIndex: r.rowIndex
+          rowIndexes: []
         };
       }
 
       grouped[key].labels.push({
         makat: r.makat,
         pka: r.pka,
-        qty: r.qty
+        qty: r.qty,
+        rowIndex: r.rowIndex
       });
+      grouped[key].rowIndexes.push(r.rowIndex);
     });
 
     return Object.values(grouped);
@@ -311,9 +312,7 @@
 
   function refreshView() {
     applyFiltersAndRender();
-  }
-
-  function applyFiltersAndRender() {
+  }  function applyFiltersAndRender() {
     const start = document.getElementById("startDate").value;
     const end = document.getElementById("endDate").value;
     const search = document.getElementById("searchInput").value.trim().toLowerCase();
@@ -324,8 +323,10 @@
         const startDateObj = start ? new Date(start) : null;
         const endDateObj = end ? new Date(end) : null;
 
-        if (startDateObj && rowDateObj < startDateObj) return false;
-        if (endDateObj && rowDateObj > endDateObj) return false;
+        if (rowDateObj) {
+          if (startDateObj && rowDateObj < startDateObj) return false;
+          if (endDateObj && rowDateObj > endDateObj) return false;
+        }
       }
 
       if (search) {
@@ -342,8 +343,68 @@
       return true;
     });
 
+    if (currentSort.field) {
+      sortRows(currentSort.field, currentSort.dir, false);
+    } else {
+      renderDesktop(filteredRows);
+      updateSummary(filteredRows);
+    }
+  }
+
+  function sortRows(field, dir, toggle = true) {
+    if (toggle) {
+      if (currentSort.field === field) {
+        currentSort.dir = -currentSort.dir;
+      } else {
+        currentSort.field = field;
+        currentSort.dir = 1;
+      }
+      dir = currentSort.dir;
+    }
+
+    filteredRows.sort((a, b) => {
+      let va = a[field];
+      let vb = b[field];
+
+      if (field === "date") {
+        const da = parseDate(va)?.getTime() || 0;
+        const db = parseDate(vb)?.getTime() || 0;
+        return (da - db) * dir;
+      }
+
+      if (field === "time") {
+        const da = va ? new Date(`1970-01-01T${va}`).getTime() : 0;
+        const db = vb ? new Date(`1970-01-01T${vb}`).getTime() : 0;
+        return (da - db) * dir;
+      }
+
+      const na = parseFloat(va);
+      const nb = parseFloat(vb);
+      if (!isNaN(na) && !isNaN(nb)) {
+        return (na - nb) * dir;
+      }
+
+      va = (va || "").toString().toLowerCase();
+      vb = (vb || "").toString().toLowerCase();
+      if (va < vb) return -1 * dir;
+      if (va > vb) return 1 * dir;
+      return 0;
+    });
+
+    updateSortHeaders();
     renderDesktop(filteredRows);
     updateSummary(filteredRows);
+  }
+
+  function updateSortHeaders() {
+    const ths = document.querySelectorAll("#historyTable thead th[data-sort]");
+    ths.forEach(th => {
+      th.classList.remove("sort-asc", "sort-desc");
+      const field = th.getAttribute("data-sort");
+      if (field && field === currentSort.field) {
+        th.classList.add(currentSort.dir === 1 ? "sort-asc" : "sort-desc");
+      }
+    });
   }
 
   function updateSummary(rows) {
@@ -358,12 +419,28 @@
 
     const groupedRows = groupByShot(rows);
 
-    groupedRows.forEach((group, idx) => {
+    groupedRows.forEach((group, gIdx) => {
       const tr = document.createElement("tr");
 
-      const labelLines = group.labels.map(l =>
-        `מק\"ט: ${l.makat || "---"}, פק\"ע: ${l.pka || "---"}, כמות: ${l.qty || "0"}`
-      ).join("<br>");
+      const labelLines = group.labels.map((l, i) => `
+        <div style="margin-bottom:6px; text-align:right;">
+          מק״ט:
+          <input id="makat-${gIdx}-${i}" value="${l.makat || ""}"
+            oninput="handleLabelChange(${gIdx}, ${i})" style="width:90px;">
+          פק״ע:
+          <input id="pka-${gIdx}-${i}" value="${l.pka || ""}"
+            oninput="handleLabelChange(${gIdx}, ${i})" style="width:60px;">
+          כמות:
+          <input id="qty-${gIdx}-${i}" value="${l.qty || ""}"
+            oninput="handleLabelChange(${gIdx}, ${i})" style="width:60px;">
+
+          <button id="save-label-${gIdx}-${i}"
+            onclick="saveLabelEdit(${gIdx}, ${i})"
+            style="padding:2px 6px; font-size:11px; display:none;">
+            שמור
+          </button>
+        </div>
+      `).join("");
 
       const totalQty = group.labels.reduce((sum, l) => sum + Number(l.qty || 0), 0);
 
@@ -381,12 +458,115 @@
     });
   }
 
+  function handleLabelChange(groupIndex, labelIndex) {
+    const grouped = groupByShot(filteredRows);
+    const group = grouped[groupIndex];
+    const label = group.labels[labelIndex];
+
+    const newMakat = document.getElementById(`makat-${groupIndex}-${labelIndex}`).value.trim();
+    const newPka = document.getElementById(`pka-${groupIndex}-${labelIndex}`).value.trim();
+    const newQty = document.getElementById(`qty-${groupIndex}-${labelIndex}`).value.trim();
+
+    const changed =
+      newMakat !== (label.makat || "") ||
+      newPka !== (label.pka || "") ||
+      newQty !== String(label.qty || "");
+
+    const btn = document.getElementById(`save-label-${groupIndex}-${labelIndex}`);
+    if (btn) {
+      btn.style.display = changed ? "inline-block" : "none";
+    }
+  }
+
+  async function saveLabelEdit(groupIndex, labelIndex) {
+    const grouped = groupByShot(filteredRows);
+    const group = grouped[groupIndex];
+    const label = group.labels[labelIndex];
+
+    const newMakat = document.getElementById(`makat-${groupIndex}-${labelIndex}`).value.trim();
+    const newPka = document.getElementById(`pka-${groupIndex}-${labelIndex}`).value.trim();
+    const newQty = document.getElementById(`qty-${groupIndex}-${labelIndex}`).value.trim();
+
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          action: "updateLabel",
+          rowIndex: label.rowIndex,
+          newMakat,
+          newPka,
+          newQty
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        const btn = document.getElementById(`save-label-${groupIndex}-${labelIndex}`);
+        if (btn) btn.style.display = "none";
+        await loadHistory();
+      } else {
+        alert("שגיאה בעדכון");
+      }
+
+    } catch (e) {
+      alert("שגיאה בחיבור");
+    }
+  }
+
   function exportCsv() {
-    alert("ייצוא CSV יותאם לגרסה החדשה לפי בקשתך — רק תגיד לי אם אתה רוצה שגם הפירוט המאוחד יופיע באקסל.");
+    if (!filteredRows || filteredRows.length === 0) {
+      alert("אין נתונים לייצוא");
+      return;
+    }
+
+    const grouped = groupByShot(filteredRows);
+    const headers = ["תאריך","שעה","עובד","פירוט תוויות","סה\"כ","מחסן","תת־מחסן"];
+    const lines = [headers.join(",")];
+
+    grouped.forEach(g => {
+      const labelText = g.labels.map(l =>
+        `מק\"ט: ${l.makat || ""}, פק\"ע: ${l.pka || ""}, כמות: ${l.qty || ""}`
+      ).join(" | ");
+
+      const totalQty = g.labels.reduce((sum, l) => sum + Number(l.qty || 0), 0);
+
+      const line = [
+        formatDateTime(g.date,"date"),
+        formatDateTime(g.time,"time"),
+        g.worker || "",
+        labelText,
+        totalQty,
+        g.warehouse || "",
+        g.subWarehouse || ""
+      ].map(v => `"${(v || "").toString().replace(/"/g,'""')}"`).join(",");
+
+      lines.push(line);
+    });
+
+    const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "history.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("searchInput").addEventListener("input", applyFiltersAndRender);
+    const searchInput = document.getElementById("searchInput");
+    searchInput.addEventListener("input", () => {
+      applyFiltersAndRender();
+    });
+
+    const ths = document.querySelectorAll("#historyTable thead th[data-sort]");
+    ths.forEach(th => {
+      th.addEventListener("click", () => {
+        const field = th.getAttribute("data-sort");
+        sortRows(field, currentSort.dir, true);
+      });
+    });
   });
 </script>
 
