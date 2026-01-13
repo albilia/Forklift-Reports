@@ -304,19 +304,21 @@
     }
 
     async function loadHistory() {
-      document.getElementById('loading').style.display = 'block';
-      try {
-        const start = document.getElementById('startDate').value || '';
-        const end = document.getElementById('endDate').value || '';
-        const resp = await google.script.run
-          .withSuccessHandler(onHistoryLoaded)
-          .withFailureHandler(onHistoryError)
-          .getHistoryData(start, end);
-      } catch (e) {
-        console.error(e);
-        document.getElementById('loading').style.display = 'none';
-      }
-    }
+  document.getElementById('loading').style.display = 'block';
+  try {
+    const start = document.getElementById('startDate').value || '';
+    const end = document.getElementById('endDate').value || '';
+
+    google.script.run
+      .withSuccessHandler(onHistoryLoaded)
+      .withFailureHandler(onHistoryError)
+      .getHistory();   // ← השינוי הקריטי
+
+  } catch (e) {
+    console.error(e);
+    document.getElementById('loading').style.display = 'none';
+  }
+}
 
     function onHistoryError(err) {
       console.error('History error', err);
