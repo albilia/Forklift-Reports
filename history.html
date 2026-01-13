@@ -6,49 +6,36 @@
         content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
   <title>היסטוריית דווחים</title>
 
-  <link rel="stylesheet" href="menu.css">
-  <link rel="stylesheet" href="buttons.css">
-
   <style>
-    html, body {
+    body {
       margin: 0;
       padding: 0;
-      max-width: 100%;
-      overflow-x: hidden;
-      overscroll-behavior-y: none;
-      background: #111 url('background.jpg') no-repeat center center fixed;
-      background-size: cover;
-      color: #f5f5f5;
       font-family: Arial, sans-serif;
-    }
-
-    body {
-      position: relative;
+      background: #111;
+      color: #f5f5f5;
+      direction: rtl;
     }
 
     .top-bar {
-      background: rgba(0,0,0,0.55);
-      height: 70px;
+      background: #000000aa;
+      height: 60px;
       display: flex;
-      justify-content: center;
       align-items: center;
-      border-radius: 0 0 12px 12px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.4);
-      backdrop-filter: blur(4px);
+      justify-content: center;
+      box-shadow: 0 2px 6px #000;
     }
 
-    .title {
-      font-size: 26px;
-      font-weight: bold;
-      text-shadow: 0 0 6px rgba(0,0,0,0.8);
+    .top-bar h1 {
+      margin: 0;
+      font-size: 22px;
     }
 
     .content {
-      padding: 15px;
+      padding: 10px;
     }
 
     .filters {
-      background: rgba(0,0,0,0.6);
+      background: #00000088;
       border-radius: 10px;
       padding: 10px;
       margin-bottom: 10px;
@@ -70,91 +57,187 @@
     }
 
     .filters input {
-      padding: 6px;
+      padding: 5px;
       border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 14px;
+      border: 1px solid #777;
+      font-size: 13px;
     }
 
     .filters button {
-      font-size: 14px !important;
-      padding: 8px 12px !important;
-      width: auto;
-      max-width: none;
-      margin: 0;
+      padding: 7px 10px;
       border-radius: 8px;
       border: none;
       cursor: pointer;
+      font-size: 13px;
+      white-space: nowrap;
     }
 
-    .filters button.main { background:#1e88e5; color:#fff; }
-    .filters button.secondary { background:#ffca28; color:#000; }
-    .filters button.neutral { background:#607d8b; color:#fff; }
-    .filters button.today { background:#43a047; color:#fff; }
-    .filters button.refresh { background:#8e24aa; color:#fff; }
+    .btn-main { background:#1e88e5; color:#fff; }
+    .btn-today { background:#43a047; color:#fff; }
+    .btn-refresh { background:#8e24aa; color:#fff; }
+    .btn-export { background:#ffca28; color:#000; }
+    .btn-back { background:#607d8b; color:#fff; }
 
     #summaryBar {
-      background: rgba(0,0,0,0.7);
-      border-radius: 10px;
-      padding: 8px 12px;
-      margin-bottom: 10px;
-      font-size: 14px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
+      background:#000000aa;
+      border-radius:10px;
+      padding:6px 10px;
+      margin-bottom:10px;
+      font-size:13px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:15px;
     }
 
-    #summaryBar span { white-space: nowrap; }
-
     #loading {
-      margin: 5px 0;
-      font-size: 14px;
-      color: #ffeb3b;
-      font-weight: bold;
+      font-size:13px;
+      color:#ffeb3b;
+      margin-bottom:5px;
+      display:none;
     }
 
     table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-      background: rgba(0,0,0,0.7);
-      border-radius: 10px;
-      overflow: hidden;
-      table-layout: fixed;
+      width:100%;
+      border-collapse:collapse;
+      background:#000000aa;
+      border-radius:10px;
+      overflow:hidden;
+      table-layout:fixed;
     }
 
     th, td {
-      border: 1px solid #555;
-      padding: 6px;
-      font-size: 13px;
-      text-align: center;
+      border:1px solid #555;
+      padding:5px;
+      font-size:12px;
+      text-align:center;
     }
 
     th {
-      background: rgba(0,0,0,0.9);
-      font-weight: bold;
-      cursor: pointer;
-      user-select: none;
+      background:#000000dd;
+      cursor:pointer;
+      user-select:none;
     }
 
-    th.sort-asc::after { content: " ▲"; font-size: 10px; }
-    th.sort-desc::after { content: " ▼"; font-size: 10px; }
+    th.sort-asc::after { content:" ▲"; font-size:10px; }
+    th.sort-desc::after { content:" ▼"; font-size:10px; }
+
+    .labels-table {
+      width:100%;
+      border-collapse:collapse;
+    }
+
+    .labels-table th, .labels-table td {
+      border:1px solid #444;
+      padding:3px;
+      font-size:11px;
+    }
+
+    .labels-table input {
+      width:95%;
+      font-size:11px;
+      padding:2px;
+      border-radius:4px;
+      border:1px solid #777;
+      text-align:center;
+    }
+
+    .save-btn {
+      padding:3px 6px;
+      font-size:11px;
+      border-radius:6px;
+      border:none;
+      cursor:pointer;
+      background:#43a047;
+      color:#fff;
+      display:none;
+    }
+
+    .save-btn.visible {
+      display:inline-block;
+    }
+
+    #mobileContainer {
+      margin-top:10px;
+    }
+
+    .card {
+      background:#000000aa;
+      border-radius:10px;
+      padding:8px;
+      margin-bottom:8px;
+      box-shadow:0 2px 4px #000;
+    }
+
+    .card-header {
+      display:flex;
+      justify-content:space-between;
+      font-size:12px;
+      margin-bottom:4px;
+    }
+
+    .card-row {
+      font-size:12px;
+      margin-bottom:2px;
+    }
+
+    .card-labels {
+      margin-top:4px;
+      border-top:1px solid #444;
+      padding-top:4px;
+    }
+
+    .card-labels table {
+      width:100%;
+      border-collapse:collapse;
+    }
+
+    .card-labels th, .card-labels td {
+      border:1px solid #444;
+      padding:3px;
+      font-size:11px;
+      text-align:center;
+    }
+
+    .card-labels input {
+      width:95%;
+      font-size:11px;
+      padding:2px;
+      border-radius:4px;
+      border:1px solid #777;
+      text-align:center;
+    }
+
+    .card-save {
+      margin-top:4px;
+      text-align:left;
+    }
+
+    .card-save button {
+      padding:3px 6px;
+      font-size:11px;
+      border-radius:6px;
+      border:none;
+      cursor:pointer;
+      background:#43a047;
+      color:#fff;
+      display:none;
+    }
 
     @media (max-width: 768px) {
-      table { font-size: 11px; }
+      table { display:none; }
+    }
+
+    @media (min-width: 769px) {
+      #mobileContainer { display:none; }
     }
   </style>
 </head>
-
 <body>
-  <div id="menuContainer"></div>
-
   <div class="top-bar">
-    <div class="title">היסטוריית דווחים</div>
+    <h1>היסטוריית דווחים</h1>
   </div>
 
   <div class="content">
-
     <div class="filters">
       <div class="field">
         <label>תאריך התחלה:</label>
@@ -165,14 +248,14 @@
         <input type="date" id="endDate">
       </div>
       <div class="field" style="flex:1;">
-        <label>חיפוש חכם (מק״ט / פק״ע / עובד / תת־מחסן):</label>
-        <input type="text" id="searchInput" placeholder="הקלד כדי לסנן בזמן אמת">
+        <label>חיפוש חכם:</label>
+        <input type="text" id="searchInput" placeholder="מק״ט / פק״ע / עובד / תת־מחסן">
       </div>
-      <button class="main" onclick="loadHistory()">טען דווחים</button>
-      <button class="today" onclick="loadToday()">היסטוריה מהיום</button>
-      <button class="refresh" onclick="refreshView()">רענן</button>
-      <button class="secondary" onclick="exportCsv()">ייצוא לאקסל</button>
-      <button class="neutral" onclick="goBack()">חזור לדשבורד</button>
+      <button class="btn-main" onclick="loadHistory()">טען דווחים</button>
+      <button class="btn-today" onclick="loadToday()">היסטוריה מהיום</button>
+      <button class="btn-refresh" onclick="refreshView()">רענן</button>
+      <button class="btn-export" onclick="exportCsv()">ייצוא</button>
+      <button class="btn-back" onclick="goBack()">חזור</button>
     </div>
 
     <div id="summaryBar">
@@ -180,7 +263,7 @@
       <span id="sumPallets">סה״כ משטחים: 0</span>
     </div>
 
-    <div id="loading" style="display:none;">טוען נתונים...</div>
+    <div id="loading">טוען נתונים...</div>
 
     <table id="historyTable">
       <thead>
@@ -197,379 +280,418 @@
       <tbody></tbody>
     </table>
 
+    <div id="mobileContainer"></div>
   </div>
 
-<script>
-  const API_URL = "https://script.google.com/macros/s/AKfycbxzNj0wvC-Tb5wquuuAWvOfkxf_H4YRKzl3vijRlyi2nvkkH8VgDcL438RBKg5QeanrTg/exec";
+  <script>
+    let allRows = [];
+    let groupedShots = [];
+    let currentSort = { field: null, dir: 1 };
 
-  const params = new URLSearchParams(window.location.search);
-  const phone = params.get("phone");
-  const name = params.get("name");
-
-  function goBack() {
-    window.location.href = `dashboard.html?phone=${encodeURIComponent(phone)}&name=${encodeURIComponent(name)}`;
-  }
-
-  let allRows = [];
-  let filteredRows = [];
-  let currentSort = { field: null, dir: 1 };
-
-  function formatDateTime(isoString, type) {
-    if (!isoString) return "";
-    try {
-      const date = new Date(isoString);
-      if (type === "date") {
-        return date.toLocaleDateString("he-IL", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric"
-        });
-      }
-      if (type === "time") {
-        return date.toLocaleTimeString("he-IL", {
-          hour: "2-digit",
-          minute: "2-digit"
-        });
-      }
-    } catch {
-      return "";
+    function goBack() {
+      window.location.href = 'index.html';
     }
-  }
 
-  function parseDate(d) {
-    if (!d) return null;
-    const parts = d.toString().trim().split("/");
-    if (parts.length !== 3) return null;
-    const [day, month, year] = parts;
-    return new Date(Number(year), Number(month) - 1, Number(day));
-  }
-
-  function groupByShot(rows) {
-    const grouped = {};
-
-    rows.forEach(r => {
-      const key = `${r.date}|${r.time}|${r.worker}|${r.subWarehouse}|${r.warehouse}`;
-
-      if (!grouped[key]) {
-        grouped[key] = {
-          date: r.date,
-          time: r.time,
-          worker: r.worker,
-          subWarehouse: r.subWarehouse,
-          warehouse: r.warehouse,
-          labels: [],
-          rowIndexes: []
-        };
-      }
-
-      grouped[key].labels.push({
-        makat: r.makat,
-        pka: r.pka,
-        qty: r.qty,
-        rowIndex: r.rowIndex
-      });
-      grouped[key].rowIndexes.push(r.rowIndex);
-    });
-
-    return Object.values(grouped);
-  }
-
-  async function loadHistory() {
-    document.getElementById("loading").style.display = "block";
-
-    try {
-      const res = await fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify({ action: "getHistory" })
-      });
-
-      const data = await res.json();
-      if (!data.success) {
-        alert("שגיאה בטעינת היסטוריה");
-        return;
-      }
-
-      allRows = data.rows || [];
-      applyFiltersAndRender();
-
-    } catch (e) {
-      alert("שגיאה בטעינת נתונים");
-    } finally {
-      document.getElementById("loading").style.display = "none";
+    function refreshView() {
+      render();
     }
-  }
 
-  function loadToday() {
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, "0");
-    const dd = String(today.getDate()).padStart(2, "0");
-    const iso = `${yyyy}-${mm}-${dd}`;
-    document.getElementById("startDate").value = iso;
-    document.getElementById("endDate").value = iso;
-    applyFiltersAndRender();
-  }
+    function loadToday() {
+      const today = new Date().toISOString().slice(0, 10);
+      document.getElementById('startDate').value = today;
+      document.getElementById('endDate').value = today;
+      loadHistory();
+    }
 
-  function refreshView() {
-    applyFiltersAndRender();
-  }  function applyFiltersAndRender() {
-    const start = document.getElementById("startDate").value;
-    const end = document.getElementById("endDate").value;
-    const search = document.getElementById("searchInput").value.trim().toLowerCase();
+    async function loadHistory() {
+      document.getElementById('loading').style.display = 'block';
+      try {
+        const start = document.getElementById('startDate').value || '';
+        const end = document.getElementById('endDate').value || '';
+        const resp = await google.script.run
+          .withSuccessHandler(onHistoryLoaded)
+          .withFailureHandler(onHistoryError)
+          .getHistoryData(start, end);
+      } catch (e) {
+        console.error(e);
+        document.getElementById('loading').style.display = 'none';
+      }
+    }
 
-    filteredRows = allRows.filter(r => {
-      if (start || end) {
-        const rowDateObj = parseDate(r.date);
-        const startDateObj = start ? new Date(start) : null;
-        const endDateObj = end ? new Date(end) : null;
+    function onHistoryError(err) {
+      console.error('History error', err);
+      document.getElementById('loading').style.display = 'none';
+      alert('שגיאה בטעינת היסטוריה');
+    }
 
-        if (rowDateObj) {
-          if (startDateObj && rowDateObj < startDateObj) return false;
-          if (endDateObj && rowDateObj > endDateObj) return false;
+    // צורת הנתונים המצופה מה־Apps Script:
+    // [{ rowIndex, date, time, worker, makat, peka, qty, warehouse, subWarehouse, shotId }, ...]
+    function onHistoryLoaded(data) {
+      document.getElementById('loading').style.display = 'none';
+      if (!Array.isArray(data)) data = [];
+
+      // סינון שורות "פייק" / ריקות
+      allRows = data.filter(r =>
+        r &&
+        r.date && String(r.date).trim() !== '' &&
+        r.time && String(r.time).trim() !== '' &&
+        r.worker && String(r.worker).trim() !== '' &&
+        r.makat && String(r.makat).trim() !== '' &&
+        r.qty && String(r.qty).trim() !== ''
+      );
+
+      groupByShot();
+      render();
+    }
+
+    function groupByShot() {
+      const map = new Map();
+      for (const r of allRows) {
+        // shotId יכול להגיע מהשרת. אם לא – נבנה מזהה לפי date+time+worker+warehouse+subWarehouse
+        const key = r.shotId ||
+          [r.date, r.time, r.worker, r.warehouse || '', r.subWarehouse || ''].join('|');
+
+        if (!map.has(key)) {
+          map.set(key, {
+            shotId: key,
+            date: r.date,
+            time: r.time,
+            worker: r.worker,
+            warehouse: r.warehouse || '',
+            subWarehouse: r.subWarehouse || '',
+            labels: [],
+            totalQty: 0
+          });
         }
+        const g = map.get(key);
+        g.labels.push({
+          rowIndex: r.rowIndex,
+          makat: r.makat,
+          peka: r.peka || '',
+          qty: Number(r.qty) || 0
+        });
+        g.totalQty += Number(r.qty) || 0;
       }
+      groupedShots = Array.from(map.values());
+      updateSummary();
+    }
+
+    function updateSummary() {
+      document.getElementById('sumCount').textContent =
+        'סה״כ דיווחים: ' + groupedShots.length;
+      const totalPallets = groupedShots.reduce((sum, g) => sum + g.totalQty, 0);
+      document.getElementById('sumPallets').textContent =
+        'סה״כ משטחים: ' + totalPallets;
+    }
+
+    function render() {
+      const search = (document.getElementById('searchInput').value || '').trim();
+      let filtered = groupedShots.slice();
 
       if (search) {
-        const hay = [
-          r.makat,
-          r.pka,
-          r.worker,
-          r.subWarehouse,
-          r.warehouse
-        ].map(x => (x || "").toString().toLowerCase()).join(" ");
-        if (!hay.includes(search)) return false;
+        const s = search.toLowerCase();
+        filtered = filtered.filter(g => {
+          if ((g.worker || '').toLowerCase().includes(s)) return true;
+          if ((g.warehouse || '').toLowerCase().includes(s)) return true;
+          if ((g.subWarehouse || '').toLowerCase().includes(s)) return true;
+          if ((g.date || '').toLowerCase().includes(s)) return true;
+          if ((g.time || '').toLowerCase().includes(s)) return true;
+          for (const lbl of g.labels) {
+            if ((lbl.makat || '').toLowerCase().includes(s)) return true;
+            if ((lbl.peka || '').toLowerCase().includes(s)) return true;
+          }
+          return false;
+        });
       }
 
-      return true;
-    });
+      if (currentSort.field) {
+        const f = currentSort.field;
+        const dir = currentSort.dir;
+        filtered.sort((a, b) => {
+          let va = a[f] || '';
+          let vb = b[f] || '';
+          if (typeof va === 'string') va = va.toLowerCase();
+          if (typeof vb === 'string') vb = vb.toLowerCase();
+          if (va < vb) return -1 * dir;
+          if (va > vb) return 1 * dir;
+          return 0;
+        });
+      }
 
-    if (currentSort.field) {
-      sortRows(currentSort.field, currentSort.dir, false);
-    } else {
-      renderDesktop(filteredRows);
-      updateSummary(filteredRows);
+      renderDesktop(filtered);
+      renderMobile(filtered);
     }
-  }
 
-  function sortRows(field, dir, toggle = true) {
-    if (toggle) {
-      if (currentSort.field === field) {
-        currentSort.dir = -currentSort.dir;
-      } else {
-        currentSort.field = field;
-        currentSort.dir = 1;
-      }
-      dir = currentSort.dir;
+    function renderDesktop(list) {
+      const tbody = document.querySelector('#historyTable tbody');
+      tbody.innerHTML = '';
+
+      list.forEach((g, idx) => {
+        const tr = document.createElement('tr');
+
+        const tdDate = document.createElement('td');
+        tdDate.textContent = g.date || '';
+        tr.appendChild(tdDate);
+
+        const tdTime = document.createElement('td');
+        tdTime.textContent = g.time || '';
+        tr.appendChild(tdTime);
+
+        const tdWorker = document.createElement('td');
+        tdWorker.textContent = g.worker || '';
+        tr.appendChild(tdWorker);
+
+        const tdLabels = document.createElement('td');
+        tdLabels.appendChild(buildLabelsTable(g, false));
+        tr.appendChild(tdLabels);
+
+        const tdTotal = document.createElement('td');
+        tdTotal.textContent = g.totalQty;
+        tr.appendChild(tdTotal);
+
+        const tdWh = document.createElement('td');
+        tdWh.textContent = g.warehouse || '';
+        tr.appendChild(tdWh);
+
+        const tdSub = document.createElement('td');
+        tdSub.textContent = g.subWarehouse || '';
+        tr.appendChild(tdSub);
+
+        tbody.appendChild(tr);
+      });
     }
 
-    filteredRows.sort((a, b) => {
-      let va = a[field];
-      let vb = b[field];
+    function renderMobile(list) {
+      const container = document.getElementById('mobileContainer');
+      container.innerHTML = '';
 
-      if (field === "date") {
-        const da = parseDate(va)?.getTime() || 0;
-        const db = parseDate(vb)?.getTime() || 0;
-        return (da - db) * dir;
-      }
+      list.forEach((g, idx) => {
+        const card = document.createElement('div');
+        card.className = 'card';
 
-      if (field === "time") {
-        const da = va ? new Date(`1970-01-01T${va}`).getTime() : 0;
-        const db = vb ? new Date(`1970-01-01T${vb}`).getTime() : 0;
-        return (da - db) * dir;
-      }
+        const header = document.createElement('div');
+        header.className = 'card-header';
+        header.innerHTML =
+          '<span>' + (g.date || '') + ' ' + (g.time || '') + '</span>' +
+          '<span>' + (g.worker || '') + '</span>';
+        card.appendChild(header);
 
-      const na = parseFloat(va);
-      const nb = parseFloat(vb);
-      if (!isNaN(na) && !isNaN(nb)) {
-        return (na - nb) * dir;
-      }
+        const row1 = document.createElement('div');
+        row1.className = 'card-row';
+        row1.textContent = 'מחסן: ' + (g.warehouse || '') +
+          ' | תת־מחסן: ' + (g.subWarehouse || '');
+        card.appendChild(row1);
 
-      va = (va || "").toString().toLowerCase();
-      vb = (vb || "").toString().toLowerCase();
-      if (va < vb) return -1 * dir;
-      if (va > vb) return 1 * dir;
-      return 0;
-    });
+        const row2 = document.createElement('div');
+        row2.className = 'card-row';
+        row2.textContent = 'סה״כ כמות: ' + g.totalQty;
+        card.appendChild(row2);
 
-    updateSortHeaders();
-    renderDesktop(filteredRows);
-    updateSummary(filteredRows);
-  }
+        const labelsDiv = document.createElement('div');
+        labelsDiv.className = 'card-labels';
+        labelsDiv.appendChild(buildLabelsTable(g, true));
+        card.appendChild(labelsDiv);
 
-  function updateSortHeaders() {
-    const ths = document.querySelectorAll("#historyTable thead th[data-sort]");
-    ths.forEach(th => {
-      th.classList.remove("sort-asc", "sort-desc");
-      const field = th.getAttribute("data-sort");
-      if (field && field === currentSort.field) {
-        th.classList.add(currentSort.dir === 1 ? "sort-asc" : "sort-desc");
-      }
-    });
-  }
-
-  function updateSummary(rows) {
-    const grouped = groupByShot(rows);
-    document.getElementById("sumCount").textContent = "סה״כ דיווחים: " + grouped.length;
-    document.getElementById("sumPallets").textContent = "סה״כ משטחים: " + grouped.length;
-  }
-
-  function renderDesktop(rows) {
-    const tbody = document.querySelector("#historyTable tbody");
-    tbody.innerHTML = "";
-
-    const groupedRows = groupByShot(rows);
-
-    groupedRows.forEach((group, gIdx) => {
-      const tr = document.createElement("tr");
-
-      const labelLines = group.labels.map((l, i) => `
-        <div style="margin-bottom:6px; text-align:right;">
-          מק״ט:
-          <input id="makat-${gIdx}-${i}" value="${l.makat || ""}"
-            oninput="handleLabelChange(${gIdx}, ${i})" style="width:90px;">
-          פק״ע:
-          <input id="pka-${gIdx}-${i}" value="${l.pka || ""}"
-            oninput="handleLabelChange(${gIdx}, ${i})" style="width:60px;">
-          כמות:
-          <input id="qty-${gIdx}-${i}" value="${l.qty || ""}"
-            oninput="handleLabelChange(${gIdx}, ${i})" style="width:60px;">
-
-          <button id="save-label-${gIdx}-${i}"
-            onclick="saveLabelEdit(${gIdx}, ${i})"
-            style="padding:2px 6px; font-size:11px; display:none;">
-            שמור
-          </button>
-        </div>
-      `).join("");
-
-      const totalQty = group.labels.reduce((sum, l) => sum + Number(l.qty || 0), 0);
-
-      tr.innerHTML = `
-        <td>${formatDateTime(group.date, "date")}</td>
-        <td>${formatDateTime(group.time, "time")}</td>
-        <td>${group.worker || ""}</td>
-        <td>${labelLines}</td>
-        <td>${totalQty}</td>
-        <td>${group.warehouse || ""}</td>
-        <td>${group.subWarehouse || ""}</td>
-      `;
-
-      tbody.appendChild(tr);
-    });
-  }
-
-  function handleLabelChange(groupIndex, labelIndex) {
-    const grouped = groupByShot(filteredRows);
-    const group = grouped[groupIndex];
-    const label = group.labels[labelIndex];
-
-    const newMakat = document.getElementById(`makat-${groupIndex}-${labelIndex}`).value.trim();
-    const newPka = document.getElementById(`pka-${groupIndex}-${labelIndex}`).value.trim();
-    const newQty = document.getElementById(`qty-${groupIndex}-${labelIndex}`).value.trim();
-
-    const changed =
-      newMakat !== (label.makat || "") ||
-      newPka !== (label.pka || "") ||
-      newQty !== String(label.qty || "");
-
-    const btn = document.getElementById(`save-label-${groupIndex}-${labelIndex}`);
-    if (btn) {
-      btn.style.display = changed ? "inline-block" : "none";
+        container.appendChild(card);
+      });
     }
-  }
 
-  async function saveLabelEdit(groupIndex, labelIndex) {
-    const grouped = groupByShot(filteredRows);
-    const group = grouped[groupIndex];
-    const label = group.labels[labelIndex];
+    function buildLabelsTable(group, isMobile) {
+      const table = document.createElement('table');
+      table.className = 'labels-table';
 
-    const newMakat = document.getElementById(`makat-${groupIndex}-${labelIndex}`).value.trim();
-    const newPka = document.getElementById(`pka-${groupIndex}-${labelIndex}`).value.trim();
-    const newQty = document.getElementById(`qty-${groupIndex}-${labelIndex}`).value.trim();
+      const thead = document.createElement('thead');
+      const hr = document.createElement('tr');
+      ['מק״ט', 'פק״ע', 'כמות', ''].forEach(h => {
+        const th = document.createElement('th');
+        th.textContent = h;
+        hr.appendChild(th);
+      });
+      thead.appendChild(hr);
+      table.appendChild(thead);
 
-    try {
-      const res = await fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify({
-          action: "updateLabel",
-          rowIndex: label.rowIndex,
-          newMakat,
-          newPka,
-          newQty
+      const tbody = document.createElement('tbody');
+
+      group.labels.forEach((lbl, idx) => {
+        const tr = document.createElement('tr');
+
+        const tdMakat = document.createElement('td');
+        const inpMakat = document.createElement('input');
+        inpMakat.value = lbl.makat || '';
+        inpMakat.dataset.groupId = group.shotId;
+        inpMakat.dataset.labelIndex = idx;
+        inpMakat.dataset.field = 'makat';
+        inpMakat.addEventListener('input', onLabelChanged);
+        tdMakat.appendChild(inpMakat);
+        tr.appendChild(tdMakat);
+
+        const tdPeka = document.createElement('td');
+        const inpPeka = document.createElement('input');
+        inpPeka.value = lbl.peka || '';
+        inpPeka.dataset.groupId = group.shotId;
+        inpPeka.dataset.labelIndex = idx;
+        inpPeka.dataset.field = 'peka';
+        inpPeka.addEventListener('input', onLabelChanged);
+        tdPeka.appendChild(inpPeka);
+        tr.appendChild(tdPeka);
+
+        const tdQty = document.createElement('td');
+        const inpQty = document.createElement('input');
+        inpQty.type = 'number';
+        inpQty.value = lbl.qty || 0;
+        inpQty.dataset.groupId = group.shotId;
+        inpQty.dataset.labelIndex = idx;
+        inpQty.dataset.field = 'qty';
+        inpQty.addEventListener('input', onLabelChanged);
+        tdQty.appendChild(inpQty);
+        tr.appendChild(tdQty);
+
+        const tdSave = document.createElement('td');
+        const btn = document.createElement('button');
+        btn.textContent = 'שמור';
+        btn.className = isMobile ? 'card-save-btn save-btn' : 'save-btn';
+        btn.dataset.groupId = group.shotId;
+        btn.dataset.labelIndex = idx;
+        btn.addEventListener('click', onSaveLabel);
+        tdSave.appendChild(btn);
+        tr.appendChild(tdSave);
+
+        tbody.appendChild(tr);
+      });
+
+      table.appendChild(tbody);
+      return table;
+    }
+
+    function onLabelChanged(e) {
+      const inp = e.target;
+      const groupId = inp.dataset.groupId;
+      const idx = Number(inp.dataset.labelIndex);
+      const field = inp.dataset.field;
+
+      const group = groupedShots.find(g => g.shotId === groupId);
+      if (!group) return;
+      const lbl = group.labels[idx];
+      if (!lbl) return;
+
+      let val = inp.value;
+      if (field === 'qty') {
+        val = Number(val) || 0;
+      }
+
+      lbl[field] = val;
+
+      // עדכון סה״כ
+      group.totalQty = group.labels.reduce((s, l) => s + (Number(l.qty) || 0), 0);
+      updateSummary();
+      render(); // כדי לעדכן את התצוגה של סה״כ
+
+      // הצגת כפתור שמירה
+      const table = inp.closest('table');
+      if (!table) return;
+      const btns = table.querySelectorAll('button.save-btn, .card-save-btn');
+      btns.forEach(b => {
+        if (b.dataset.groupId === groupId && Number(b.dataset.labelIndex) === idx) {
+          b.classList.add('visible');
+        }
+      });
+    }
+
+    function onSaveLabel(e) {
+      const btn = e.target;
+      const groupId = btn.dataset.groupId;
+      const idx = Number(btn.dataset.labelIndex);
+
+      const group = groupedShots.find(g => g.shotId === groupId);
+      if (!group) return;
+      const lbl = group.labels[idx];
+      if (!lbl) return;
+
+      const payload = {
+        rowIndex: lbl.rowIndex,
+        makat: lbl.makat,
+        peka: lbl.peka,
+        qty: lbl.qty
+      };
+
+      btn.disabled = true;
+      btn.textContent = 'שומר...';
+
+      google.script.run
+        .withSuccessHandler(() => {
+          btn.textContent = 'נשמר';
+          setTimeout(() => {
+            btn.classList.remove('visible');
+            btn.disabled = false;
+            btn.textContent = 'שמור';
+          }, 1000);
         })
-      });
+        .withFailureHandler(err => {
+          console.error('updateLabel error', err);
+          alert('שגיאה בשמירת התווית');
+          btn.disabled = false;
+          btn.textContent = 'שמור';
+        })
+        .updateLabel(payload);
+    }
 
-      const data = await res.json();
-      if (data.success) {
-        const btn = document.getElementById(`save-label-${groupIndex}-${labelIndex}`);
-        if (btn) btn.style.display = "none";
-        await loadHistory();
-      } else {
-        alert("שגיאה בעדכון");
+    document.getElementById('searchInput').addEventListener('input', () => {
+      render();
+    });
+
+    document.querySelectorAll('#historyTable th[data-sort]').forEach(th => {
+      th.addEventListener('click', () => {
+        const field = th.dataset.sort;
+        if (currentSort.field === field) {
+          currentSort.dir *= -1;
+        } else {
+          currentSort.field = field;
+          currentSort.dir = 1;
+        }
+        document.querySelectorAll('#historyTable th').forEach(h => {
+          h.classList.remove('sort-asc', 'sort-desc');
+        });
+        th.classList.add(currentSort.dir === 1 ? 'sort-asc' : 'sort-desc');
+        render();
+      });
+    });
+
+    function exportCsv() {
+      if (!groupedShots.length) {
+        alert('אין נתונים לייצוא');
+        return;
       }
-
-    } catch (e) {
-      alert("שגיאה בחיבור");
-    }
-  }
-
-  function exportCsv() {
-    if (!filteredRows || filteredRows.length === 0) {
-      alert("אין נתונים לייצוא");
-      return;
-    }
-
-    const grouped = groupByShot(filteredRows);
-    const headers = ["תאריך","שעה","עובד","פירוט תוויות","סה\"כ","מחסן","תת־מחסן"];
-    const lines = [headers.join(",")];
-
-    grouped.forEach(g => {
-      const labelText = g.labels.map(l =>
-        `מק\"ט: ${l.makat || ""}, פק\"ע: ${l.pka || ""}, כמות: ${l.qty || ""}`
-      ).join(" | ");
-
-      const totalQty = g.labels.reduce((sum, l) => sum + Number(l.qty || 0), 0);
-
-      const line = [
-        formatDateTime(g.date,"date"),
-        formatDateTime(g.time,"time"),
-        g.worker || "",
-        labelText,
-        totalQty,
-        g.warehouse || "",
-        g.subWarehouse || ""
-      ].map(v => `"${(v || "").toString().replace(/"/g,'""')}"`).join(",");
-
-      lines.push(line);
-    });
-
-    const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "history.csv";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    const searchInput = document.getElementById("searchInput");
-    searchInput.addEventListener("input", () => {
-      applyFiltersAndRender();
-    });
-
-    const ths = document.querySelectorAll("#historyTable thead th[data-sort]");
-    ths.forEach(th => {
-      th.addEventListener("click", () => {
-        const field = th.getAttribute("data-sort");
-        sortRows(field, currentSort.dir, true);
+      let rows = [];
+      rows.push(['תאריך','שעה','עובד','מחסן','תת־מחסן','מק״ט','פק״ע','כמות','סה״כ צילום']);
+      groupedShots.forEach(g => {
+        g.labels.forEach((lbl, i) => {
+          rows.push([
+            i === 0 ? g.date : '',
+            i === 0 ? g.time : '',
+            i === 0 ? g.worker : '',
+            i === 0 ? g.warehouse : '',
+            i === 0 ? g.subWarehouse : '',
+            lbl.makat,
+            lbl.peka,
+            lbl.qty,
+            i === 0 ? g.totalQty : ''
+          ]);
+        });
       });
-    });
-  });
-</script>
+      const csv = rows.map(r => r.join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'history.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
 
-<script src="menu.js"></script>
+    // אפשר לקרוא ל-loadToday אוטומטית אם אתה רוצה:
+    // window.onload = loadToday;
+  </script>
 </body>
 </html>
