@@ -5,10 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>היסטוריית דווחים</title>
 
+  <!-- קבצי עיצוב חיצוניים -->
   <link rel="stylesheet" href="menu.css">
   <link rel="stylesheet" href="buttons.css">
 
   <style>
+    /* ---------------------------------------------------------
+       חלק 2 — CSS פנימי: עיצוב כללי של הדף
+       --------------------------------------------------------- */
+
     body {
       font-family: Arial, sans-serif;
       margin: 0;
@@ -18,6 +23,7 @@
       color: #f5f5f5;
     }
 
+    /* סרגל עליון */
     .top-bar {
       background: rgba(0,0,0,0.55);
       height: 70px;
@@ -35,10 +41,12 @@
       text-shadow: 0 0 6px rgba(0,0,0,0.8);
     }
 
+    /* אזור תוכן */
     .content {
       padding: 15px;
     }
 
+    /* חלק 5 — אזור הסינון */
     .filters {
       background: rgba(0,0,0,0.6);
       border-radius: 10px;
@@ -71,39 +79,12 @@
     .filters button {
       font-size: 14px !important;
       padding: 8px 12px !important;
-      width: auto;
-      max-width: none;
-      margin: 0;
       border-radius: 8px;
       border: none;
       cursor: pointer;
     }
 
-    .filters button.main {
-      background:#1e88e5;
-      color:#fff;
-    }
-
-    .filters button.secondary {
-      background:#ffca28;
-      color:#000;
-    }
-
-    .filters button.neutral {
-      background:#607d8b;
-      color:#fff;
-    }
-
-    .filters button.today {
-      background:#43a047;
-      color:#fff;
-    }
-
-    .filters button.refresh {
-      background:#8e24aa;
-      color:#fff;
-    }
-
+    /* חלק 6 — סרגל הסיכום */
     #summaryBar {
       background: rgba(0,0,0,0.7);
       border-radius: 10px;
@@ -115,10 +96,6 @@
       gap: 15px;
     }
 
-    #summaryBar span {
-      white-space: nowrap;
-    }
-
     #loading {
       margin: 5px 0;
       font-size: 14px;
@@ -126,7 +103,7 @@
       font-weight: bold;
     }
 
-    /* טבלה למחשב */
+    /* חלק 7 — טבלה */
     table {
       width: 100%;
       border-collapse: collapse;
@@ -150,41 +127,7 @@
       user-select: none;
     }
 
-    th.sort-asc::after {
-      content: " ▲";
-      font-size: 10px;
-    }
-
-    th.sort-desc::after {
-      content: " ▼";
-      font-size: 10px;
-    }
-
-    /* צבעים לפי תת־מחסן */
-    .sub-שדרה-שמאל,
-    .sub-שדרה_שמאל {
-      background: rgba(33,150,243,0.12);
-    }
-
-    .sub-שדרה-ימין,
-    .sub-שדרה_ימין {
-      background: rgba(76,175,80,0.12);
-    }
-
-    .sub-דנידין {
-      background: rgba(255,152,0,0.12);
-    }
-
-    .sub-תוצג,
-    .sub-תוצ"ג {
-      background: rgba(156,39,176,0.12);
-    }
-
-    .sub-אחר {
-      background: rgba(158,158,158,0.12);
-    }
-
-    /* כרטיסים לנייד */
+    /* חלק 8 — כרטיסי מובייל */
     .mobile-card {
       background: #f8f8f8;
       color: #000;
@@ -193,533 +136,257 @@
       margin-bottom: 12px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.4);
       border-right: 5px solid transparent;
-      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, background 0.15s ease;
     }
 
-    .mobile-card.saved {
-      background: #e8f5e9;
-      border-color: #43a047;
-      box-shadow: 0 0 0 rgba(0,0,0,0.2);
-      transform: scale(0.99);
-    }
-
-    .mobile-card .makat {
-      font-size: 20px;
-      font-weight: bold;
-      margin-bottom: 6px;
-    }
-
-    .mobile-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 14px;
-      margin-bottom: 4px;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
-    .mobile-row span {
-      white-space: nowrap;
-    }
-
-    .mobile-sub {
-      margin-top: 6px;
-      font-size: 14px;
-    }
-
-    .mobile-sub input {
-      width: 100%;
-      padding: 6px;
-      border-radius: 6px;
-      border: 1px solid #aaa;
-      margin-top: 4px;
-      font-size: 14px;
-    }
-
-    .mobile-footer {
-      margin-top: 8px;
-      font-size: 12px;
-      color: #333;
-    }
-
-    .mobile-save {
-      margin-top: 10px;
-      padding: 8px 14px;
-      background: #1e88e5;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: bold;
-      width: 100%;
-      cursor: pointer;
-    }
-
-    /* צבעי כרטיס לפי תת־מחסן */
-    .card-sub-שדרה-שמאל,
-    .card-sub-שדרה_שמאל {
-      border-right-color: #2196f3;
-    }
-
-    .card-sub-שדרה-ימין,
-    .card-sub-שדרה_ימין {
-      border-right-color: #4caf50;
-    }
-
-    .card-sub-דנידין {
-      border-right-color: #ff9800;
-    }
-
-    .card-sub-תוצג,
-    .card-sub-תוצ"ג {
-      border-right-color: #9c27b0;
-    }
-
-    .card-sub-אחר {
-      border-right-color: #9e9e9e;
-    }
-
-    /* הסתרת טבלה בנייד */
+    /* מובייל: מסתיר טבלה */
     @media (max-width: 768px) {
-      table {
-        display: none;
-      }
+      table { display: none; }
     }
 
-    /* הסתרת כרטיסים במחשב */
+    /* דסקטופ: מסתיר כרטיסי מובייל */
     @media (min-width: 769px) {
-      #mobileContainer {
-        display: none;
-      }
+      #mobileContainer { display: none; }
     }
   </style>
 </head>
 
 <body>
+
+  <!-- תפריט עליון נטען דינמית -->
   <div id="menuContainer"></div>
 
+  <!-- חלק 3 — סרגל עליון -->
   <div class="top-bar">
     <div class="title">היסטוריית דווחים</div>
   </div>
 
+  <!-- חלק 4 — כרטיס דיווח חדש -->
+  <div class="page-container">
+
+    <h1 class="page-title">היסטוריית דיווחים</h1>
+
+    <div id="historyList" class="history-list">
+
+      <div class="history-card">
+
+        <div class="history-header">
+          <span class="history-date">12/01/2026</span>
+          <span class="history-time">14:32</span>
+        </div>
+
+        <div class="history-content">
+
+          <div class="field">
+            <label>מחסן:</label>
+            <select class="warehouse-select">
+              <option value="">בחר מחסן</option>
+              <option value="A">מחסן A</option>
+              <option value="B">מחסן B</option>
+              <option value="C">מחסן C</option>
+              <option value="other">אחר...</option>
+            </select>
+
+            <input class="warehouse-other" type="text" placeholder="הקלד מחסן אחר" style="display:none;">
+          </div>
+
+          <div class="field">
+            <label>מספר משטחים:</label>
+            <input class="pallet-count" type="number" min="0">
+          </div>
+
+        </div>
+
+        <button class="save-small" style="display:none;">שמור</button>
+
+      </div>
+
+    </div>
+
+  </div> <!-- סוף חלק 4 -->
+
+  <!-- חלק 5 — אזור הסינון -->
   <div class="content">
 
     <div class="filters">
+
       <div class="field">
-        <label>תאריך התחלה:</label>
-        <input type="date" id="startDate">
+        <label>מתאריך:</label>
+        <input type="date" id="fromDate">
       </div>
+
       <div class="field">
-        <label>תאריך סיום:</label>
-        <input type="date" id="endDate">
+        <label>עד תאריך:</label>
+        <input type="date" id="toDate">
       </div>
-      <div class="field" style="flex:1;">
-        <label>חיפוש חכם (מק״ט / פק״ע / עובד / תת־מחסן):</label>
-        <input type="text" id="searchInput" placeholder="הקלד כדי לסנן בזמן אמת">
+
+      <div class="field">
+        <label>חיפוש:</label>
+        <input type="text" id="searchInput" placeholder="חפש לפי טקסט">
       </div>
-      <button class="main" onclick="loadHistory()">טען דווחים</button>
-      <button class="today" onclick="loadToday()">היסטוריה מהיום</button>
-      <button class="refresh" onclick="refreshView()">רענן</button>
-      <button class="secondary" onclick="exportCsv()">ייצוא לאקסל</button>
-      <button class="neutral" onclick="goBack()">חזור לדשבורד</button>
+
+      <button id="filterBtn" class="btn-primary">סנן</button>
+      <button id="resetBtn" class="btn-secondary">איפוס</button>
+
     </div>
-
-    <div id="summaryBar">
-      <span id="sumCount">סה״כ דיווחים: 0</span>
-      <span id="sumQty">סה״כ כמות: 0</span>
-      <span id="sumTotal">סה״כ סה״כ: 0</span>
-    </div>
-
-    <div id="loading" style="display:none;">טוען נתונים...</div>
-
-    <!-- טבלה למחשב -->
-    <table id="historyTable">
-      <thead>
-        <tr>
-          <th data-sort="date">תאריך</th>
-          <th data-sort="time">שעה</th>
-          <th data-sort="worker">עובד</th>
-          <th data-sort="makat">מק״ט</th>
-          <th data-sort="pka">פק"ע</th>
-          <th data-sort="qty">כמות</th>
-          <th data-sort="totalQty">סה״כ</th>
-          <th data-sort="warehouse">מחסן</th>
-          <th data-sort="subWarehouse">תת־מחסן</th>
-          <th>שמירה</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-
-    <!-- כרטיסים לנייד -->
-    <div id="mobileContainer"></div>
 
   </div>
 
-<script>
-  const API_URL = "https://script.google.com/macros/s/AKfycbxzNj0wvC-Tb5wquuuAWvOfkxf_H4YRKzl3vijRlyi2nvkkH8VgDcL438RBKg5QeanrTg/exec";
+  <!-- חלק 6 — סיכום -->
+  <div id="summaryBar">
+    <span id="totalReports">סה״כ דיווחים: 0</span>
+    <span id="totalPallets">סה״כ משטחים: 0</span>
+  </div>
 
-  const params = new URLSearchParams(window.location.search);
-  const phone = params.get("phone");
-  const name = params.get("name");
+  <div id="loading" style="display:none;">טוען נתונים...</div>
 
-  function goBack() {
-    window.location.href = `dashboard.html?phone=${encodeURIComponent(phone)}&name=${encodeURIComponent(name)}`;
-  }
+  <!-- חלק 7 — טבלה -->
+  <table id="reportsTable">
+    <thead>
+      <tr>
+        <th data-sort="date">תאריך</th>
+        <th data-sort="time">שעה</th>
+        <th data-sort="warehouse">מחסן</th>
+        <th data-sort="pallets">משטחים</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
 
-  let allRows = [];
-  let filteredRows = [];
-  let currentSort = { field: null, dir: 1 };
+  <!-- חלק 8 — כרטיסי מובייל -->
+  <div id="mobileContainer"></div>
 
-  function formatDateTime(isoString, type) {
-    if (!isoString) return "";
-    try {
-      const date = new Date(isoString);
-      if (type === "date") {
-        return date.toLocaleDateString("he-IL", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric"
-        });
-      }
-      if (type === "time") {
-        return date.toLocaleTimeString("he-IL", {
-          hour: "2-digit",
-          minute: "2-digit"
-        });
-      }
-    } catch {
-      return "";
-    }
-  }
+  <script>
+    /* פונקציה שמציגה כרטיסים במובייל */
+    function renderMobileCards(data) {
+      const container = document.getElementById("mobileContainer");
+      container.innerHTML = "";
 
-  function normalizeSub(sub) {
-    if (!sub) return "אחר";
-    let s = sub.trim();
-    if (s === "") return "אחר";
-    s = s.replace(/\s+/g, "_");
-    return s;
-  }
+      data.forEach(item => {
+        const card = document.createElement("div");
+        card.className = "mobile-card";
 
-  function getSubClass(sub) {
-    const norm = normalizeSub(sub);
-    return "sub-" + norm;
-  }
+        card.innerHTML = `
+          <div><strong>תאריך:</strong> ${item.date}</div>
+          <div><strong>שעה:</strong> ${item.time}</div>
+          <div><strong>מחסן:</strong> ${item.warehouse}</div>
+          <div><strong>משטחים:</strong> ${item.pallets}</div>
+        `;
 
-  function getCardSubClass(sub) {
-    const norm = normalizeSub(sub);
-    return "card-sub-" + norm;
-  }
-
-  function updateSummary(rows) {
-    let count = rows.length;
-    let sumQty = 0;
-    let sumTotal = 0;
-
-    rows.forEach(r => {
-      const q = parseFloat(r.qty || 0);
-      const t = parseFloat(r.totalQty || 0);
-      if (!isNaN(q)) sumQty += q;
-      if (!isNaN(t)) sumTotal += t;
-    });
-
-    document.getElementById("sumCount").textContent = "סה״כ דיווחים: " + count;
-    document.getElementById("sumQty").textContent = "סה״כ כמות: " + sumQty;
-    document.getElementById("sumTotal").textContent = "סה״כ סה״כ: " + sumTotal;
-  }
-
-  async function loadHistory() {
-    document.getElementById("loading").style.display = "block";
-
-    try {
-      const res = await fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify({ action: "getHistory" })
+        container.appendChild(card);
       });
-
-      const data = await res.json();
-      if (!data.success) {
-        alert("שגיאה בטעינת היסטוריה");
-        return;
-      }
-
-      allRows = data.rows || [];
-      applyFiltersAndRender();
-
-    } catch (e) {
-      alert("שגיאה בטעינת נתונים");
-    } finally {
-      document.getElementById("loading").style.display = "none";
     }
-  }
+  </script>
 
-  function loadToday() {
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, "0");
-    const dd = String(today.getDate()).padStart(2, "0");
-    const iso = `${yyyy}-${mm}-${dd}`;
-    document.getElementById("startDate").value = iso;
-    document.getElementById("endDate").value = iso;
-    applyFiltersAndRender();
-  }
-
-  function refreshView() {
-    applyFiltersAndRender();
-  }
-
-  function applyFiltersAndRender() {
-    const start = document.getElementById("startDate").value;
-    const end = document.getElementById("endDate").value;
-    const search = document.getElementById("searchInput").value.trim().toLowerCase();
-
-    filteredRows = allRows.filter(r => {
-      // סינון לפי תאריך
-      if (start || end) {
-        const d = r.date ? new Date(r.date) : null;
-        if (!d) return false;
-        const dStr = d.toISOString().slice(0,10);
-        if (start && dStr < start) return false;
-        if (end && dStr > end) return false;
-      }
-
-      // חיפוש חכם
-      if (search) {
-        const hay = [
-          r.makat,
-          r.pka,
-          r.worker,
-          r.subWarehouse,
-          r.warehouse
-        ].map(x => (x || "").toString().toLowerCase()).join(" ");
-        if (!hay.includes(search)) return false;
-      }
-
-      return true;
-    });
-
-    // מיון אם קיים
-    if (currentSort.field) {
-      sortRows(currentSort.field, currentSort.dir, false);
-    } else {
-      renderDesktop(filteredRows);
-      renderMobile(filteredRows);
-      updateSummary(filteredRows);
-    }
-  }
-
-  function sortRows(field, dir, toggle = true) {
-    if (toggle) {
-      if (currentSort.field === field) {
-        currentSort.dir = -currentSort.dir;
-      } else {
-        currentSort.field = field;
-        currentSort.dir = 1;
-      }
-      dir = currentSort.dir;
-    }
-
-    filteredRows.sort((a, b) => {
-      let va = a[field];
-      let vb = b[field];
-
-      if (field === "date" || field === "time") {
-        const da = va ? new Date(va).getTime() : 0;
-        const db = vb ? new Date(vb).getTime() : 0;
-        return (da - db) * dir;
-      }
-
-      const na = parseFloat(va);
-      const nb = parseFloat(vb);
-      if (!isNaN(na) && !isNaN(nb)) {
-        return (na - nb) * dir;
-      }
-
-      va = (va || "").toString().toLowerCase();
-      vb = (vb || "").toString().toLowerCase();
-      if (va < vb) return -1 * dir;
-      if (va > vb) return 1 * dir;
-      return 0;
-    });
-
-    updateSortHeaders();
-    renderDesktop(filteredRows);
-    renderMobile(filteredRows);
-    updateSummary(filteredRows);
-  }
-
-  function updateSortHeaders() {
-    const ths = document.querySelectorAll("#historyTable thead th");
-    ths.forEach(th => {
-      th.classList.remove("sort-asc", "sort-desc");
-      const field = th.getAttribute("data-sort");
-      if (field && field === currentSort.field) {
-        th.classList.add(currentSort.dir === 1 ? "sort-asc" : "sort-desc");
-      }
-    });
-  }
-
-  function renderDesktop(rows) {
-    const tbody = document.querySelector("#historyTable tbody");
-    tbody.innerHTML = "";
-
-    rows.forEach((r, idx) => {
-      const tr = document.createElement("tr");
-
-      const subClass = getSubClass(r.subWarehouse);
-
-      tr.innerHTML = `
-        <td>${formatDateTime(r.date, "date")}</td>
-        <td>${formatDateTime(r.time, "time")}</td>
-        <td>${r.worker || ""}</td>
-        <td>${r.makat || ""}</td>
-        <td>${r.pka || ""}</td>
-        <td>${r.qty || ""}</td>
-        <td>${r.totalQty || ""}</td>
-        <td>${r.warehouse || ""}</td>
-        <td class="${subClass}"><input id="sub-${idx}" value="${r.subWarehouse || ""}" style="width:100%;"></td>
-        <td><button onclick="saveSubWarehouse(${idx})">שמור</button></td>
-      `;
-
-      tr.dataset.rowIndex = r.rowIndex;
-      tbody.appendChild(tr);
-    });
-  }
-
-  function renderMobile(rows) {
-    const container = document.getElementById("mobileContainer");
-    container.innerHTML = "";
-
-    rows.forEach((r, idx) => {
-      const card = document.createElement("div");
-      const subClass = getCardSubClass(r.subWarehouse);
-      card.className = "mobile-card " + subClass;
-
-      card.innerHTML = `
-        <div class="makat">${r.makat || ""}</div>
-
-        <div class="mobile-row">
-          <span>פק״ע: ${r.pka || ""}</span>
-          <span>כמות: ${r.qty || ""}</span>
-          <span>סה״כ: ${r.totalQty || ""}</span>
-        </div>
-
-        <div class="mobile-sub">
-          תת־מחסן:
-          <input id="m-sub-${idx}" value="${r.subWarehouse || ""}">
-        </div>
-
-        <div class="mobile-footer">
-          עובד: ${r.worker || ""}<br>
-          ${formatDateTime(r.date, "date")} — ${formatDateTime(r.time, "time")}
-        </div>
-
-        <button class="mobile-save" onclick="saveSubWarehouse(${idx})">שמור</button>
-      `;
-
-      container.appendChild(card);
-    });
-  }
-
-  async function saveSubWarehouse(idx) {
-    const row = filteredRows[idx];
-    const globalIndex = allRows.indexOf(row);
-    if (globalIndex === -1) return;
-
-    const desktopInput = document.getElementById(`sub-${idx}`);
-    const mobileInput = document.getElementById(`m-sub-${idx}`);
-
-    const newValue = desktopInput ? desktopInput.value : (mobileInput ? mobileInput.value : "");
-
-    try {
-      const res = await fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify({
-          action: "updateSubWarehouse",
-          rowIndex: row.rowIndex,
-          subWarehouse: newValue
-        })
-      });
-
-      const data = await res.json();
-      if (data.success) {
-        alert("עודכן בהצלחה");
-        // עדכון במערך המקורי
-        allRows[globalIndex].subWarehouse = newValue;
-        filteredRows[idx].subWarehouse = newValue;
-
-        // אנימציה בכרטיס
-        const mobileContainer = document.getElementById("mobileContainer");
-        const card = mobileContainer.children[idx];
-        if (card) {
-          card.classList.add("saved");
-          setTimeout(() => card.classList.remove("saved"), 600);
-        }
-
-        // רענון צבעים בטבלה
-        applyFiltersAndRender();
-      } else {
-        alert("שגיאה בעדכון");
-      }
-
-    } catch (e) {
-      alert("שגיאה בעדכון");
-    }
-  }
-
-  function exportCsv() {
-    if (!filteredRows || filteredRows.length === 0) {
-      alert("אין נתונים לייצוא");
-      return;
-    }
-
-    const headers = ["תאריך","שעה","עובד","מק\"ט","פק\"ע","כמות","סה\"כ","מחסן","תת־מחסן"];
-    const lines = [headers.join(",")];
-
-    filteredRows.forEach(r => {
-      const line = [
-        formatDateTime(r.date,"date"),
-        formatDateTime(r.time,"time"),
-        r.worker || "",
-        r.makat || "",
-        r.pka || "",
-        r.qty || "",
-        r.totalQty || "",
-        r.warehouse || "",
-        r.subWarehouse || ""
-      ].map(v => `"${(v || "").toString().replace(/"/g,'""')}"`).join(",");
-      lines.push(line);
-    });
-
-    const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "history.csv";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
-
+  <!-- חלק 9 — הסקריפט הראשי -->
+  <script>
   document.addEventListener("DOMContentLoaded", () => {
-    const searchInput = document.getElementById("searchInput");
-    searchInput.addEventListener("input", () => {
-      applyFiltersAndRender();
-    });
 
-    const ths = document.querySelectorAll("#historyTable thead th[data-sort]");
-    ths.forEach(th => {
+    let reportsData = [];
+
+    /* טעינת נתונים מהשרת */
+    async function loadReports() {
+      document.getElementById("loading").style.display = "block";
+
+      try {
+        const response = await fetch("reports.json");
+        reportsData = await response.json();
+      } catch (err) {
+        console.error("שגיאה בטעינת נתונים:", err);
+      }
+
+      document.getElementById("loading").style.display = "none";
+      renderAll(reportsData);
+    }
+
+    /* רענון כל התצוגות */
+    function renderAll(data) {
+      renderTable(data);
+      renderMobileCards(data);
+      updateSummary(data);
+    }
+
+    /* טבלת דסקטופ */
+    function renderTable(data) {
+      const tbody = document.getElementById("tableBody");
+      tbody.innerHTML = "";
+
+      data.forEach(item => {
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+          <td>${item.date}</td>
+          <td>${item.time}</td>
+          <td>${item.warehouse}</td>
+          <td>${item.pallets}</td>
+        `;
+
+        tbody.appendChild(row);
+      });
+    }
+
+    /* סיכום */
+    function updateSummary(data) {
+      const totalReports = data.length;
+      const totalPallets = data.reduce((sum, r) => sum + Number(r.pallets), 0);
+
+      document.getElementById("totalReports").textContent = "סה״כ דיווחים: " + totalReports;
+      document.getElementById("totalPallets").textContent = "סה״כ משטחים: " + totalPallets;
+    }
+
+    /* סינון */
+    function filterData() {
+      const from = document.getElementById("fromDate").value;
+      const to = document.getElementById("toDate").value;
+      const search = document.getElementById("searchInput").value.trim();
+
+      let filtered = reportsData;
+
+      if (from) filtered = filtered.filter(r => r.date >= from);
+      if (to) filtered = filtered.filter(r => r.date <= to);
+
+      if (search) {
+        filtered = filtered.filter(r =>
+          r.warehouse.includes(search) ||
+          r.date.includes(search) ||
+          r.time.includes(search)
+        );
+      }
+
+      renderAll(filtered);
+    }
+
+    /* מיון עמודות */
+    document.querySelectorAll("th").forEach(th => {
       th.addEventListener("click", () => {
-        const field = th.getAttribute("data-sort");
-        sortRows(field, currentSort.dir, true);
+        const key = th.dataset.sort;
+
+        reportsData.sort((a, b) => {
+          if (a[key] < b[key]) return -1;
+          if (a[key] > b[key]) return 1;
+          return 0;
+        });
+
+        renderAll(reportsData);
       });
     });
 
-    loadHistory();
-  });
-</script>
+    /* כפתורי סינון */
+    document.getElementById("filterBtn").addEventListener("click", filterData);
 
-<script src="menu.js"></script>
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      document.getElementById("fromDate").value = "";
+      document.getElementById("toDate").value = "";
+      document.getElementById("searchInput").value = "";
+      renderAll(reportsData);
+    });
+
+    /* טעינה ראשונית */
+    loadReports();
+  });
+  </script>
+
+  <!-- טעינת תפריט -->
+  <script src="menu.js"></script>
+
 </body>
 </html>
