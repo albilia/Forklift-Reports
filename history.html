@@ -87,30 +87,11 @@
       cursor: pointer;
     }
 
-    .filters button.main {
-      background:#1e88e5;
-      color:#fff;
-    }
-
-    .filters button.secondary {
-      background:#ffca28;
-      color:#000;
-    }
-
-    .filters button.neutral {
-      background:#607d8b;
-      color:#fff;
-    }
-
-    .filters button.today {
-      background:#43a047;
-      color:#fff;
-    }
-
-    .filters button.refresh {
-      background:#8e24aa;
-      color:#fff;
-    }
+    .filters button.main { background:#1e88e5; color:#fff; }
+    .filters button.secondary { background:#ffca28; color:#000; }
+    .filters button.neutral { background:#607d8b; color:#fff; }
+    .filters button.today { background:#43a047; color:#fff; }
+    .filters button.refresh { background:#8e24aa; color:#fff; }
 
     #summaryBar {
       background: rgba(0,0,0,0.7);
@@ -123,9 +104,7 @@
       gap: 15px;
     }
 
-    #summaryBar span {
-      white-space: nowrap;
-    }
+    #summaryBar span { white-space: nowrap; }
 
     #loading {
       margin: 5px 0;
@@ -158,192 +137,11 @@
       user-select: none;
     }
 
-    th.sort-asc::after {
-      content: " ▲";
-      font-size: 10px;
-    }
+    th.sort-asc::after { content: " ▲"; font-size: 10px; }
+    th.sort-desc::after { content: " ▼"; font-size: 10px; }
 
-    th.sort-desc::after {
-      content: " ▼";
-      font-size: 10px;
-    }
-
-    .sub-שדרה-שמאל,
-    .sub-שדרה_שמאל {
-      background: rgba(33,150,243,0.12);
-    }
-
-    .sub-שדרה-ימין,
-    .sub-שדרה_ימין {
-      background: rgba(76,175,80,0.12);
-    }
-
-    .sub-דנידין {
-      background: rgba(255,152,0,0.12);
-    }
-
-    .sub-תוצג,
-    .sub-תוצ"ג {
-      background: rgba(156,39,176,0.12);
-    }
-
-    .sub-אחר {
-      background: rgba(158,158,158,0.12);
-    }
-
-    .mobile-card {
-      background: #f8f8f8;
-      color: #000;
-      border-radius: 12px;
-      padding: 12px;
-      margin-bottom: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-      border-right: 5px solid transparent;
-      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, background 0.15s ease;
-    }
-
-    .mobile-card.saved {
-      background: #e8f5e9;
-      border-color: #43a047;
-      box-shadow: 0 0 0 rgba(0,0,0,0.2);
-      transform: scale(0.99);
-    }
-
-    .mobile-card .makat {
-      font-size: 20px;
-      font-weight: bold;
-      margin-bottom: 6px;
-    }
-
-    .mobile-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 14px;
-      margin-bottom: 4px;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
-    .mobile-row span {
-      white-space: nowrap;
-    }
-
-    .mobile-sub {
-      margin-top: 6px;
-      font-size: 14px;
-    }
-
-    .mobile-sub select,
-    .mobile-sub input {
-      width: 100%;
-      padding: 6px;
-      border-radius: 6px;
-      border: 1px solid #aaa;
-      margin-top: 4px;
-      font-size: 14px;
-    }
-
-    .mobile-footer {
-      margin-top: 8px;
-      font-size: 12px;
-      color: #333;
-    }
-
-    .mobile-save {
-      margin-top: 8px;
-      padding: 6px 10px;
-      background: #1e88e5;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: bold;
-      width: auto;
-      align-self: flex-start;
-      cursor: pointer;
-      display: none;
-    }
-
-    .mobile-card.changed .mobile-save {
-      display: inline-block;
-    }
-
-    .card-sub-שדרה-שמאל,
-    .card-sub-שדרה_שמאל {
-      border-right-color: #2196f3;
-    }
-
-    .card-sub-שדרה-ימין,
-    .card-sub-שדרה_ימין {
-      border-right-color: #4caf50;
-    }
-
-    .card-sub-דנידין {
-      border-right-color: #ff9800;
-    }
-
-    .card-sub-תוצג,
-    .card-sub-תוצ"ג {
-      border-right-color: #9c27b0;
-    }
-
-    .card-sub-אחר {
-      border-right-color: #9e9e9e;
-    }
-
-    .sub-select {
-      width: 100%;
-      padding: 4px;
-      border-radius: 4px;
-      border: 1px solid #aaa;
-      font-size: 13px;
-      margin-bottom: 4px;
-    }
-
-    .sub-other-input {
-      width: 100%;
-      padding: 4px;
-      border-radius: 4px;
-      border: 1px solid #aaa;
-      font-size: 13px;
-      display: none;
-    }
-
-    .sub-search-input {
-      width: 100%;
-      padding: 3px;
-      border-radius: 4px;
-      border: 1px solid #bbb;
-      font-size: 12px;
-      margin-bottom: 3px;
-    }
-
-    .save-small-btn {
-      padding: 4px 8px;
-      font-size: 11px;
-      border-radius: 6px;
-      border: none;
-      background:#1e88e5;
-      color:#fff;
-      cursor:pointer;
-      display:none;
-    }
-
-    .save-small-btn.visible {
-      display:inline-block;
-    }
-
-    @media (max-width: 768px) {
-      table {
-        display: none;
-      }
-    }
-
-    @media (min-width: 769px) {
-      #mobileContainer {
-        display: none;
-      }
-    }
+    @media (max-width: 768px) { table { display: none; } }
+    @media (min-width: 769px) { #mobileContainer { display: none; } }
   </style>
 </head>
 
@@ -366,7 +164,7 @@
         <input type="date" id="endDate">
       </div>
       <div class="field" style="flex:1;">
-        <label>חיפוש חכם (מק״ט / פק״ע / עובד / תת־מחסן):</label>
+        <label>חיפוש חכם:</label>
         <input type="text" id="searchInput" placeholder="הקלד כדי לסנן בזמן אמת">
       </div>
       <button class="main" onclick="loadHistory()">טען דווחים</button>
@@ -389,13 +187,10 @@
           <th data-sort="date">תאריך</th>
           <th data-sort="time">שעה</th>
           <th data-sort="worker">עובד</th>
-          <th data-sort="makat">מק״ט</th>
-          <th data-sort="pka">פק"ע</th>
-          <th data-sort="qty">כמות</th>
+          <th>פירוט תוויות</th>
           <th data-sort="totalQty">סה״כ</th>
           <th data-sort="warehouse">מחסן</th>
           <th data-sort="subWarehouse">תת־מחסן</th>
-          <th>שמירה</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -415,28 +210,6 @@
   function goBack() {
     window.location.href = `dashboard.html?phone=${encodeURIComponent(phone)}&name=${encodeURIComponent(name)}`;
   }
-
-  const SUB_WAREHOUSES = [
-    "דנידין",
-    "בצק סוכר ימין",
-    "בצק סוכר שמאל",
-    "שדרה מרכזית רצפה",
-    "שדרה מרכזית ימין",
-    "שדרה מרכזית שמאל",
-    "שדרה מרכזית מדפים",
-    "שדרה שמאל",
-    "שדרה שמאל צד שמאל",
-    "שדרה שמאל תחת הגלריה",
-    "כניסה שמאל",
-    "כניסה ימין",
-    "קלוי קלוף",
-    "קלוי קלוף טור",
-    "קיר ווילטון בחוץ",
-    "קיר שרינק",
-    "מחסן חדש",
-    "מחסן חדש שמאל",
-    "מחסן חדש ימין"
-  ];
 
   let allRows = [];
   let filteredRows = [];
@@ -464,30 +237,40 @@
     }
   }
 
-  function normalizeSub(sub) {
-    if (!sub) return "אחר";
-    let s = sub.trim();
-    if (s === "") return "אחר";
-    s = s.replace(/\s+/g, "_");
-    return s;
+  function parseDate(d) {
+    if (!d) return null;
+    const parts = d.trim().split("/");
+    if (parts.length !== 3) return null;
+    const [day, month, year] = parts;
+    return new Date(Number(year), Number(month) - 1, Number(day));
   }
 
-  function getSubClass(sub) {
-    const norm = normalizeSub(sub);
-    return "sub-" + norm;
-  }
+  function groupByShot(rows) {
+    const grouped = {};
 
-  function getCardSubClass(sub) {
-    const norm = normalizeSub(sub);
-    return "card-sub-" + norm;
-  }
+    rows.forEach(r => {
+      const key = `${r.date}|${r.time}|${r.worker}|${r.subWarehouse}`;
 
-  function updateSummary(rows) {
-    const count = rows.length;
-    const pallets = rows.length; // כל דווח = משטח אחד
+      if (!grouped[key]) {
+        grouped[key] = {
+          date: r.date,
+          time: r.time,
+          worker: r.worker,
+          subWarehouse: r.subWarehouse,
+          warehouse: r.warehouse,
+          labels: [],
+          rowIndex: r.rowIndex
+        };
+      }
 
-    document.getElementById("sumCount").textContent = "סה״כ דיווחים: " + count;
-    document.getElementById("sumPallets").textContent = "סה״כ משטחים: " + pallets;
+      grouped[key].labels.push({
+        makat: r.makat,
+        pka: r.pka,
+        qty: r.qty
+      });
+    });
+
+    return Object.values(grouped);
   }
 
   async function loadHistory() {
@@ -536,18 +319,14 @@
     const search = document.getElementById("searchInput").value.trim().toLowerCase();
 
     filteredRows = allRows.filter(r => {
-    if (start || end) {
-  const rowDate = (r.date || "").toString().trim();
-  if (!rowDate) return false;
+      if (start || end) {
+        const rowDateObj = parseDate(r.date);
+        const startDateObj = start ? new Date(start) : null;
+        const endDateObj = end ? new Date(end) : null;
 
-  const [day, month, year] = rowDate.split("/");
-  const rowDateObj = new Date(`${year}-${month}-${day}`);
-  const startDateObj = start ? new Date(start) : null;
-  const endDateObj = end ? new Date(end) : null;
-
-  if (startDateObj && rowDateObj < startDateObj) return false;
-  if (endDateObj && rowDateObj > endDateObj) return false;
-}
+        if (startDateObj && rowDateObj < startDateObj) return false;
+        if (endDateObj && rowDateObj > endDateObj) return false;
+      }
 
       if (search) {
         const hay = [
@@ -563,368 +342,51 @@
       return true;
     });
 
-    if (currentSort.field) {
-      sortRows(currentSort.field, currentSort.dir, false);
-    } else {
-      renderDesktop(filteredRows);
-      renderMobile(filteredRows);
-      updateSummary(filteredRows);
-    }
-  }
-
-  function sortRows(field, dir, toggle = true) {
-    if (toggle) {
-      if (currentSort.field === field) {
-        currentSort.dir = -currentSort.dir;
-      } else {
-        currentSort.field = field;
-        currentSort.dir = 1;
-      }
-      dir = currentSort.dir;
-    }
-
-    filteredRows.sort((a, b) => {
-      let va = a[field];
-      let vb = b[field];
-
-      if (field === "date" || field === "time") {
-        const da = va ? new Date(va).getTime() : 0;
-        const db = vb ? new Date(vb).getTime() : 0;
-        return (da - db) * dir;
-      }
-
-      const na = parseFloat(va);
-      const nb = parseFloat(vb);
-      if (!isNaN(na) && !isNaN(nb)) {
-        return (na - nb) * dir;
-      }
-
-      va = (va || "").toString().toLowerCase();
-      vb = (vb || "").toString().toLowerCase();
-      if (va < vb) return -1 * dir;
-      if (va > vb) return 1 * dir;
-      return 0;
-    });
-
-    updateSortHeaders();
     renderDesktop(filteredRows);
-    renderMobile(filteredRows);
     updateSummary(filteredRows);
   }
 
-  function updateSortHeaders() {
-    const ths = document.querySelectorAll("#historyTable thead th");
-    ths.forEach(th => {
-      th.classList.remove("sort-asc", "sort-desc");
-      const field = th.getAttribute("data-sort");
-      if (field && field === currentSort.field) {
-        th.classList.add(currentSort.dir === 1 ? "sort-asc" : "sort-desc");
-      }
-    });
-  }
-
-  function buildSubSelectHTML(idx, currentValue, isMobile) {
-    const safeValue = (currentValue || "").trim();
-    const isOther = safeValue && !SUB_WAREHOUSES.includes(safeValue);
-    const options = SUB_WAREHOUSES.map(v => {
-      const selected = v === safeValue ? 'selected' : '';
-      return `<option value="${v}" ${selected}>${v}</option>`;
-    }).join("");
-    const otherSelected = isOther ? 'selected' : '';
-    const otherValue = isOther ? safeValue : '';
-
-    const selectId = isMobile ? `m-sub-select-${idx}` : `sub-select-${idx}`;
-    const otherId = isMobile ? `m-sub-other-${idx}` : `sub-other-${idx}`;
-    const searchId = isMobile ? `m-sub-search-${idx}` : `sub-search-${idx}`;
-
-    return `
-      <input id="${searchId}" class="sub-search-input" placeholder="חיפוש במחסנים">
-      <select id="${selectId}" class="sub-select">
-        <option value="">בחר תת־מחסן</option>
-        ${options}
-        <option value="__OTHER__" ${otherSelected}>אחר</option>
-      </select>
-      <input id="${otherId}" class="sub-other-input" placeholder="הקלד תת־מחסן אחר" value="${otherValue}">
-    `;
-  }
-
-  function attachSubWarehouseHandlersDesktop(idx) {
-    const select = document.getElementById(`sub-select-${idx}`);
-    const otherInput = document.getElementById(`sub-other-${idx}`);
-    const searchInput = document.getElementById(`sub-search-${idx}`);
-    const saveBtn = document.getElementById(`save-btn-${idx}`);
-
-    if (!select || !otherInput || !searchInput || !saveBtn) return;
-
-    const row = filteredRows[idx];
-    const originalValue = (row.subWarehouse || "").trim();
-
-    function updateUI() {
-      const selected = select.value;
-      if (selected === "__OTHER__") {
-        otherInput.style.display = "block";
-      } else {
-        otherInput.style.display = "none";
-      }
-
-      let newValue = "";
-      if (selected === "__OTHER__") {
-        newValue = otherInput.value.trim();
-      } else {
-        newValue = selected;
-      }
-
-      if (newValue !== originalValue && newValue !== "") {
-        saveBtn.classList.add("visible");
-      } else {
-        saveBtn.classList.remove("visible");
-      }
-    }
-
-    select.addEventListener("change", updateUI);
-    otherInput.addEventListener("input", updateUI);
-
-    searchInput.addEventListener("input", () => {
-      const term = searchInput.value.trim().toLowerCase();
-      Array.from(select.options).forEach(opt => {
-        if (!opt.value || opt.value === "__OTHER__") {
-          opt.style.display = "";
-          return;
-        }
-        const txt = opt.textContent.toLowerCase();
-        opt.style.display = txt.includes(term) ? "" : "none";
-      });
-    });
-  }
-
-  function attachSubWarehouseHandlersMobile(idx) {
-    const select = document.getElementById(`m-sub-select-${idx}`);
-    const otherInput = document.getElementById(`m-sub-other-${idx}`);
-    const searchInput = document.getElementById(`m-sub-search-${idx}`);
-    const card = document.getElementById(`m-card-${idx}`);
-    const saveBtn = card ? card.querySelector(".mobile-save") : null;
-
-    if (!select || !otherInput || !searchInput || !card || !saveBtn) return;
-
-    const row = filteredRows[idx];
-    const originalValue = (row.subWarehouse || "").trim();
-
-    function updateUI() {
-      const selected = select.value;
-      if (selected === "__OTHER__") {
-        otherInput.style.display = "block";
-      } else {
-        otherInput.style.display = "none";
-      }
-
-      let newValue = "";
-      if (selected === "__OTHER__") {
-        newValue = otherInput.value.trim();
-      } else {
-        newValue = selected;
-      }
-
-      if (newValue !== originalValue && newValue !== "") {
-        card.classList.add("changed");
-      } else {
-        card.classList.remove("changed");
-      }
-    }
-
-    select.addEventListener("change", updateUI);
-    otherInput.addEventListener("input", updateUI);
-
-    searchInput.addEventListener("input", () => {
-      const term = searchInput.value.trim().toLowerCase();
-      Array.from(select.options).forEach(opt => {
-        if (!opt.value || opt.value === "__OTHER__") {
-          opt.style.display = "";
-          return;
-        }
-        const txt = opt.textContent.toLowerCase();
-        opt.style.display = txt.includes(term) ? "" : "none";
-      });
-    });
-  }
-
-  function getNewSubWarehouseValue(idx, isMobile) {
-    const selectId = isMobile ? `m-sub-select-${idx}` : `sub-select-${idx}`;
-    const otherId = isMobile ? `m-sub-other-${idx}` : `sub-other-${idx}`;
-    const select = document.getElementById(selectId);
-    const otherInput = document.getElementById(otherId);
-    if (!select || !otherInput) return null;
-
-    const selected = select.value;
-    if (selected === "__OTHER__") {
-      const v = otherInput.value.trim();
-      return v || null;
-    }
-    return selected || null;
+  function updateSummary(rows) {
+    const grouped = groupByShot(rows);
+    document.getElementById("sumCount").textContent = "סה״כ דיווחים: " + grouped.length;
+    document.getElementById("sumPallets").textContent = "סה״כ משטחים: " + grouped.length;
   }
 
   function renderDesktop(rows) {
     const tbody = document.querySelector("#historyTable tbody");
     tbody.innerHTML = "";
 
-    rows.forEach((r, idx) => {
+    const groupedRows = groupByShot(rows);
+
+    groupedRows.forEach((group, idx) => {
       const tr = document.createElement("tr");
-      const subClass = getSubClass(r.subWarehouse);
+
+      const labelLines = group.labels.map(l =>
+        `מק\"ט: ${l.makat || "---"}, פק\"ע: ${l.pka || "---"}, כמות: ${l.qty || "0"}`
+      ).join("<br>");
+
+      const totalQty = group.labels.reduce((sum, l) => sum + Number(l.qty || 0), 0);
 
       tr.innerHTML = `
-        <td>${formatDateTime(r.date, "date")}</td>
-        <td>${formatDateTime(r.time, "time")}</td>
-        <td>${r.worker || ""}</td>
-        <td>${r.makat || ""}</td>
-        <td>${r.pka || ""}</td>
-        <td>${r.qty || ""}</td>
-        <td>${r.totalQty || ""}</td>
-        <td>${r.warehouse || ""}</td>
-        <td class="${subClass}">
-          ${buildSubSelectHTML(idx, r.subWarehouse, false)}
-        </td>
-        <td>
-          <button id="save-btn-${idx}" class="save-small-btn" onclick="saveSubWarehouse(${idx})">שמור</button>
-        </td>
+        <td>${formatDateTime(group.date, "date")}</td>
+        <td>${formatDateTime(group.time, "time")}</td>
+        <td>${group.worker || ""}</td>
+        <td>${labelLines}</td>
+        <td>${totalQty}</td>
+        <td>${group.warehouse || ""}</td>
+        <td>${group.subWarehouse || ""}</td>
       `;
 
-      tr.dataset.rowIndex = r.rowIndex;
       tbody.appendChild(tr);
-      attachSubWarehouseHandlersDesktop(idx);
     });
-  }
-
-  function renderMobile(rows) {
-    const container = document.getElementById("mobileContainer");
-    container.innerHTML = "";
-
-    rows.forEach((r, idx) => {
-      const card = document.createElement("div");
-      const subClass = getCardSubClass(r.subWarehouse);
-      card.className = "mobile-card " + subClass;
-      card.id = `m-card-${idx}`;
-
-      card.innerHTML = `
-        <div class="makat">${r.makat || ""}</div>
-
-        <div class="mobile-row">
-          <span>פק״ע: ${r.pka || ""}</span>
-          <span>כמות: ${r.qty || ""}</span>
-          <span>סה״כ: ${r.totalQty || ""}</span>
-        </div>
-
-        <div class="mobile-sub">
-          תת־מחסן:
-          ${buildSubSelectHTML(idx, r.subWarehouse, true)}
-        </div>
-
-        <div class="mobile-footer">
-          עובד: ${r.worker || ""}<br>
-          ${formatDateTime(r.date, "date")} — ${formatDateTime(r.time, "time")}
-        </div>
-
-        <button class="mobile-save" onclick="saveSubWarehouse(${idx}, true)">שמור</button>
-      `;
-
-      container.appendChild(card);
-      attachSubWarehouseHandlersMobile(idx);
-    });
-  }
-
-  async function saveSubWarehouse(idx, isMobile = false) {
-    const row = filteredRows[idx];
-    const globalIndex = allRows.indexOf(row);
-    if (globalIndex === -1) return;
-
-    const newValue = getNewSubWarehouseValue(idx, isMobile);
-    const originalValue = (row.subWarehouse || "").trim();
-
-    if (!newValue || newValue === originalValue) return;
-
-    try {
-      const res = await fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify({
-          action: "updateSubWarehouse",
-          rowIndex: row.rowIndex,
-          subWarehouse: newValue
-        })
-      });
-
-      const data = await res.json();
-      if (data.success) {
-        alert("עודכן בהצלחה");
-        allRows[globalIndex].subWarehouse = newValue;
-        filteredRows[idx].subWarehouse = newValue;
-
-        const mobileContainer = document.getElementById("mobileContainer");
-        const card = mobileContainer.children[idx];
-        if (card) {
-          card.classList.add("saved");
-          card.classList.remove("changed");
-          setTimeout(() => card.classList.remove("saved"), 600);
-        }
-
-        applyFiltersAndRender();
-      } else {
-        alert("שגיאה בעדכון");
-      }
-
-    } catch (e) {
-      alert("שגיאה בעדכון");
-    }
   }
 
   function exportCsv() {
-    if (!filteredRows || filteredRows.length === 0) {
-      alert("אין נתונים לייצוא");
-      return;
-    }
-
-    const headers = ["תאריך","שעה","עובד","מק\"ט","פק\"ע","כמות","סה\"כ","מחסן","תת־מחסן"];
-    const lines = [headers.join(",")];
-
-    filteredRows.forEach(r => {
-      const line = [
-        formatDateTime(r.date,"date"),
-        formatDateTime(r.time,"time"),
-        r.worker || "",
-        r.makat || "",
-        r.pka || "",
-        r.qty || "",
-        r.totalQty || "",
-        r.warehouse || "",
-        r.subWarehouse || ""
-      ].map(v => `"${(v || "").toString().replace(/"/g,'""')}"`).join(",");
-      lines.push(line);
-    });
-
-    const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "history.csv";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    alert("ייצוא CSV יותאם לגרסה החדשה לפי בקשתך — רק תגיד לי אם אתה רוצה שגם הפירוט המאוחד יופיע באקסל.");
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    const searchInput = document.getElementById("searchInput");
-    searchInput.addEventListener("input", () => {
-      applyFiltersAndRender();
-    });
-
-    const ths = document.querySelectorAll("#historyTable thead th[data-sort]");
-    ths.forEach(th => {
-      th.addEventListener("click", () => {
-        const field = th.getAttribute("data-sort");
-        sortRows(field, currentSort.dir, true);
-      });
-    });
-
-    // שים לב: לא טוען אוטומטית היסטוריה
-    // loadHistory();  // מבוטל לפי בקשתך
+    document.getElementById("searchInput").addEventListener("input", applyFiltersAndRender);
   });
 </script>
 
