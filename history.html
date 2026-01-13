@@ -536,13 +536,16 @@
     const search = document.getElementById("searchInput").value.trim().toLowerCase();
 
     filteredRows = allRows.filter(r => {
-      if (start || end) {
-        const d = r.date ? new Date(r.date) : null;
-        if (!d) return false;
-        const dStr = d.toISOString().slice(0,10);
-        if (start && dStr < start) return false;
-        if (end && dStr > end) return false;
-      }
+     if (start || end) {
+  const rowDate = (r.date || "").toString().trim(); // dd/MM/yyyy מהגיליון
+  if (!rowDate) return false;
+
+  const [day, month, year] = rowDate.split("/");
+  const formatted = `${year}-${month}-${day}`; // המרה ל־ISO
+
+  if (start && formatted < start) return false;
+  if (end && formatted > end) return false;
+}
 
       if (search) {
         const hay = [
