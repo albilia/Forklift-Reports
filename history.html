@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>היסטוריית דווחים</title>
+
+  <link rel="stylesheet" href="menu.css">
+  <link rel="stylesheet" href="buttons.css">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: url('background.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #f5f5f5;
+    }
+
+    .top-bar {
+      background: rgba(0,0,0,0.55);
+      height: 70px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 0 0 12px 12px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+      backdrop-filter: blur(4px);
+    }
+
+    .title {
+      font-size: 26px;
+      font-weight: bold;
+      text-shadow: 0 0 6px rgba(0,0,0,0.8);
+    }
+
+    .content {
+      padding: 15px;
+    }
+
+    .filters {
+      background: rgba(0,0,0,0.6);
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .filters label {
+      font-size: 14px;
+      margin-bottom: 3px;
+      display: block;
+    }
+
+    .filters input {
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    .filters .field {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .filters button {
+      font-size: 16px !important;
+      padding: 10px 16px !important;
+      width: auto;
+      max-width: none;
+      margin: 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      background: rgba(0,0,0,0.7);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    th, td {
+      border: 1px solid #555;
+      padding: 6px;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    th {
+      background: rgba(0,0,0,0.9);
+      font-weight: bold;
+    }
+
+    .edit-input {
+      width: 100%;
+      padding: 4px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 12px;
+    }
+
+    .small-btn {
+      font-size: 12px !important;
+      padding: 4px 8px !important;
+      width: auto;
+      max-width: none;
+      margin: 2px;
+    }
+
+    #loading {
+      margin-top: 10px;
+      font-weight: bold;
+      color: #ffeb3b;
+      display: none;
+    }
+
+    .row-updated {
+      background-color: rgba(76, 175, 80, 0.4);
+      transition: background-color 0.8s ease;
+    }
+
+    .row-deleted {
+      background-color: rgba(244, 67, 54, 0.4);
+      transition: background-color 0.8s ease;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="menuContainer"></div>
+
+  <div class="top-bar">
+    <div class="title">היסטוריית דווחים</div>
+  </div>
+
+  <div class="content">
+
+    <div class="filters">
+      <div class="field">
+        <label>תאריך התחלה:</label>
+        <input type="date" id="startDate">
+      </div>
+      <div class="field">
+        <label>תאריך סיום:</label>
+        <input type="date" id="endDate">
+      </div>
+      <div class="field" style="flex:1;">
+        <label>חיפוש מק״ט / משטח:</label>
+        <input type="text" id="searchInput" placeholder="הקלד מק״ט או מספר משטח">
+      </div>
+      <button onclick="loadHistory()">טען דווחים</button>
+      <button onclick="exportCsv()" style="background:#ffca28;">ייצוא לאקסל</button>
+      <button onclick="goBack()" style="background:#607d8b;">חזור לדשבורד</button>
+    </div>
+
+    <div id="loading">טוען נתונים...</div>
+
+    <table id="historyTable">
+      <thead>
+        <tr>
+          <th>תאריך</th>
+          <th>שעה</th>
+          <th>עובד</th>
+          <th>מק״ט</th>
+          <th>פק"ע</th>
+          <th>כמות</th>
+          <th>סה״כ</th>
+          <th>מחסן</th>
+          <th>תת־מחסן</th>
+          <th>שמירה</th>
+          <th>מחיקה</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+  </div>
+
+<script>
+  const API_URL = "https://script.google.com/macros/s/AKfycbxzNj0wvC-Tb5wquuuAWvOfkxf_H4YRKzl3vijRlyi2nvkkH8VgDcL438RBKg5QeanrTg/exec";
+
+  const params = new URLSearchParams(window.location.search);
+  const phone = params.get("phone");
+  const name = params.get("name");
+
+  function goBack() {
+    window.location.href = `dashboard.html?phone=${encodeURIComponent(phone)}&name=${encodeURIComponent(name)}`;
+  }
+
+  let allRows = [];
+
+  async function loadHistory() {
+    const start = document.getElementById("startDate").value;
+    const end = document.getElementById("endDate").value;
+    const search = document.getElementById("searchInput").value.trim();
+
+    document.getElementById("loading").style.display = "block";
+
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "getHistory" })
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+        alert("שגיאה בטעינת היסטוריה");
+        document.getElementById("loading").style.display = "none";
+        return;
+      }
+
+      allRows = data.rows || [];
+
+      let filtered = allRows;
+
+      if (start) filtered = filtered.filter(r => r.date >= start);
+      if (end) filtered = filtered.filter(r => r.date <= end);
+
+      if (search) {
+        filtered = filtered.filter(r =>
+          (r.makat || "").includes(search) ||
+          (r.palletId || "").includes(search)
+        );
+      }
+
+      renderTable(filtered);
+
+    } catch (e) {
+      alert("שגיאה בטעינת נתונים");
+    } finally {
+      document.getElementById("loading").style.display = "none";
+    }
+  }
+
+  function renderTable(rows) {
+    const tbody = document.querySelector("#historyTable tbody");
+    tbody.innerHTML = "";
+
+    rows.forEach((r, idx) => {
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td>${r.date || ""}</td>
+        <td>${r.time || ""}</td>
+        <td>${r.worker || ""}</td>
+        <td>${r.makat || ""}</td>
+        <td>${r.pka || ""}</td>
+        <td>${r.qty || ""}</td>
+        <td>${r.totalQty || ""}</td>
+        <td>${r.warehouse || ""}</td>
+        <td><input class="edit-input" id="sub-${idx}" value="${r.subWarehouse || ""}"></td>
+        <td><button class="small-btn" onclick="saveSubWarehouse(${idx})">שמור</button></td>
+        <td><button class="small-btn" style="background:#f44336;" onclick="deleteRow(${idx})">מחק</button></td>
+      `;
+
+      tr.dataset.rowIndex = r.rowIndex;
+      tbody.appendChild(tr);
+    });
+  }
+
+  async function saveSubWarehouse(idx) {
+    const row = allRows[idx];
+    const newValue = document.getElementById(`sub-${idx}`).value;
+
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          action: "updateSubWarehouse",
+          rowIndex: row.rowIndex,
+          subWarehouse: newValue
+        })
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        const tr = document.querySelectorAll("#historyTable tbody tr")[idx];
+        tr.classList.add("row-updated");
+        setTimeout(() => tr.classList.remove("row-updated"), 800);
+      } else {
+        alert("שגיאה בעדכון");
+      }
+
+    } catch (e) {
+      alert("שגיאה בעדכון");
+    }
+  }
+
+  async function deleteRow(idx) {
+    const row = allRows[idx];
+
+    if (!confirm("למחוק את הדווח הזה?")) return;
+
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          action: "deleteReport",
+          rowIndex: row.rowIndex
+        })
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        const tr = document.querySelectorAll("#historyTable tbody tr")[idx];
+        tr.classList.add("row-deleted");
+        setTimeout(() => loadHistory(), 500);
+      } else {
+        alert("שגיאה במחיקה");
+      }
+
+    } catch (e) {
+      alert("שגיאה במחיקה");
+    }
+  }
+
+  function exportCsv() {
+    const tbodyRows = document.querySelectorAll("#historyTable tbody tr");
+
+    if (!tbodyRows.length) {
+      alert("אין נתונים לייצוא");
+      return;
+    }
+
+    const rows = [];
+
+    tbodyRows.forEach(tr => {
+      const cells = Array.from(tr.querySelectorAll("td"))
+        .slice(0, 9)
+        .map(td => td.innerText.replace(/,/g, " "));
+      rows.push(cells);
+    });
+
+    const csvContent = "data:text/csv;charset=utf-8," +
+      rows.map(e => e.join(",")).join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "history_reports.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+</script>
+
+<script src="menu.js"></script>
+</body>
+</html>
