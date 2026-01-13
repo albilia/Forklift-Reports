@@ -118,7 +118,6 @@
 
     <label for="mainWarehouse">בחר קטגוריה:</label>
 
-    <!-- ⭐ תוקן: הערכים בעברית -->
     <select id="mainWarehouse" onchange="handleMainWarehouse()">
       <option value="">-- בחר --</option>
       <option value="מחסן חומרי גלם">מחסן חומרי גלם</option>
@@ -154,7 +153,7 @@
   const params = new URLSearchParams(window.location.search);
 
   let phone = params.get("phone") || sessionStorage.getItem("phone");
-  let name = params.get("name") || sessionStorage.getItem("name");
+  let name  = params.get("name")  || sessionStorage.getItem("name");
 
   if (!phone) {
     alert("שגיאה: לא התקבל מספר נייד");
@@ -188,7 +187,6 @@
       main === "מחסן תוצר גמר" ? "block" : "none";
   }
 
-  /* ⭐ תוקן: מילון תואם לערכים החדשים */
   const warehouseNames = {
     "מחסן חומרי גלם": "מחסן חומרי גלם",
     "מחסן תוצר גמר": "מחסן תוצר גמר"
@@ -198,8 +196,10 @@
     const main = document.getElementById("mainWarehouse").value;
     const finished = document.getElementById("finishedWarehouse").value;
 
+    // ⭐ היסטוריית דווחים — מעבר למסך החדש
     if (main === "history") {
-      alert("היסטוריית דווחים תתווסף בהמשך");
+      window.location.href =
+        `history.html?phone=${encodeURIComponent(phone)}&name=${encodeURIComponent(name)}`;
       return;
     }
 
