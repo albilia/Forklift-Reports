@@ -536,15 +536,17 @@
     const search = document.getElementById("searchInput").value.trim().toLowerCase();
 
     filteredRows = allRows.filter(r => {
-     if (start || end) {
-  const rowDate = (r.date || "").toString().trim(); // dd/MM/yyyy מהגיליון
+    if (start || end) {
+  const rowDate = (r.date || "").toString().trim();
   if (!rowDate) return false;
 
   const [day, month, year] = rowDate.split("/");
-  const formatted = `${year}-${month}-${day}`; // המרה ל־ISO
+  const rowDateObj = new Date(`${year}-${month}-${day}`);
+  const startDateObj = start ? new Date(start) : null;
+  const endDateObj = end ? new Date(end) : null;
 
-  if (start && formatted < start) return false;
-  if (end && formatted > end) return false;
+  if (startDateObj && rowDateObj < startDateObj) return false;
+  if (endDateObj && rowDateObj > endDateObj) return false;
 }
 
       if (search) {
