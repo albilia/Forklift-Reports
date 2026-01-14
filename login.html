@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>התחברות</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .login-box {
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 320px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 16px;
+      font-size: 20px;
+      color: #333;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-top: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+      text-align: center;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 16px;
+      background: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .error {
+      margin-top: 12px;
+      color: #d32f2f;
+      font-size: 14px;
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="login-box">
+    <h2>התחברות למערכת</h2>
+
+    <input id="phoneInput" type="tel" placeholder="מספר טלפון" maxlength="10">
+    <button onclick="login()">התחבר</button>
+
+    <div id="errorBox" class="error">מספר טלפון לא נמצא במערכת</div>
+  </div>
+
+  <script>
+    const API_URL = "YOUR_WEB_APP_URL_HERE"; // הכנס כאן את כתובת ה־Apps Script שלך
+
+    async function login() {
+      const phone = document.getElementById("phoneInput").value.trim();
+      const errorBox = document.getElementById("errorBox");
+
+      errorBox.style.display = "none";
+
+      if (!phone) {
+        errorBox.innerText = "נא להזין מספר טלפון";
+        errorBox.style.display = "block";
+        return;
+      }
+
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "verifyOTP",
+            phone: phone
+          })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          // שמירת פרטי המשתמש
+          localStorage.setItem("workerPhone", phone);
+          localStorage.setItem("workerName", data.name);
+
+          // מעבר לדשבורד
+          window.location.href = `dashboard.html?phone=${phone}&name=${encodeURIComponent(data.name)}`;
+        } else {
+          errorBox.innerText = "מספר טלפון לא נמצא במערכת";
+          errorBox.style.display = "block";
+        }
+
+      } catch (e) {
+        errorBox.innerText = "שגיאה בחיבור לשרת";
+        errorBox.style.display = "block";
+      }
+    }
+  </script>
+
+</body>
+</html>
