@@ -1,114 +1,46 @@
-const CACHE_VERSION = "v7";   // ← עדכון גרסה חובה
-const CACHE_NAME = `forklift-cache-${CACHE_VERSION}`;
+const CACHE_NAME = "pallet-app-v1";
 
-const CORE_ASSETS = [
-  "./",
-  "index.html",
-  "dashboard.html",
-  "report.html",
-  "menu.js",
-  "menu.css",
-  "manifest.json",
-  "logo.jpg",
-  "camera-icon.png",
-  "offline.html"
+const FILES_TO_CACHE = [
+  "/",
+  "/index.html",
+  "/login.html",
+  "/dashboard.html",
+  "/report.html",
+  "/history.html",
+  "/manifest.json",
+  "/icons/icon-192.png",
+  "/icons/icon-512.png"
 ];
 
-// התקנה – קאש ראשוני
+// התקנה — שמירת קבצים בזיכרון
 self.addEventListener("install", event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache =>
-      cache.addAll(CORE_ASSETS)
-    )
-  );
-  self.skipWaiting();
-});
-
-// הפעלה – ניקוי קאש ישן
-self.addEventListener("activate", event => {
-  event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys
-          .filter(key => key.startsWith("forklift-cache-") && key !== CACHE_NAME)
-          .map(key => caches.delete(key))
-      )
-    )
-  );
-  self.clients.claim();
-});
-
-// אסטרטגיית fetch חכמה
-self.addEventListener("fetch", event => {
-  const request = event.request;
-
-  // ❗ לא נוגעים בבקשות POST
-  if (request.method !== "GET") {
-    return;
-  }
-
-  // ❗ לא נוגעים בבקשות chrome-extension
-  if (!request.url.startsWith("http")) {
-    return;
-  }
-
-  // קבצי ליבה – Network falling back to Cache
-  if (isCoreAsset(request)) {
-    event.respondWith(
-      fetch(request)
-        .then(response => {
-          if (!response || response.status === 206) {
-            return caches.match(request);
-          }
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            if (request.url.startsWith("http")) {
-              cache.put(request, clone);
-            }
-          });
-          return response;
-        })
-        .catch(() =>
-          caches.match(request).then(res => res || caches.match("offline.html"))
-        )
-    );
-    return;
-  }
-
-  // שאר הבקשות – Stale-While-Revalidate
-  event.respondWith(
-    caches.match(request).then(cachedResponse => {
-      const fetchPromise = fetch(request)
-        .then(response => {
-          if (!response || response.status === 206) {
-            return response;
-          }
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            if (request.url.startsWith("http")) {
-              cache.put(request, clone);
-            }
-          });
-          return response;
-        })
-        .catch(() => null);
-
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-
-      return fetchPromise.then(res => res || caches.match("offline.html"));
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll(FILES_TO_CACHE);
     })
   );
 });
 
-// זיהוי אם הבקשה היא לקובץ ליבה
-function isCoreAsset(request) {
-  const url = new URL(request.url);
-  const path = url.pathname.replace(/^\//, "");
-  return (
-    CORE_ASSETS.includes(path) ||
-    CORE_ASSETS.includes("./" + path) ||
-    CORE_ASSETS.includes(url.pathname)
+// הפעלה — ניקוי גרסאות ישנות
+self.addEventListener("activate", event => {
+  event.waitUntil(
+    caches.keys().then(keys => {
+      return Promise.all(
+        keys.map(key => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
+      );
+    })
   );
-}
+});
+
+// שליפה — טעינה מהירה מה‑cache
+self.addEventListener("fetch", event => {
+  event.respondWith(
+    caches.match(event.request).then(response => {
+      return response || fetch(event.request);
+    })
+  );
+});

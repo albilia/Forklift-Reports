@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>דשבורד מנהל</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background-color: #f5f5f5;
+      color: #222;
+    }
+
+    .app-container {
+      max-width: 900px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background-color: #ffffff;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #283593, #5c6bc0);
+      color: #fff;
+      padding: 16px 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    }
+
+    .header-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .header-sub {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .content {
+      padding: 16px 20px 24px;
+      flex: 1;
+      box-sizing: border-box;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .card {
+      background-color: #fafafa;
+      border-radius: 10px;
+      padding: 10px 12px;
+      border: 1px solid #e0e0e0;
+    }
+
+    .card-title {
+      font-size: 13px;
+      color: #555;
+      margin-bottom: 4px;
+    }
+
+    .card-value {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .card-sub {
+      font-size: 11px;
+      color: #777;
+      margin-top: 2px;
+    }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin: 16px 0 8px;
+    }
+
+    .filters-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .filters-row > div {
+      flex: 1;
+      min-width: 140px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      margin-bottom: 3px;
+    }
+
+    select, input[type="date"] {
+      width: 100%;
+      padding: 6px 8px;
+      font-size: 13px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      background-color: #fafafa;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 12px;
+      min-width: 600px;
+    }
+
+    th, td {
+      border-bottom: 1px solid #e0e0e0;
+      padding: 6px 8px;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    th {
+      background-color: #e8eaf6;
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) td {
+      background-color: #f9f9f9;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 999px;
+      font-size: 11px;
+      background-color: #e0e0e0;
+    }
+
+    .badge-raw {
+      background-color: #bbdefb;
+    }
+
+    .badge-finished {
+      background-color: #c8e6c9;
+    }
+
+    .footer {
+      padding: 10px 16px;
+      font-size: 11px;
+      color: #777;
+      border-top: 1px solid #eee;
+      text-align: center;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      background-color: #eeeeee;
+    }
+
+    .btn-primary {
+      background-color: #283593;
+      color: #fff;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .top-bar-left {
+      font-size: 13px;
+      color: #555;
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+  <div class="app-container">
+
+    <div class="header">
+      <div class="header-title">דשבורד מנהל</div>
+      <div class="header-sub" id="headerSub">
+        טוען נתונים...
+      </div>
+    </div>
+
+    <div class="content">
+
+      <div class="top-bar">
+        <div class="top-bar-left" id="dateRangeLabel">
+          טווח: כל הזמנים
+        </div>
+        <div>
+          <button class="btn" onclick="goToDashboard()">חזרה למסך הראשי</button>
+        </div>
+      </div>
+
+      <div class="cards-grid">
+        <div class="card">
+          <div class="card-title">סה״כ דווחים</div>
+          <div class="card-value" id="totalReports">0</div>
+          <div class="card-sub">כל השורות בגיליון</div>
+        </div>
+        <div class="card">
+          <div class="card-title">סה״כ משטחים</div>
+          <div class="card-value" id="totalPallets">0</div>
+          <div class="card-sub">שורות אחרונות בלבד</div>
+        </div>
+        <div class="card">
+          <div class="card-title">סה״כ יחידות</div>
+          <div class="card-value" id="totalUnits">0</div>
+          <div class="card-sub">סכום כל הכמויות</div>
+        </div>
+        <div class="card">
+          <div class="card-title">מספר עובדים פעילים</div>
+          <div class="card-value" id="totalWorkers">0</div>
+          <div class="card-sub">עובדים שדיווחו לפחות פעם אחת</div>
+        </div>
+      </div>
+
+      <div class="section-title">סינון נתונים</div>
+      <div class="filters-row">
+        <div>
+          <label for="dateFilter">תאריך</label>
+          <input type="date" id="dateFilter" />
+        </div>
+        <div>
+          <label for="workerFilter">עובד</label>
+          <select id="workerFilter">
+            <option value="all">הכול</option>
+          </select>
+        </div>
+        <div>
+          <label for="warehouseFilter">מחסן</label>
+          <select id="warehouseFilter">
+            <option value="all">הכול</option>
+            <option value="מחסן חומרי גלם">מחסן חומרי גלם</option>
+            <option value="מחסן תוצר גמר">מחסן תוצר גמר</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="section-title">פעילות לפי עובדים</div>
+      <div class="table-wrapper" style="margin-bottom: 16px;">
+        <table>
+          <thead>
+            <tr>
+              <th>עובד</th>
+              <th>מס׳ דווחים</th>
+              <th>מס׳ משטחים</th>
+              <th>סה״כ יחידות</th>
+            </tr>
+          </thead>
+          <tbody id="workersTableBody">
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-title">פילוח לפי מחסן</div>
+      <div class="table-wrapper" style="margin-bottom: 16px;">
+        <table>
+          <thead>
+            <tr>
+              <th>מחסן</th>
+              <th>מס׳ דווחים</th>
+              <th>מס׳ משטחים</th>
+              <th>סה״כ יחידות</th>
+            </tr>
+          </thead>
+          <tbody id="warehouseTableBody">
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-title">פעילות לפי שעות</div>
+      <canvas id="hourChart" height="120"></canvas>
+
+      <div class="section-title">חריגות אפשריות</div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>תאריך</th>
+              <th>שעה</th>
+              <th>עובד</th>
+              <th>מק״ט</th>
+              <th>פק״ע</th>
+              <th>כמות</th>
+              <th>סה״כ במשטח</th>
+            </tr>
+          </thead>
+          <tbody id="anomaliesTableBody">
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <div class="footer">
+      דשבורד מנהל — מבוסס נתונים מגיליון "טבלת העברת דווחי משטחים"
+    </div>
+
+  </div>
+
+  <script>
+    const WEB_APP_URL = "YOUR_WEB_APP_URL_HERE";
+
+    let allRows = [];
+
+    const totalReportsEl = document.getElementById("totalReports");
+    const totalPalletsEl = document.getElementById("totalPallets");
+    const totalUnitsEl = document.getElementById("totalUnits");
+    const totalWorkersEl = document.getElementById("totalWorkers");
+    const headerSubEl = document.getElementById("headerSub");
+    const dateRangeLabelEl = document.getElementById("dateRangeLabel");
+
+    const dateFilter = document.getElementById("dateFilter");
+    const workerFilter = document.getElementById("workerFilter");
+    const warehouseFilter = document.getElementById("warehouseFilter");
+
+    const workersTableBody = document.getElementById("workersTableBody");
+    const warehouseTableBody = document.getElementById("warehouseTableBody");
+    const anomaliesTableBody = document.getElementById("anomaliesTableBody");
+
+    let hourChart = null;
+
+    function goToDashboard() {
+      window.location.href = "dashboard.html";
+    }
+
+    function isNumeric(val) {
+      return typeof val === "number" && !isNaN(val);
+    }
+
+    function filterRows() {
+      const dateVal = dateFilter.value;
+      const workerVal = workerFilter.value;
+      const warehouseVal = warehouseFilter.value;
+
+      return allRows.filter(r => {
+        if (dateVal) {
+          const parts = (r.date || "").split("/");
+          if (parts.length === 3) {
+            const iso = `${parts[2]}-${parts[1].padStart(2,"0")}-${parts[0].padStart(2,"0")}`;
+            if (iso !== dateVal) return false;
+          }
+        }
+
+        if (workerVal !== "all" && r.worker !== workerVal) return false;
+        if (warehouseVal !== "all" && r.warehouse !== warehouseVal) return false;
+
+        return true;
+      });
+    }
+
+    function buildFilters() {
+      const workersSet = new Set();
+      allRows.forEach(r => {
+        if (r.worker) workersSet.add(r.worker);
+      });
+
+      workersSet.forEach(w => {
+        const opt = document.createElement("option");
+        opt.value = w;
+        opt.textContent = w;
+        workerFilter.appendChild(opt);
+      });
+    }
+
+    function updateSummary() {
+      const filtered = filterRows();
+
+      const totalReports = filtered.length;
+      const totalPallets = filtered.filter(r => isNumeric(r.totalQty)).length;
+      const totalUnits = filtered.reduce((sum, r) => sum + (Number(r.qty) || 0), 0);
+
+      const workersSet = new Set();
+      filtered.forEach(r => {
+        if (r.worker) workersSet.add(r.worker);
+      });
+
+      totalReportsEl.textContent = totalReports;
+      totalPalletsEl.textContent = totalPallets;
+      totalUnitsEl.textContent = totalUnits;
+      totalWorkersEl.textContent = workersSet.size;
+
+      if (!filtered.length) {
+        headerSubEl.textContent = "אין נתונים לתצוגה בטווח הנוכחי";
+      } else {
+        headerSubEl.textContent = `סה״כ ${totalReports} דווחים, ${totalPallets} משטחים, ${totalUnits} יחידות`;
+      }
+
+      if (dateFilter.value) {
+        dateRangeLabelEl.textContent = "טווח: " + dateFilter.value;
+      } else {
+        dateRangeLabelEl.textContent = "טווח: כל הזמנים";
+      }
+    }
+
+    function updateWorkersTable() {
+      const filtered = filterRows();
+      workersTableBody.innerHTML = "";
+
+      const map = new Map();
+
+      filtered.forEach(r => {
+        const key = r.worker || "ללא שם";
+        if (!map.has(key)) {
+          map.set(key, { worker: key, reports: 0, pallets: 0, units: 0 });
+        }
+        const obj = map.get(key);
+        obj.reports += 1;
+        obj.units += Number(r.qty) || 0;
+        if (isNumeric(r.totalQty)) obj.pallets += 1;
+      });
+
+      const rows = Array.from(map.values()).sort((a, b) => b.units - a.units);
+
+      rows.forEach(row => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${row.worker}</td>
+          <td>${row.reports}</td>
+          <td>${row.pallets}</td>
+          <td>${row.units}</td>
+        `;
+        workersTableBody.appendChild(tr);
+      });
+    }
+
+    function updateWarehouseTable() {
+      const filtered = filterRows();
+      warehouseTableBody.innerHTML = "";
+
+      const map = new Map();
+
+      filtered.forEach(r => {
+        const key = r.warehouse || "לא מוגדר";
+        if (!map.has(key)) {
+          map.set(key, { warehouse: key, reports: 0, pallets: 0, units: 0 });
+        }
+        const obj = map.get(key);
+        obj.reports += 1;
+        obj.units += Number(r.qty) || 0;
+        if (isNumeric(r.totalQty)) obj.pallets += 1;
+      });
+
+      const rows = Array.from(map.values());
+
+      rows.forEach(row => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>
+            <span class="badge ${
+              row.warehouse === "מחסן חומרי גלם" ? "badge-raw" :
+              row.warehouse === "מחסן תוצר גמר" ? "badge-finished" : ""
+            }">${row.warehouse}</span>
+          </td>
+          <td>${row.reports}</td>
+          <td>${row.pallets}</td>
+          <td>${row.units}</td>
+        `;
+        warehouseTableBody.appendChild(tr);
+      });
+    }
+
+    function updateHourChart() {
+      const filtered = filterRows();
+
+      const hoursMap = new Map();
+      for (let h = 0; h < 24; h++) {
+        hoursMap.set(h, 0);
+      }
+
+      filtered.forEach(r => {
+        if (!r.time) return;
+        const parts = r.time.toString().split(":");
+        const h = Number(parts[0]) || 0;
+        if (hoursMap.has(h)) {
+          hoursMap.set(h, hoursMap.get(h) + 1);
+        }
+      });
+
+      const labels = [];
+      const data = [];
+      hoursMap.forEach((val, key) => {
+        labels.push(key.toString().padStart(2, "0") + ":00");
+        data.push(val);
+      });
+
+      const ctx = document.getElementById("hourChart").getContext("2d");
+
+      if (hourChart) {
+        hourChart.destroy();
+      }
+
+      hourChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [
+            {
+              label: "מס׳ דווחים",
+              data,
+              backgroundColor: "rgba(63, 81, 181, 0.6)"
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            x: { ticks: { font: { size: 10 } } },
+            y: { beginAtZero: true, ticks: { stepSize: 1 } }
+          }
+        }
+      });
+    }
+
+    function updateAnomaliesTable() {
+      const filtered = filterRows();
+      anomaliesTableBody.innerHTML = "";
+
+      const anomalies = filtered.filter(r => {
+        const qty = Number(r.qty) || 0;
+        const total = Number(r.totalQty) || 0;
+
+        if (qty <= 0) return true;
+        if (total > 0 && qty > total) return true;
+        if (!r.makat || !r.pka) return true;
+
+        return false;
+      });
+
+      anomalies
