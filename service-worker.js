@@ -16,10 +16,11 @@ const STATIC_ASSETS = [
   "/background.jpg",
   "/logo.png",
   "/manifest.json",
-  "/icons/icon-192.png",
-  "/icons/icon-512.png",
   "/qr.json",
-  "/offline.html"
+  "/offline.html",
+
+  // ⭐ האייקון החדש של Nis (מה־GitHub RAW)
+  "https://raw.githubusercontent.com/albilia/Forklift-Reports/main/apple-touch-icon.png"
 ];
 
 // התקנה — שמירת קבצים קבועים
@@ -61,7 +62,9 @@ self.addEventListener("fetch", event => {
           cacheDynamic(event.request, res.clone());
           return res;
         })
-        .catch(() => caches.match(event.request).then(c => c || caches.match("/offline.html")))
+        .catch(() =>
+          caches.match(event.request).then(c => c || caches.match("/offline.html"))
+        )
     );
     return;
   }
@@ -116,7 +119,8 @@ async function sendPendingReports() {
 function readPendingReports() {
   return new Promise(resolve => {
     const req = indexedDB.open("pallet-db", 1);
-    req.onupgradeneeded = () => req.result.createObjectStore("pending", { autoIncrement: true });
+    req.onupgradeneeded = () =>
+      req.result.createObjectStore("pending", { autoIncrement: true });
     req.onsuccess = () => {
       const db = req.result;
       const tx = db.transaction("pending", "readonly");
