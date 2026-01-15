@@ -63,15 +63,22 @@
       background: linear-gradient(135deg, #6a1b9a, #ab47bc);
     }
 
-    /* כפתור מנהל — קטן, אפור, לא מושך תשומת לב */
+    /* כפתור מנהל — זהב עם אייקון 🛡️ משני הצדדים */
     .btn-admin {
-      background: #eceff1;
-      color: #333;
-      font-size: 14px;
-      padding: 12px;
+      background: linear-gradient(135deg, #D4AF37, #C9A227);
+      color: #fff;
+      font-size: 18px;
+      padding: 18px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     }
 
-    .menu-btn:active {
+    .btn-admin:active {
       transform: scale(0.97);
     }
 
@@ -99,12 +106,12 @@
     </button>
 
     <button class="menu-btn btn-history" onclick="goToHistory()">
-      היסטוריית דווחים
+      היסטוריית דיווחים
     </button>
 
-    <!-- כפתור דשבורד מנהל — גרסה עדינה ולא בולטת -->
+    <!-- כפתור דשבורד מנהל — זהב עם אייקון 🛡️ משני הצדדים -->
     <button class="menu-btn btn-admin" onclick="goToAdmin()">
-      דשבורד מנהל
+      🛡️ דשבורד מנהל 🛡️
     </button>
 
     <div class="footer">
