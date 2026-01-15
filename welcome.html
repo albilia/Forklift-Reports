@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>ברוך הבא</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #ffffff;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .welcome-box {
+      text-align: center;
+      animation: fadeIn 1s ease-out forwards;
+      opacity: 0;
+    }
+
+    .welcome-emoji {
+      font-size: 60px;
+      margin-bottom: 10px;
+      animation: wave 1.2s ease-in-out infinite alternate;
+    }
+
+    .welcome-text {
+      font-size: 26px;
+      font-weight: 700;
+      color: #333;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes wave {
+      from { transform: rotate(-8deg); }
+      to { transform: rotate(8deg); }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="welcome-box">
+    <div class="welcome-emoji">👋</div>
+    <div class="welcome-text" id="welcomeName">שלום</div>
+  </div>
+
+  <script>
+    // שליפת שם העובד
+    const name = localStorage.getItem("workerName") || "";
+
+    // הצגת שם העובד
+    document.getElementById("welcomeName").textContent = `שלום ${name}`;
+
+    // מעבר אוטומטי לדשבורד
+    setTimeout(() => {
+      window.location.href = "dashboard.html";
+    }, 1500);
+  </script>
+
+</body>
+</html>
