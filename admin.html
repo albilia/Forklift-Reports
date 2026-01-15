@@ -83,33 +83,6 @@
       margin: 16px 0 8px;
     }
 
-    .filters-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 10px;
-    }
-
-    .filters-row > div {
-      flex: 1;
-      min-width: 140px;
-    }
-
-    label {
-      display: block;
-      font-size: 12px;
-      margin-bottom: 3px;
-    }
-
-    select, input[type="date"] {
-      width: 100%;
-      padding: 6px 8px;
-      font-size: 13px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-    }
-
     .table-wrapper {
       overflow-x: auto;
       border-radius: 8px;
@@ -138,22 +111,6 @@
 
     tr:nth-child(even) td {
       background-color: #f9f9f9;
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 2px 6px;
-      border-radius: 999px;
-      font-size: 11px;
-      background-color: #e0e0e0;
-    }
-
-    .badge-raw {
-      background-color: #bbdefb;
-    }
-
-    .badge-finished {
-      background-color: #c8e6c9;
     }
 
     .footer {
@@ -240,28 +197,6 @@
         </div>
       </div>
 
-      <div class="section-title">סינון נתונים</div>
-      <div class="filters-row">
-        <div>
-          <label for="dateFilter">תאריך</label>
-          <input type="date" id="dateFilter" />
-        </div>
-        <div>
-          <label for="workerFilter">עובד</label>
-          <select id="workerFilter">
-            <option value="all">הכול</option>
-          </select>
-        </div>
-        <div>
-          <label for="warehouseFilter">מחסן</label>
-          <select id="warehouseFilter">
-            <option value="all">הכול</option>
-            <option value="מחסן חומרי גלם">מחסן חומרי גלם</option>
-            <option value="מחסן תוצר גמר">מחסן תוצר גמר</option>
-          </select>
-        </div>
-      </div>
-
       <div class="section-title">פעילות לפי עובדים</div>
       <div class="table-wrapper" style="margin-bottom: 16px;">
         <table>
@@ -273,8 +208,7 @@
               <th>סה״כ יחידות</th>
             </tr>
           </thead>
-          <tbody id="workersTableBody">
-          </tbody>
+          <tbody id="workersTableBody"></tbody>
         </table>
       </div>
 
@@ -289,8 +223,7 @@
               <th>סה״כ יחידות</th>
             </tr>
           </thead>
-          <tbody id="warehouseTableBody">
-          </tbody>
+          <tbody id="warehouseTableBody"></tbody>
         </table>
       </div>
 
@@ -311,8 +244,7 @@
               <th>סה״כ במשטח</th>
             </tr>
           </thead>
-          <tbody id="anomaliesTableBody">
-          </tbody>
+          <tbody id="anomaliesTableBody"></tbody>
         </table>
       </div>
 
@@ -324,236 +256,153 @@
 
   </div>
 
-  <script>
-    const WEB_APP_URL = "YOUR_WEB_APP_URL_HERE";
+<script>
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwJX4IaxmTmNx0re1ifoEPxgbsh6rAkFfmaehHDkJKW0LViqLtnkiCCg8uzsaA3PTtJEg/exec";
 
-    let allRows = [];
+  let allRows = [];
 
-    const totalReportsEl = document.getElementById("totalReports");
-    const totalPalletsEl = document.getElementById("totalPallets");
-    const totalUnitsEl = document.getElementById("totalUnits");
-    const totalWorkersEl = document.getElementById("totalWorkers");
-    const headerSubEl = document.getElementById("headerSub");
-    const dateRangeLabelEl = document.getElementById("dateRangeLabel");
+  const totalReportsEl = document.getElementById("totalReports");
+  const totalPalletsEl = document.getElementById("totalPallets");
+  const totalUnitsEl = document.getElementById("totalUnits");
+  const totalWorkersEl = document.getElementById("totalWorkers");
+  const headerSubEl = document.getElementById("headerSub");
+  const dateRangeLabelEl = document.getElementById("dateRangeLabel");
 
-    const dateFilter = document.getElementById("dateFilter");
-    const workerFilter = document.getElementById("workerFilter");
-    const warehouseFilter = document.getElementById("warehouseFilter");
+  const workersTableBody = document.getElementById("workersTableBody");
+  const warehouseTableBody = document.getElementById("warehouseTableBody");
+  const anomaliesTableBody = document.getElementById("anomaliesTableBody");
 
-    const workersTableBody = document.getElementById("workersTableBody");
-    const warehouseTableBody = document.getElementById("warehouseTableBody");
-    const anomaliesTableBody = document.getElementById("anomaliesTableBody");
+  let hourChart = null;
 
-    let hourChart = null;
+  function goToDashboard() {
+    window.location.href = "dashboard.html";
+  }
 
-    function goToDashboard() {
-      window.location.href = "dashboard.html";
+  function isNumeric(val) {
+    return typeof val === "number" && !isNaN(val);
+  }
+
+  async function loadDashboard() {
+    try {
+      // ⭐ FIXED — ללא headers, פעולה נכונה: getDashboardData
+      const res = await fetch(WEB_APP_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "getDashboardData" })
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+        headerSubEl.textContent = "שגיאה בטעינת הנתונים";
+        return;
+      }
+
+      allRows = data.rows || [];
+
+      updateSummary(data.summary);
+      updateWorkersTable(data.workers);
+      updateWarehouseTable(data.warehouses);
+      updateHourChart(data.hours);
+      updateAnomaliesTable(data.anomalies);
+
+    } catch (e) {
+      headerSubEl.textContent = "שגיאה בחיבור לשרת";
     }
+  }
 
-    function isNumeric(val) {
-      return typeof val === "number" && !isNaN(val);
-    }
+  function updateSummary(summary) {
+    totalReportsEl.textContent = summary.totalReports;
+    totalPalletsEl.textContent = summary.totalPallets;
+    totalUnitsEl.textContent = summary.totalUnits;
+    totalWorkersEl.textContent = summary.totalWorkers;
 
-    function filterRows() {
-      const dateVal = dateFilter.value;
-      const workerVal = workerFilter.value;
-      const warehouseVal = warehouseFilter.value;
+    headerSubEl.textContent =
+      `סה״כ ${summary.totalReports} דווחים, ${summary.totalPallets} משטחים, ${summary.totalUnits} יחידות`;
+  }
 
-      return allRows.filter(r => {
-        if (dateVal) {
-          const parts = (r.date || "").split("/");
-          if (parts.length === 3) {
-            const iso = `${parts[2]}-${parts[1].padStart(2,"0")}-${parts[0].padStart(2,"0")}`;
-            if (iso !== dateVal) return false;
+  function updateWorkersTable(workers) {
+    workersTableBody.innerHTML = "";
+
+    Object.keys(workers).forEach(w => {
+      const row = workers[w];
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${w}</td>
+        <td>${row.reports}</td>
+        <td>${row.pallets}</td>
+        <td>${row.units}</td>
+      `;
+      workersTableBody.appendChild(tr);
+    });
+  }
+
+  function updateWarehouseTable(warehouses) {
+    warehouseTableBody.innerHTML = "";
+
+    Object.keys(warehouses).forEach(w => {
+      const row = warehouses[w];
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${w}</td>
+        <td>${row.reports}</td>
+        <td>${row.pallets}</td>
+        <td>${row.units}</td>
+      `;
+      warehouseTableBody.appendChild(tr);
+    });
+  }
+
+  function updateHourChart(hours) {
+    const labels = Object.keys(hours).map(h => h.padStart(2, "0") + ":00");
+    const values = Object.values(hours);
+
+    const ctx = document.getElementById("hourChart").getContext("2d");
+
+    if (hourChart) hourChart.destroy();
+
+    hourChart = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [
+          {
+            label: "מס׳ דווחים",
+            data: values,
+            backgroundColor: "rgba(63, 81, 181, 0.6)"
           }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { font: { size: 10 } } },
+          y: { beginAtZero: true, ticks: { stepSize: 1 } }
         }
-
-        if (workerVal !== "all" && r.worker !== workerVal) return false;
-        if (warehouseVal !== "all" && r.warehouse !== warehouseVal) return false;
-
-        return true;
-      });
-    }
-
-    function buildFilters() {
-      const workersSet = new Set();
-      allRows.forEach(r => {
-        if (r.worker) workersSet.add(r.worker);
-      });
-
-      workersSet.forEach(w => {
-        const opt = document.createElement("option");
-        opt.value = w;
-        opt.textContent = w;
-        workerFilter.appendChild(opt);
-      });
-    }
-
-    function updateSummary() {
-      const filtered = filterRows();
-
-      const totalReports = filtered.length;
-      const totalPallets = filtered.filter(r => isNumeric(r.totalQty)).length;
-      const totalUnits = filtered.reduce((sum, r) => sum + (Number(r.qty) || 0), 0);
-
-      const workersSet = new Set();
-      filtered.forEach(r => {
-        if (r.worker) workersSet.add(r.worker);
-      });
-
-      totalReportsEl.textContent = totalReports;
-      totalPalletsEl.textContent = totalPallets;
-      totalUnitsEl.textContent = totalUnits;
-      totalWorkersEl.textContent = workersSet.size;
-
-      if (!filtered.length) {
-        headerSubEl.textContent = "אין נתונים לתצוגה בטווח הנוכחי";
-      } else {
-        headerSubEl.textContent = `סה״כ ${totalReports} דווחים, ${totalPallets} משטחים, ${totalUnits} יחידות`;
       }
+    });
+  }
 
-      if (dateFilter.value) {
-        dateRangeLabelEl.textContent = "טווח: " + dateFilter.value;
-      } else {
-        dateRangeLabelEl.textContent = "טווח: כל הזמנים";
-      }
-    }
+  function updateAnomaliesTable(anomalies) {
+    anomaliesTableBody.innerHTML = "";
 
-    function updateWorkersTable() {
-      const filtered = filterRows();
-      workersTableBody.innerHTML = "";
+    anomalies.forEach(r => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${r.date}</td>
+        <td>${r.time}</td>
+        <td>${r.worker}</td>
+        <td>${r.makat}</td>
+        <td>${r.pka}</td>
+        <td>${r.qty}</td>
+        <td>${r.totalQty}</td>
+      `;
+      anomaliesTableBody.appendChild(tr);
+    });
+  }
 
-      const map = new Map();
+  loadDashboard();
+</script>
 
-      filtered.forEach(r => {
-        const key = r.worker || "ללא שם";
-        if (!map.has(key)) {
-          map.set(key, { worker: key, reports: 0, pallets: 0, units: 0 });
-        }
-        const obj = map.get(key);
-        obj.reports += 1;
-        obj.units += Number(r.qty) || 0;
-        if (isNumeric(r.totalQty)) obj.pallets += 1;
-      });
-
-      const rows = Array.from(map.values()).sort((a, b) => b.units - a.units);
-
-      rows.forEach(row => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${row.worker}</td>
-          <td>${row.reports}</td>
-          <td>${row.pallets}</td>
-          <td>${row.units}</td>
-        `;
-        workersTableBody.appendChild(tr);
-      });
-    }
-
-    function updateWarehouseTable() {
-      const filtered = filterRows();
-      warehouseTableBody.innerHTML = "";
-
-      const map = new Map();
-
-      filtered.forEach(r => {
-        const key = r.warehouse || "לא מוגדר";
-        if (!map.has(key)) {
-          map.set(key, { warehouse: key, reports: 0, pallets: 0, units: 0 });
-        }
-        const obj = map.get(key);
-        obj.reports += 1;
-        obj.units += Number(r.qty) || 0;
-        if (isNumeric(r.totalQty)) obj.pallets += 1;
-      });
-
-      const rows = Array.from(map.values());
-
-      rows.forEach(row => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>
-            <span class="badge ${
-              row.warehouse === "מחסן חומרי גלם" ? "badge-raw" :
-              row.warehouse === "מחסן תוצר גמר" ? "badge-finished" : ""
-            }">${row.warehouse}</span>
-          </td>
-          <td>${row.reports}</td>
-          <td>${row.pallets}</td>
-          <td>${row.units}</td>
-        `;
-        warehouseTableBody.appendChild(tr);
-      });
-    }
-
-    function updateHourChart() {
-      const filtered = filterRows();
-
-      const hoursMap = new Map();
-      for (let h = 0; h < 24; h++) {
-        hoursMap.set(h, 0);
-      }
-
-      filtered.forEach(r => {
-        if (!r.time) return;
-        const parts = r.time.toString().split(":");
-        const h = Number(parts[0]) || 0;
-        if (hoursMap.has(h)) {
-          hoursMap.set(h, hoursMap.get(h) + 1);
-        }
-      });
-
-      const labels = [];
-      const data = [];
-      hoursMap.forEach((val, key) => {
-        labels.push(key.toString().padStart(2, "0") + ":00");
-        data.push(val);
-      });
-
-      const ctx = document.getElementById("hourChart").getContext("2d");
-
-      if (hourChart) {
-        hourChart.destroy();
-      }
-
-      hourChart = new Chart(ctx, {
-        type: "bar",
-        data: {
-          labels,
-          datasets: [
-            {
-              label: "מס׳ דווחים",
-              data,
-              backgroundColor: "rgba(63, 81, 181, 0.6)"
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { display: false }
-          },
-          scales: {
-            x: { ticks: { font: { size: 10 } } },
-            y: { beginAtZero: true, ticks: { stepSize: 1 } }
-          }
-        }
-      });
-    }
-
-    function updateAnomaliesTable() {
-      const filtered = filterRows();
-      anomaliesTableBody.innerHTML = "";
-
-      const anomalies = filtered.filter(r => {
-        const qty = Number(r.qty) || 0;
-        const total = Number(r.totalQty) || 0;
-
-        if (qty <= 0) return true;
-        if (total > 0 && qty > total) return true;
-        if (!r.makat || !r.pka) return true;
-
-        return false;
-      });
-
-      anomalies
+</body>
+</html>
