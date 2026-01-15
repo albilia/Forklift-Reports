@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>דשבורד מנהל - דו"חות תוויות</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <link rel="stylesheet" href="buttons.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
     body {
@@ -13,7 +12,6 @@
       color: #f5f5f5;
       margin: 0;
       padding: 0;
-      direction: rtl;
     }
 
     header {
@@ -83,37 +81,6 @@
       font-size: 13px;
     }
 
-    .filters label {
-      font-size: 13px;
-      margin-inline-start: 4px;
-    }
-
-    .summary-cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 10px;
-      margin-bottom: 15px;
-    }
-
-    .card {
-      background: #17212b;
-      border-radius: 10px;
-      padding: 10px;
-      text-align: center;
-    }
-
-    .card-title {
-      font-size: 13px;
-      color: #b0bec5;
-      margin-bottom: 4px;
-    }
-
-    .card-value {
-      font-size: 20px;
-      font-weight: bold;
-      color: #ffeb3b;
-    }
-
     .accordion-section {
       margin-bottom: 10px;
       border-radius: 10px;
@@ -130,10 +97,6 @@
       align-items: center;
       font-size: 14px;
       font-weight: bold;
-    }
-
-    .accordion-header span {
-      pointer-events: none;
     }
 
     .accordion-header .arrow {
@@ -190,6 +153,32 @@
       border: 1px solid #263445;
     }
 
+    .summary-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .card {
+      background: #17212b;
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .card-title {
+      font-size: 13px;
+      color: #b0bec5;
+      margin-bottom: 4px;
+    }
+
+    .card-value {
+      font-size: 20px;
+      font-weight: bold;
+      color: #ffeb3b;
+    }
+
     .loader {
       display: none;
       text-align: center;
@@ -204,27 +193,9 @@
       margin: 10px 0;
       font-weight: bold;
     }
-
-    .info-line {
-      font-size: 13px;
-      color: #b0bec5;
-      margin-bottom: 8px;
-    }
-
-    @media (max-width: 768px) {
-      header h1 {
-        font-size: 18px;
-      }
-      .filters {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      th, td {
-        font-size: 11px;
-      }
-    }
   </style>
 </head>
+
 <body>
 
 <header>
@@ -233,26 +204,26 @@
 </header>
 
 <main>
+
+  <!-- סינון -->
   <div class="filters">
     <div>
       <button id="btnToday" onclick="setQuickRange('today')">היום</button>
       <button id="btnWeek" onclick="setQuickRange('week')">שבוע</button>
       <button id="btnMonth" onclick="setQuickRange('month')">חודש</button>
     </div>
+
     <div>
       <label>מתאריך:</label>
-      <input type="date" id="fromDate" onchange="onDateChange()">
+      <input type="date" id="fromDate" onchange="applyFilters()">
       <label>עד תאריך:</label>
-      <input type="date" id="toDate" onchange="onDateChange()">
+      <input type="date" id="toDate" onchange="applyFilters()">
     </div>
-    <div>
-      <button id="btnShiftMorning" onclick="setShift('morning')">משמרת בוקר (06:30–18:30)</button>
-      <button id="btnShiftEvening" onclick="setShift('evening')">משמרת ערב (18:30–06:30)</button>
-    </div>
-  </div>
 
-  <div class="info-line" id="currentFilterInfo">
-    טוען נתונים...
+    <div>
+      <button id="btnShiftMorning" onclick="setShift('morning')">משמרת בוקר</button>
+      <button id="btnShiftEvening" onclick="setShift('evening')">משמרת ערב</button>
+    </div>
   </div>
 
   <div class="summary-cards">
@@ -260,21 +231,24 @@
       <div class="card-title">סה"כ דו"חות</div>
       <div class="card-value" id="totalReports">0</div>
     </div>
+
     <div class="card">
       <div class="card-title">סה"כ משטחים</div>
       <div class="card-value" id="totalPallets">0</div>
     </div>
+
     <div class="card">
       <div class="card-title">סה"כ יחידות</div>
       <div class="card-value" id="totalUnits">0</div>
     </div>
+
     <div class="card">
       <div class="card-title">סה"כ עובדים</div>
       <div class="card-value" id="totalWorkers">0</div>
     </div>
   </div>
 
-  <div class="loader" id="loader">טוען נתונים מהשרת...</div>
+  <div class="loader" id="loader">טוען נתונים...</div>
   <div class="error" id="errorMsg"></div>
 
   <!-- סיכום לפי מק"ט -->
@@ -315,8 +289,8 @@
             <thead>
               <tr>
                 <th>עובד</th>
-                <th>מס' דו"חות</th>
-                <th>מס' משטחים</th>
+                <th>דו"חות</th>
+                <th>משטחים</th>
                 <th>סה"כ יחידות</th>
               </tr>
             </thead>
@@ -327,10 +301,10 @@
     </div>
   </div>
 
-  <!-- סיכום לפי מחסן / תת־מחסן -->
+  <!-- סיכום לפי מחסן -->
   <div class="accordion-section">
     <div class="accordion-header" onclick="toggleAccordion(this)">
-      <span>סיכום לפי מחסן / תת־מחסן</span>
+      <span>סיכום לפי מחסן</span>
       <span class="arrow">▶</span>
     </div>
     <div class="accordion-content">
@@ -341,8 +315,8 @@
               <tr>
                 <th>מחסן</th>
                 <th>תת־מחסן</th>
-                <th>מס' דו"חות</th>
-                <th>מס' משטחים</th>
+                <th>דו"חות</th>
+                <th>משטחים</th>
                 <th>סה"כ יחידות</th>
               </tr>
             </thead>
@@ -356,7 +330,7 @@
   <!-- דו"חות גולמיים -->
   <div class="accordion-section">
     <div class="accordion-header" onclick="toggleAccordion(this)">
-      <span>דו"חות גולמיים (כל הדו"חות במשמרת)</span>
+      <span>דו"חות גולמיים</span>
       <span class="arrow">▶</span>
     </div>
     <div class="accordion-content">
@@ -371,7 +345,7 @@
                 <th>מק"ט</th>
                 <th>פק"ע</th>
                 <th>כמות</th>
-                <th>מס' משטח</th>
+                <th>משטח</th>
                 <th>מחסן</th>
                 <th>תת־מחסן</th>
               </tr>
@@ -383,7 +357,7 @@
     </div>
   </div>
 
-  <!-- חריגות (לדוגמה: כמות 0, נתונים חסרים וכו') -->
+  <!-- חריגות -->
   <div class="accordion-section">
     <div class="accordion-header" onclick="toggleAccordion(this)">
       <span>חריגות</span>
@@ -401,7 +375,7 @@
                 <th>מק"ט</th>
                 <th>פק"ע</th>
                 <th>כמות</th>
-                <th>מס' משטח</th>
+                <th>משטח</th>
                 <th>מחסן</th>
                 <th>תת־מחסן</th>
                 <th>סיבה</th>
@@ -417,475 +391,189 @@
 </main>
 
 <script>
-  const API_URL = "https://script.google.com/macros/s/AKfycbwJX4IaxmTmNx0re1ifoEPxgbsh6rAkFfmaehHDkJKW0LViqLtnkiCCg8uzsaA3PTtJEg/exec";
+  const API_URL =
+    "https://script.google.com/macros/s/AKfycbwJX4IaxmTmNx0re1ifoEPxgbsh6rAkFfmaehHDkJKW0LViqLtnkiCCg8uzsaA3PTtJEg/exec";
 
-  let allReports = [];
-  let filteredReports = [];
-  let currentShift = null; // 'morning' | 'evening' | null
-
-  const loader = document.getElementById("loader");
-  const errorMsg = document.getElementById("errorMsg");
-  const infoLine = document.getElementById("currentFilterInfo");
-
-  const totalReportsEl = document.getElementById("totalReports");
-  const totalPalletsEl = document.getElementById("totalPallets");
-  const totalUnitsEl = document.getElementById("totalUnits");
-  const totalWorkersEl = document.getElementById("totalWorkers");
-
-  const tableByMakat = document.getElementById("tableByMakat");
-  const tableByWorker = document.getElementById("tableByWorker");
-  const tableByWarehouse = document.getElementById("tableByWarehouse");
-  const tableRawReports = document.getElementById("tableRawReports");
-  const tableAnomalies = document.getElementById("tableAnomalies");
-
-  const btnToday = document.getElementById("btnToday");
-  const btnWeek = document.getElementById("btnWeek");
-  const btnMonth = document.getElementById("btnMonth");
-  const btnShiftMorning = document.getElementById("btnShiftMorning");
-  const btnShiftEvening = document.getElementById("btnShiftEvening");
-  const fromDateInput = document.getElementById("fromDate");
-  const toDateInput = document.getElementById("toDate");
+  let allRows = [];
+  let filteredRows = [];
+  let currentShift = null;
 
   function goBack() {
     window.location.href = "dashboard.html";
   }
 
-  function toggleAccordion(headerEl) {
-    const content = headerEl.nextElementSibling;
-    const arrow = headerEl.querySelector(".arrow");
-    const isOpen = headerEl.classList.contains("open");
+  function toggleAccordion(header) {
+    const content = header.nextElementSibling;
+    const isOpen = header.classList.contains("open");
 
     if (isOpen) {
-      headerEl.classList.remove("open");
+      header.classList.remove("open");
       content.style.maxHeight = 0;
     } else {
-      headerEl.classList.add("open");
+      header.classList.add("open");
       content.style.maxHeight = content.scrollHeight + "px";
     }
   }
 
   function setQuickRange(type) {
-    clearQuickButtons();
-    currentShift = null;
-    btnShiftMorning.classList.remove("active");
-    btnShiftEvening.classList.remove("active");
-
     const today = new Date();
     let from, to;
 
     if (type === "today") {
-      btnToday.classList.add("active");
-      from = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-      to = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      from = to = today;
     } else if (type === "week") {
-      btnWeek.classList.add("active");
-      to = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-      from = new Date(to);
+      to = today;
+      from = new Date(today);
       from.setDate(from.getDate() - 6);
     } else if (type === "month") {
-      btnMonth.classList.add("active");
-      to = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-      from = new Date(to);
+      to = today;
+      from = new Date(today);
       from.setDate(from.getDate() - 29);
     }
 
-    fromDateInput.value = formatDateInput(from);
-    toDateInput.value = formatDateInput(to);
+    document.getElementById("fromDate").value = formatDateInput(from);
+    document.getElementById("toDate").value = formatDateInput(to);
 
     applyFilters();
-  }
-
-  function clearQuickButtons() {
-    btnToday.classList.remove("active");
-    btnWeek.classList.remove("active");
-    btnMonth.classList.remove("active");
   }
 
   function setShift(shift) {
     currentShift = shift;
-    btnShiftMorning.classList.toggle("active", shift === "morning");
-    btnShiftEvening.classList.toggle("active", shift === "evening");
     applyFilters();
   }
 
-  function onDateChange() {
-    clearQuickButtons();
-    applyFilters();
+  function formatDateInput(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
   }
 
-  function formatDateInput(dateObj) {
-    const y = dateObj.getFullYear();
-    const m = String(dateObj.getMonth() + 1).padStart(2, "0");
-    const d = String(dateObj.getDate()).padStart(2, "0");
-    return `${y}-${m}-${d}`;
+  function parseDate(d) {
+    const parts = d.split("/");
+    return new Date(2000 + Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
   }
 
-  function parseReportDate(dateStr) {
-    const parts = dateStr.split("/");
-    if (parts.length !== 3) return null;
-    const d = parseInt(parts[0], 10);
-    const m = parseInt(parts[1], 10) - 1;
-    const y = parseInt(parts[2], 10);
-    return new Date(2000 + y, m, d);
+  function parseTime(t) {
+    const [h, m] = t.split(":").map(Number);
+    return h * 60 + m;
   }
 
-  function parseReportTime(timeStr) {
-    const parts = timeStr.split(":");
-    if (parts.length !== 2) return null;
-    const h = parseInt(parts[0], 10);
-    const m = parseInt(parts[1], 10);
-    return { h, m };
-  }
-
-  function isInShift(report) {
+  function isInShift(row) {
     if (!currentShift) return true;
 
-    const t = parseReportTime(report.time || report.hour || "");
-    if (!t) return true;
-
-    const minutes = t.h * 60 + t.m;
+    const minutes = parseTime(row.time);
 
     const morningStart = 6 * 60 + 30;
     const morningEnd = 18 * 60 + 30;
-    const eveningStart = 18 * 60 + 30;
-    const eveningEnd = 6 * 60 + 30;
 
     if (currentShift === "morning") {
       return minutes >= morningStart && minutes <= morningEnd;
-    } else if (currentShift === "evening") {
-      return minutes >= eveningStart || minutes <= eveningEnd;
     }
+
+    if (currentShift === "evening") {
+      return minutes >= morningEnd || minutes <= morningStart;
+    }
+
     return true;
   }
 
   function applyFilters() {
-    if (!allReports.length) return;
+    const fromVal = document.getElementById("fromDate").value;
+    const toVal = document.getElementById("toDate").value;
 
-    const fromVal = fromDateInput.value;
-    const toVal = toDateInput.value;
+    let from = fromVal ? new Date(fromVal) : null;
+    let to = toVal ? new Date(toVal) : null;
 
-    let fromDate = null;
-    let toDate = null;
+    filteredRows = allRows.filter(r => {
+      const d = parseDate(r.date);
 
-    if (fromVal) {
-      const [y, m, d] = fromVal.split("-");
-      fromDate = new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
-    }
-    if (toVal) {
-      const [y, m, d] = toVal.split("-");
-      toDate = new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
-    }
-
-    filteredReports = allReports.filter(r => {
-      const d = parseReportDate(r.date || r.reportDate || "");
-      if (!d) return false;
-
-      if (fromDate && d < fromDate) return false;
-      if (toDate && d > toDate) return false;
+      if (from && d < from) return false;
+      if (to && d > to) return false;
 
       if (!isInShift(r)) return false;
 
       return true;
     });
 
-    updateInfoLine();
     updateSummary();
     buildTables();
   }
 
-  function updateInfoLine() {
-    const fromVal = fromDateInput.value;
-    const toVal = toDateInput.value;
-
-    let text = "טווח נוכחי: ";
-
-    if (fromVal && toVal) {
-      text += `מ-${formatDateDisplay(fromVal)} עד ${formatDateDisplay(toVal)}`;
-    } else if (fromVal) {
-      text += `מ-${formatDateDisplay(fromVal)}`;
-    } else if (toVal) {
-      text += `עד ${formatDateDisplay(toVal)}`;
-    } else {
-      text += "כל הזמנים";
-    }
-
-    if (currentShift === "morning") {
-      text += " | משמרת בוקר (06:30–18:30)";
-    } else if (currentShift === "evening") {
-      text += " | משמרת ערב (18:30–06:30)";
-    }
-
-    text += ` | סה"כ דו"חות: ${filteredReports.length}`;
-
-    infoLine.innerText = text;
-  }
-
-  function formatDateDisplay(inputVal) {
-    const [y, m, d] = inputVal.split("-");
-    return `${d}/${m}/${y.slice(-2)}`;
-  }
-
   function updateSummary() {
-    totalReportsEl.innerText = filteredReports.length;
+    document.getElementById("totalReports").innerText = filteredRows.length;
 
-    const palletSet = new Set();
-    let totalUnits = 0;
-    const workerSet = new Set();
+    const pallets = filteredRows.filter(r => r.totalQty !== "").length;
+    document.getElementById("totalPallets").innerText = pallets;
 
-    filteredReports.forEach(r => {
-      const palletId = r.palletId || r.pallet || r.palletNum || "";
-      if (palletId) {
-        palletSet.add(`${r.makat || r.makatNum || ""}#${palletId}`);
-      }
-      const qty = Number(r.qty || r.quantity || 0);
-      if (!isNaN(qty)) totalUnits += qty;
+    const units = filteredRows.reduce((s, r) => s + r.qty, 0);
+    document.getElementById("totalUnits").innerText = units;
 
-      const worker = r.name || r.worker || "";
-      if (worker) workerSet.add(worker);
-    });
-
-    totalPalletsEl.innerText = palletSet.size;
-    totalUnitsEl.innerText = totalUnits;
-    totalWorkersEl.innerText = workerSet.size;
+    const workers = new Set(filteredRows.map(r => r.worker));
+    document.getElementById("totalWorkers").innerText = workers.size;
   }
 
   function buildTables() {
-    buildTableByMakat();
-    buildTableByWorker();
-    buildTableByWarehouse();
-    buildTableRawReports();
-    buildTableAnomalies();
+    buildByMakat();
+    buildByWorker();
+    buildByWarehouse();
+    buildRaw();
+    buildAnomalies();
   }
 
-  function buildTableByMakat() {
-    tableByMakat.innerHTML = "";
-    const map = new Map();
+  function buildByMakat() {
+    const tbody = document.getElementById("tableByMakat");
+    tbody.innerHTML = "";
 
-    filteredReports.forEach(r => {
-      const makat = r.makat || r.makatNum || "---";
-      const key = makat;
-      if (!map.has(key)) {
-        map.set(key, {
-          makat,
+    const map = {};
+
+    filteredRows.forEach(r => {
+      if (!map[r.makat]) {
+        map[r.makat] = {
           pallets: new Set(),
-          totalQty: 0,
-          pkaSet: new Set()
-        });
+          qty: 0,
+          pka: new Set()
+        };
       }
-      const obj = map.get(key);
-      const palletId = r.palletId || r.pallet || r.palletNum || "";
-      if (palletId) obj.pallets.add(palletId);
-      const qty = Number(r.qty || r.quantity || 0);
-      if (!isNaN(qty)) obj.totalQty += qty;
-      const pka = r.pka || r.batch || "";
-      if (pka) obj.pkaSet.add(pka);
+
+      if (r.totalQty !== "") map[r.makat].pallets.add(r.rowIndex);
+      map[r.makat].qty += r.qty;
+      map[r.makat].pka.add(r.pka);
     });
 
-    Array.from(map.values()).forEach(row => {
+    Object.keys(map).forEach(makat => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td>${row.makat}</td>
-        <td>${row.pallets.size}</td>
-        <td>${row.totalQty}</td>
-        <td>${row.pkaSet.size}</td>
+        <td>${makat}</td>
+        <td>${map[makat].pallets.size}</td>
+        <td>${map[makat].qty}</td>
+        <td>${map[makat].pka.size}</td>
       `;
-      tableByMakat.appendChild(tr);
+      tbody.appendChild(tr);
     });
   }
 
-  function buildTableByWorker() {
-    tableByWorker.innerHTML = "";
-    const map = new Map();
+  function buildByWorker() {
+    const tbody = document.getElementById("tableByWorker");
+    tbody.innerHTML = "";
 
-    filteredReports.forEach(r => {
-      const worker = r.name || r.worker || "לא ידוע";
-      if (!map.has(worker)) {
-        map.set(worker, {
-          worker,
-          reportsCount: 0,
-          pallets: new Set(),
-          totalQty: 0
-        });
+    const map = {};
+
+    filteredRows.forEach(r => {
+      if (!map[r.worker]) {
+        map[r.worker] = {
+          reports: 0,
+          pallets: 0,
+          qty: 0
+        };
       }
-      const obj = map.get(worker);
-      obj.reportsCount++;
-      const palletId = r.palletId || r.pallet || r.palletNum || "";
-      if (palletId) obj.pallets.add(`${r.makat || ""}#${palletId}`);
-      const qty = Number(r.qty || r.quantity || 0);
-      if (!isNaN(qty)) obj.totalQty += qty;
+
+      map[r.worker].reports++;
+      map[r.worker].qty += r.qty;
+      if (r.totalQty !== "") map[r.worker].pallets++;
     });
 
-    Array.from(map.values()).forEach(row => {
+    Object.keys(map).forEach(worker => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td>${row.worker}</td>
-        <td>${row.reportsCount}</td>
-        <td>${row.pallets.size}</td>
-        <td>${row.totalQty}</td>
-      `;
-      tableByWorker.appendChild(tr);
-    });
-  }
-
-  function buildTableByWarehouse() {
-    tableByWarehouse.innerHTML = "";
-    const map = new Map();
-
-    filteredReports.forEach(r => {
-      const main = r.main || r.warehouse || "";
-      const finished = r.finished || r.sub || r.subWarehouse || "";
-      const key = main + "||" + finished;
-
-      if (!map.has(key)) {
-        map.set(key, {
-          main,
-          finished,
-          reportsCount: 0,
-          pallets: new Set(),
-          totalQty: 0
-        });
-      }
-      const obj = map.get(key);
-      obj.reportsCount++;
-      const palletId = r.palletId || r.pallet || r.palletNum || "";
-      if (palletId) obj.pallets.add(`${r.makat || ""}#${palletId}`);
-      const qty = Number(r.qty || r.quantity || 0);
-      if (!isNaN(qty)) obj.totalQty += qty;
-    });
-
-    Array.from(map.values()).forEach(row => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${row.main || ""}</td>
-        <td>${row.finished || ""}</td>
-        <td>${row.reportsCount}</td>
-        <td>${row.pallets.size}</td>
-        <td>${row.totalQty}</td>
-      `;
-      tableByWarehouse.appendChild(tr);
-    });
-  }
-
-  function buildTableRawReports() {
-    tableRawReports.innerHTML = "";
-
-    filteredReports
-      .slice()
-      .sort((a, b) => {
-        const da = parseReportDate(a.date || "");
-        const db = parseReportDate(b.date || "");
-        if (da && db && da.getTime() !== db.getTime()) {
-          return da - db;
-        }
-        const ta = a.time || "";
-        const tb = b.time || "";
-        return ta.localeCompare(tb);
-      })
-      .forEach(r => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${r.date || ""}</td>
-          <td>${r.time || ""}</td>
-          <td>${r.name || ""}</td>
-          <td>${r.makat || ""}</td>
-          <td>${r.pka || ""}</td>
-          <td>${r.qty || ""}</td>
-          <td>${r.palletId || r.pallet || ""}</td>
-          <td>${r.main || r.warehouse || ""}</td>
-          <td>${r.finished || r.sub || ""}</td>
-        `;
-        tableRawReports.appendChild(tr);
-      });
-  }
-
-  function buildTableAnomalies() {
-    tableAnomalies.innerHTML = "";
-
-    filteredReports.forEach(r => {
-      const qty = Number(r.qty || r.quantity || 0);
-      let reason = "";
-
-      if (isNaN(qty) || qty <= 0) {
-        reason = "כמות לא תקינה";
-      } else if (!r.makat) {
-        reason = "מק\"ט חסר";
-      } else if (!r.pka) {
-        reason = "פק\"ע חסר";
-      }
-
-      if (!reason) return;
-
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${r.date || ""}</td>
-        <td>${r.time || ""}</td>
-        <td>${r.name || ""}</td>
-        <td>${r.makat || ""}</td>
-        <td>${r.pka || ""}</td>
-        <td>${r.qty || ""}</td>
-        <td>${r.palletId || r.pallet || ""}</td>
-        <td>${r.main || r.warehouse || ""}</td>
-        <td>${r.finished || r.sub || ""}</td>
-        <td>${reason}</td>
-      `;
-      tableAnomalies.appendChild(tr);
-    });
-  }
-
-  async function loadReports() {
-    loader.style.display = "block";
-    errorMsg.innerText = "";
-    infoLine.innerText = "טוען נתונים...";
-
-    try {
-      const res = await fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify({
-          action: "getReports"
-        })
-      });
-
-      const data = await res.json();
-
-      if (!data || !data.success || !Array.isArray(data.reports)) {
-        throw new Error("מבנה נתונים לא תקין מהשרת");
-      }
-
-      allReports = data.reports;
-      if (!allReports.length) {
-        infoLine.innerText = "אין דו\"חות להצגה.";
-        filteredReports = [];
-        updateSummary();
-        buildTables();
-        return;
-      }
-
-      const dates = allReports
-        .map(r => parseReportDate(r.date || ""))
-        .filter(d => d instanceof Date && !isNaN(d.getTime()))
-        .sort((a, b) => a - b);
-
-      if (dates.length) {
-        const from = dates[0];
-        const to = dates[dates.length - 1];
-        fromDateInput.value = formatDateInput(from);
-        toDateInput.value = formatDateInput(to);
-      }
-
-      applyFilters();
-    } catch (e) {
-      console.error(e);
-      errorMsg.innerText = "שגיאה בטעינת הנתונים: " + e.message;
-      infoLine.innerText = "לא ניתן להציג נתונים.";
-    } finally {
-      loader.style.display = "none";
-    }
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    loadReports();
-  });
-</script>
-
-</body>
-</html>
+        <td
