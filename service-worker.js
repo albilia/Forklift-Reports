@@ -1,57 +1,66 @@
-const CACHE_NAME = "pallet-app-v1";
+// גרסה של הקאש — אם תיתקע גרסה ישנה, פשוט תעלה מספר
+const CACHE_NAME = "pallet-app-v3";
 
-const FILES_TO_CACHE = [
-  "index.html",
-  "login.html",
-  "dashboard.html",
-  "report.html",
-  "history.html",
-  "manifest.json",
-  "logo.jpg",
-  "background.jpg",
-  "apple-touch-icon.png"
+// קבצים לשמירה בקאש
+const ASSETS = [
+  "/",
+  "/index.html",
+  "/login.html",
+  "/dashboard.html",
+  "/report.html",
+  "/history.html",
+  "/admin.html",
+  "/buttons.css",
+  "/background.jpg",
+  "/logo.png",
+  "/manifest.json",
+  "/icons/icon-192.png",
+  "/icons/icon-512.png",
+  "/qr.json"
 ];
 
-// התקנה — שמירת קבצים בזיכרון
+// התקנה — שמירת קבצים בקאש
 self.addEventListener("install", event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(async cache => {
-      try {
-        await cache.addAll(FILES_TO_CACHE);
-      } catch (err) {
-        console.warn("⚠ חלק מהקבצים לא נטענו לקאש:", err);
-      }
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll(ASSETS);
     })
   );
+  self.skipWaiting();
 });
 
-// הפעלה — ניקוי גרסאות ישנות
+// הפעלה — ניקוי קאש ישן
 self.addEventListener("activate", event => {
   event.waitUntil(
-    caches.keys().then(keys => {
-      return Promise.all(
-        keys.map(key => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
-        })
-      );
-    })
+    caches.keys().then(keys =>
+      Promise.all(
+        keys
+          .filter(key => key !== CACHE_NAME)
+          .map(key => caches.delete(key))
+      )
+    )
   );
+  self.clients.claim();
 });
 
-// שליפה — טעינה מהירה מה‑cache
+// יירוט בקשות
 self.addEventListener("fetch", event => {
+  const url = event.request.url;
+
+  // ❗ חשוב: לא לגעת בבקשות ל־Apps Script
+  // אחרת זה יגרום ל־CORS / שגיאות API
+  if (url.includes("script.google.com/macros")) {
+    return; // נותן לדפדפן לבצע את הבקשה ישירות
+  }
+
+  // Cache-first עבור קבצי האתר
   event.respondWith(
-    caches.match(event.request).then(response => {
+    caches.match(event.request).then(cached => {
       return (
-        response ||
-        fetch(event.request).catch(() => {
-          // fallback לקבצים בסיסיים
-          if (event.request.mode === "navigate") {
-            return caches.match("index.html");
-          }
-        })
+        cached ||
+        fetch(event.request).catch(() =>
+          caches.match("/index.html")
+        )
       );
     })
   );
