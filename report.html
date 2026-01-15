@@ -158,7 +158,6 @@
       img.src = e.target.result;
       img.style.display = "block";
 
-      // ניקוי נתונים ישנים
       finishedReports = [];
       document.getElementById("ocrList").innerHTML = "";
       document.getElementById("totalBox").style.display = "none";
@@ -186,6 +185,7 @@
 
   async function sendToGemini(base64) {
     try {
+      // FIXED — ללא headers
       const res = await fetch(API_URL, {
         method: "POST",
         body: JSON.stringify({ 
@@ -273,6 +273,7 @@
     document.getElementById("loader").style.display = "block";
 
     try {
+      // FIXED — ללא headers
       const res = await fetch(API_URL, {
         method: "POST",
         body: JSON.stringify({ 
