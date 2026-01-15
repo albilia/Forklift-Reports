@@ -146,31 +146,6 @@
       color: #fff;
     }
 
-    .summary-table {
-      margin-top: 10px;
-      border-collapse: collapse;
-      width: 100%;
-      font-size: 13px;
-    }
-
-    .summary-table th,
-    .summary-table td {
-      border: 1px solid #ddd;
-      padding: 6px 8px;
-      text-align: right;
-    }
-
-    .summary-table th {
-      background-color: #f3e5f5;
-      font-weight: 600;
-    }
-
-    .summary-section {
-      margin-top: 14px;
-      padding-top: 10px;
-      border-top: 1px solid #eee;
-    }
-
     .back-btn {
       width: 100%;
       padding: 14px;
@@ -220,8 +195,8 @@
         <label for="categoryFilter">קטגוריה</label>
         <select id="categoryFilter">
           <option value="all">הכול</option>
-          <option value="raw">מחסן חומרי גלם</option>
-          <option value="finished">מחסן תוצר גמר</option>
+          <option value="מחסן חומרי גלם">מחסן חומרי גלם</option>
+          <option value="מחסן תוצר גמר">מחסן תוצר גמר</option>
         </select>
       </div>
 
@@ -241,11 +216,6 @@
 
       <div class="section-title">דווחים</div>
       <div class="reports-list" id="reportsList"></div>
-
-      <div class="summary-section">
-        <button class="btn btn-primary" id="summarizeBtn">סיכום לפי מק״ט</button>
-        <div id="summaryBySkuContainer"></div>
-      </div>
 
       <button class="back-btn" onclick="goBack()">חזור לדשבורד</button>
 
@@ -279,7 +249,6 @@
   const totalReportsEl = document.getElementById("totalReports");
   const totalPalletsEl = document.getElementById("totalPallets");
   const summaryBannerEl = document.getElementById("summaryBanner");
-  const summaryBySkuContainer = document.getElementById("summaryBySkuContainer");
 
   const dateFilter = document.getElementById("dateFilter");
   const startTimeFilter = document.getElementById("startTimeFilter");
@@ -287,9 +256,21 @@
   const categoryFilter = document.getElementById("categoryFilter");
   const subWarehouseFilter = document.getElementById("subWarehouseFilter");
   const workerFilter = document.getElementById("workerFilter");
-  const summarizeBtn = document.getElementById("summarizeBtn");
 
   let reports = [];
+
+  function formatDate(d) {
+    if (!d) return "";
+    try {
+      const date = new Date(d);
+      const day = String(date.getDate()).padStart(2, "0");
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const year = String(date.getFullYear()).slice(-2);
+      return `${day}/${month}/${year}`;
+    } catch {
+      return d;
+    }
+  }
 
   function timeToMinutes(t) {
     if (!t) return null;
@@ -319,10 +300,6 @@
       opt.textContent = w;
       workerFilter.appendChild(opt);
     });
-
-    if (name) {
-      workerFilter.value = name;
-    }
   }
 
   function filterReports() {
@@ -336,13 +313,12 @@
     return reports.filter(r => {
       if (dateVal) {
         const [d, m, y] = r.date.split('/');
-        const iso = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+        const iso = `20${y}-${m}-${d}`;
         if (iso !== dateVal) return false;
       }
 
-      if (categoryFilter.value !== "all") {
-        if (categoryFilter.value === "raw" && r.warehouse !== "מחסן חומרי גלם") return false;
-        if (categoryFilter.value === "finished" && r.warehouse !== "מחסן תוצר גמר") return false;
+      if (categoryFilter.value !== "all" && r.warehouse !== categoryFilter.value) {
+        return false;
       }
 
       if (subWarehouseFilter.value !== "all" && r.subWarehouse !== subWarehouseFilter.value) {
@@ -371,7 +347,6 @@
   function renderReports() {
     const filtered = filterReports();
     reportsListEl.innerHTML = "";
-    summaryBySkuContainer.innerHTML = "";
 
     filtered.forEach(r => {
       const div = document.createElement("div");
@@ -401,61 +376,20 @@
     summaryBannerEl.textContent = `סה״כ דווחים: ${filtered.length} | סה״כ משטחים: ${palletsCount}`;
   }
 
-  function summarizeBySku() {
-    const filtered = filterReports();
-
-    const lastRows = filtered.filter(r => typeof r.totalQty === 'number' && !isNaN(r.totalQty));
-
-    const map = new Map();
-    lastRows.forEach(r => {
-      const sku = r.makat || 'ללא מק״ט';
-      if (!map.has(sku)) {
-        map.set(sku, { sku, pallets: 0 });
-      }
-      map.get(sku).pallets += 1;
-    });
-
-    if (map.size === 0) {
-      summaryBySkuContainer.innerHTML = "<div style='margin-top:8px;font-size:13px;color:#666;'>אין נתונים לסיכום לפי מק״ט.</div>";
-      return;
-    }
-
-    let html = `
-      <table class="summary-table">
-        <thead>
-          <tr>
-            <th>מק״ט</th>
-            <th>סה״כ משטחים</th>
-          </tr>
-        </thead>
-        <tbody>
-    `;
-
-    Array.from(map.values()).forEach(row => {
-      html += `
-        <tr>
-          <td>${row.sku}</td>
-          <td>${row.pallets}</td>
-        </tr>
-      `;
-    });
-
-    html += `</tbody></table>`;
-    summaryBySkuContainer.innerHTML = html;
-  }
-
   async function loadReports() {
     reportsListEl.innerHTML = "<div style='margin-top:20px;font-size:14px;color:#666;'>טוען דווחים...</div>";
 
     try {
-      // ⭐ FIXED — ללא headers, פעולה נכונה: getHistory
       const res = await fetch(WEB_APP_URL, {
         method: "POST",
         body: JSON.stringify({ action: "getHistory" })
       });
 
       const data = await res.json();
-      reports = data.rows || [];
+      reports = (data.rows || []).map(r => ({
+        ...r,
+        date: formatDate(r.date)
+      }));
 
       initFiltersOptions();
       renderReports();
@@ -470,7 +404,6 @@
   categoryFilter.addEventListener("change", renderReports);
   subWarehouseFilter.addEventListener("change", renderReports);
   workerFilter.addEventListener("change", renderReports);
-  summarizeBtn.addEventListener("click", summarizeBySku);
 
   loadReports();
 </script>
