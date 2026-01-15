@@ -151,16 +151,29 @@
   <div id="subSelectBox">
     <select id="subWarehouseSelect" onchange="selectSubWarehouse()">
       <option value="">בחר תת־מחסן</option>
-      <option>תת מחסן 1</option>
-      <option>תת מחסן 2</option>
-      <option>תת מחסן 3</option>
-      <option>תת מחסן 4</option>
-      <option>תת מחסן 5</option>
-      <option>תת מחסן 6</option>
-      <option>תת מחסן 7</option>
-      <option>תת מחסן 8</option>
-      <option>תת מחסן 9</option>
-      <option>תת מחסן 10</option>
+      <option>דנידין</option>
+      <option>דנידין צד שמאל</option>
+      <option>דנידין צד ימין</option>
+      <option>בצק סוכר מעבר</option>
+      <option>בצק סוכר ימין</option>
+      <option>בצק סוכר שמאל</option>
+      <option>שדרה מרכזית ימין</option>
+      <option>שדרה מרכזית שמאל</option>
+      <option>שדרה מרכזית מדפים</option>
+      <option>שדרה שמאל צד שמאל</option>
+      <option>שדרה מרכזת מעבר</option>
+      <option>שדרה שמאל תחת הגלריה</option>
+      <option>כניסה ימין</option>
+      <option>כניסה שמאל</option>
+      <option>מחסן חדש</option>
+      <option>מחסן חדש שמאל</option>
+      <option>מחסן חדש ימין</option>
+      <option>קלוי קלוף טור</option>
+      <option>קלוי קלוף קטן</option>
+      <option>תריסים</option>
+      <option>קיר ווילטון</option>
+      <option>קיר שרינק</option>
+      <option>צרפתי</option>
     </select>
   </div>
 
@@ -198,7 +211,7 @@
 
   let main = "";
   let finished = "";
-  let pallets = [];      // כל משטח בנפרד
+  let pallets = [];
   let pendingFile = null;
   let isProcessing = false;
 
@@ -210,7 +223,6 @@
   const palletsContainer = document.getElementById("palletsContainer");
   const globalTotalBox = document.getElementById("globalTotalBox");
 
-  // קביעת מחסן לפי קטגוריה
   if (category === "raw") {
     main = "מחסן חומרי גלם";
     finished = "";
@@ -397,7 +409,6 @@
     document.getElementById("loader").innerText = "שומר...";
     document.getElementById("loader").style.display = "block";
 
-    // ממירים את מבנה המשטחים למבנה reports שהשרת מצפה לו
     const reports = [];
     pallets.forEach(pallet => {
       pallet.items.forEach((item, idx) => {
@@ -406,7 +417,6 @@
           pka: item.pka,
           qty: item.qty,
           palletId: item.palletId,
-          // השורה האחרונה של כל משטח תקבל totalQty, השאר ריק
           totalForPallet: (idx === pallet.items.length - 1) ? pallet.totalQty : ""
         });
       });
