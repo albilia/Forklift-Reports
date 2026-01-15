@@ -265,7 +265,7 @@
   </div>
 
 <script>
-  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxzNj0wvC-Tb5wquuuAWvOfkxf_H4YRKzl3vijRlyi2nvkkH8VgDcL438RBKg5QeanrTg/exec";
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwJX4IaxmTmNx0re1ifoEPxgbsh6rAkFfmaehHDkJKW0LViqLtnkiCCg8uzsaA3PTtJEg/exec";
 
   const params = new URLSearchParams(window.location.search);
   const phone = params.get("phone");
@@ -383,8 +383,8 @@
           <div>${r.qty} יח'</div>
         </div>
         <div class="report-meta">עובד: ${r.worker || ''}</div>
-        <div class="report-meta">מק״ט: ${r.sku || ''}</div>
-        <div class="report-meta">פק״ע: ${r.lot || ''}</div>
+        <div class="report-meta">מק״ט: ${r.makat || ''}</div>
+        <div class="report-meta">פק״ע: ${r.pka || ''}</div>
         <div class="report-meta">מחסן: ${r.warehouse || ''}</div>
         <div class="report-meta">תת־מחסן: ${r.subWarehouse || ''}</div>
         <div class="report-meta">סה״כ כמות במשטח: ${r.totalQty || ''}</div>
@@ -408,7 +408,7 @@
 
     const map = new Map();
     lastRows.forEach(r => {
-      const sku = r.sku || 'ללא מק״ט';
+      const sku = r.makat || 'ללא מק״ט';
       if (!map.has(sku)) {
         map.set(sku, { sku, pallets: 0 });
       }
@@ -448,14 +448,14 @@
     reportsListEl.innerHTML = "<div style='margin-top:20px;font-size:14px;color:#666;'>טוען דווחים...</div>";
 
     try {
+      // ⭐ FIXED — ללא headers, פעולה נכונה: getHistory
       const res = await fetch(WEB_APP_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'getReports' })
+        method: "POST",
+        body: JSON.stringify({ action: "getHistory" })
       });
 
       const data = await res.json();
-      reports = data.reports || [];
+      reports = data.rows || [];
 
       initFiltersOptions();
       renderReports();
@@ -476,5 +476,4 @@
 </script>
 
 </body>
-
 </html>
