@@ -55,23 +55,45 @@
     #preview { max-width: 80%; display: none; margin: 15px auto; border-radius: 12px; border: 3px solid #fff; }
     #loader { display: none; font-weight: bold; margin-top: 20px; font-size: 24px; color: #ffeb3b; }
 
-    .ocr-box {
-      background: rgba(0,0,0,0.8);
+    .pallet-box {
+      background: rgba(0,0,0,0.85);
       border-right: 6px solid #00e5ff;
-      padding: 15px;
+      padding: 12px;
       margin: 10px auto;
-      border-radius: 8px;
+      border-radius: 10px;
       width: 90%;
       text-align: right;
+      font-size: 14px;
     }
 
-    .delete-btn {
+    .pallet-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      font-weight: bold;
+      color: #ffeb3b;
+    }
+
+    .pallet-items {
+      margin-top: 4px;
+    }
+
+    .pallet-item {
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 4px;
+      margin-top: 4px;
+    }
+
+    .delete-pallet-btn {
       background: #ff5252;
       color: white;
       border: none;
-      padding: 8px 12px;
+      padding: 6px 10px;
       border-radius: 5px;
       font-weight: bold;
+      cursor: pointer;
+      font-size: 13px;
     }
 
     button {
@@ -102,7 +124,11 @@
       color: white;
     }
 
-    #totalBox {
+    #palletsContainer {
+      margin-top: 10px;
+    }
+
+    #globalTotalBox {
       background: rgba(0,0,0,0.85);
       border-left: 6px solid #ffeb3b;
       padding: 12px;
@@ -117,7 +143,7 @@
 </head>
 
 <body>
-  <h2>דיווח תווית</h2>
+  <h2>דיווח תוויות</h2>
 
   <div id="warehouseInfo"></div>
 
@@ -154,18 +180,15 @@
 
   <img id="preview">
   <div id="loader">סורק תוויות באמצעות AI...</div>
-  <div id="ocrList"></div>
-  <div id="totalBox"></div>
+
+  <div id="palletsContainer"></div>
+  <div id="globalTotalBox"></div>
 
   <button id="processAllBtn" onclick="sendToAIScan()">שלח לסריקה</button>
   <button id="saveBtn" onclick="saveAll()">שגר דווח</button>
   <button id="backBtn" onclick="goBack()">חזור לדשבורד</button>
 
 <script>
-  let finishedReports = [];
-  let pendingFile = null;
-  let isProcessing = false;
-
   const API_URL = "https://script.google.com/macros/s/AKfycbwJX4IaxmTmNx0re1ifoEPxgbsh6rAkFfmaehHDkJKW0LViqLtnkiCCg8uzsaA3PTtJEg/exec";
 
   const params = new URLSearchParams(window.location.search);
@@ -175,25 +198,39 @@
 
   let main = "";
   let finished = "";
+  let pallets = [];      // כל משטח בנפרד
+  let pendingFile = null;
+  let isProcessing = false;
+
+  const warehouseInfoDiv = document.getElementById("warehouseInfo");
+  const subSelectBox = document.getElementById("subSelectBox");
+  const subWarehouseSelect = document.getElementById("subWarehouseSelect");
+  const processAllBtn = document.getElementById("processAllBtn");
+  const saveBtn = document.getElementById("saveBtn");
+  const palletsContainer = document.getElementById("palletsContainer");
+  const globalTotalBox = document.getElementById("globalTotalBox");
 
   // קביעת מחסן לפי קטגוריה
   if (category === "raw") {
     main = "מחסן חומרי גלם";
     finished = "";
-    document.getElementById("warehouseInfo").innerText = main;
+    warehouseInfoDiv.innerText = main;
+    processAllBtn.style.display = "block";
   }
 
   if (category === "finished") {
     main = "מחסן תוצר גמר";
-    document.getElementById("warehouseInfo").innerText = main;
-    document.getElementById("subSelectBox").style.display = "block";
+    warehouseInfoDiv.innerText = main;
+    subSelectBox.style.display = "block";
   }
 
   function selectSubWarehouse() {
-    finished = document.getElementById("subWarehouseSelect").value;
+    finished = subWarehouseSelect.value;
     if (finished) {
-      document.getElementById("warehouseInfo").innerText = main + " | תת־מחסן: " + finished;
-      document.getElementById("processAllBtn").style.display = "block";
+      warehouseInfoDiv.innerText = main + " | תת־מחסן: " + finished;
+      processAllBtn.style.display = "block";
+    } else {
+      processAllBtn.style.display = "none";
     }
   }
 
@@ -222,13 +259,11 @@
       img.src = e.target.result;
       img.style.display = "block";
 
-      finishedReports = [];
-      document.getElementById("ocrList").innerHTML = "";
-      document.getElementById("totalBox").style.display = "none";
       document.getElementById("statusLine").style.display = "none";
+      document.getElementById("labelsCount").innerText = "0";
 
-      document.getElementById("processAllBtn").style.display = "block";
-      document.getElementById("processAllBtn").disabled = false;
+      processAllBtn.style.display = "block";
+      processAllBtn.disabled = false;
     };
     reader.readAsDataURL(file);
   }
@@ -238,7 +273,7 @@
 
     isProcessing = true;
     document.getElementById("loader").style.display = "block";
-    document.getElementById("processAllBtn").disabled = true;
+    processAllBtn.disabled = true;
 
     const reader = new FileReader();
     reader.onload = async e => {
@@ -269,18 +304,22 @@
         document.getElementById("statusLine").style.display = "inline-block";
         document.getElementById("labelsCount").innerText = data.reports.length;
 
-        data.reports.forEach(r => {
-          finishedReports.push({
-            makat: r.makat || "---",
-            pka: (r.pka || "").toString().slice(-3),
-            qty: Number(r.qty) || 0,
-            palletId: r.palletId || "---"
-          });
-        });
+        const items = data.reports.map(r => ({
+          makat: r.makat || "---",
+          pka: (r.pka || "").toString().slice(-3),
+          qty: Number(r.qty) || 0,
+          palletId: r.palletId || "---"
+        }));
 
-        showList();
-        document.getElementById("saveBtn").style.display = "block";
-        document.getElementById("processAllBtn").style.display = "none";
+        const totalQty = items.reduce((sum, r) => sum + (Number(r.qty) || 0), 0);
+
+        pallets.push({ items, totalQty });
+
+        renderPallets();
+        updateGlobalTotal();
+
+        saveBtn.style.display = "block";
+        processAllBtn.style.display = "block";
       } else {
         alert("לא זוהו נתונים בתמונה.");
       }
@@ -293,48 +332,85 @@
     }
   }
 
-  function showList() {
-    const box = document.getElementById("ocrList");
+  function renderPallets() {
+    palletsContainer.innerHTML = "";
 
-    if (!finishedReports.length) {
-      box.innerHTML = "";
-      document.getElementById("totalBox").style.display = "none";
+    pallets.forEach((pallet, index) => {
+      const div = document.createElement("div");
+      div.className = "pallet-box";
+
+      let itemsHtml = pallet.items.map(item => `
+        <div class="pallet-item">
+          <b>מק"ט:</b> ${item.makat}<br>
+          <b>פק"ע:</b> ${item.pka}<br>
+          <b>כמות:</b> ${item.qty}<br>
+          <b>מספר משטח:</b> ${item.palletId}
+        </div>
+      `).join("");
+
+      div.innerHTML = `
+        <div class="pallet-header">
+          <div>משטח ${index + 1} — סה"כ: ${pallet.totalQty} יח'</div>
+          <button class="delete-pallet-btn" onclick="deletePallet(${index})">מחק משטח</button>
+        </div>
+        <div class="pallet-items">
+          ${itemsHtml}
+        </div>
+      `;
+
+      palletsContainer.appendChild(div);
+    });
+  }
+
+  function deletePallet(index) {
+    pallets.splice(index, 1);
+    renderPallets();
+    updateGlobalTotal();
+
+    if (pallets.length === 0) {
+      saveBtn.style.display = "none";
+    }
+  }
+
+  function updateGlobalTotal() {
+    if (!pallets.length) {
+      globalTotalBox.style.display = "none";
+      globalTotalBox.innerHTML = "";
       return;
     }
 
-    let totalQty = finishedReports.reduce((sum, r) => sum + (Number(r.qty) || 0), 0);
+    const totalPallets = pallets.length;
+    const totalUnits = pallets.reduce((sum, p) => sum + (p.totalQty || 0), 0);
 
-    box.innerHTML = finishedReports.map((r, i) => `
-      <div class="ocr-box">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <div>
-            <b>מק"ט:</b> ${r.makat}<br>
-            <b>פק"ע:</b> ${r.pka}<br>
-            <b>כמות:</b> ${r.qty}<br>
-            <b>מספר משטח:</b> ${r.palletId}
-          </div>
-          <button class="delete-btn" onclick="deleteItem(${i})">מחיקה</button>
-        </div>
-      </div>`).join("");
-
-    const totalBox = document.getElementById("totalBox");
-    totalBox.style.display = "block";
-    totalBox.innerHTML = `<b>סה"כ כמות:</b> ${totalQty}`;
-  }
-
-  function deleteItem(i) {
-    finishedReports.splice(i, 1);
-    showList();
+    globalTotalBox.style.display = "block";
+    globalTotalBox.innerHTML = `
+      <b>סה"כ משטחים:</b> ${totalPallets} | <b>סה"כ יחידות:</b> ${totalUnits}
+    `;
   }
 
   async function saveAll() {
-    if (!finishedReports.length) {
-      alert("אין נתונים לשמירה");
+    if (!pallets.length) {
+      alert("אין משטחים לשמירה");
       return;
     }
 
     document.getElementById("loader").innerText = "שומר...";
     document.getElementById("loader").style.display = "block";
+
+    // ממירים את מבנה המשטחים למבנה reports שהשרת מצפה לו
+    const reports = [];
+    pallets.forEach(pallet => {
+      pallet.items.forEach((item, idx) => {
+        reports.push({
+          makat: item.makat,
+          pka: item.pka,
+          qty: item.qty,
+          palletId: item.palletId,
+          // השורה האחרונה של כל משטח תקבל totalQty, השאר ריק
+          totalForPallet: (idx === pallet.items.length - 1) ? pallet.totalQty : ""
+        });
+      });
+    });
 
     try {
       const res = await fetch(API_URL, {
@@ -345,7 +421,7 @@
           name,
           main,
           finished,
-          reports: finishedReports
+          reports
         })
       });
 
