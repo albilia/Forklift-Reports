@@ -17,6 +17,7 @@
       text-align: center;
       margin: 0;
     }
+
     h2 { font-size: 32px; margin-bottom: 10px; text-shadow: 0 0 4px rgba(0,0,0,0.5); }
 
     #warehouseInfo {
@@ -24,7 +25,20 @@
       margin-bottom: 15px;
       text-shadow: 0 0 4px rgba(0,0,0,0.5);
     }
-    
+
+    #subSelectBox {
+      margin: 10px auto;
+      width: 90%;
+      display: none;
+    }
+
+    select {
+      width: 100%;
+      padding: 10px;
+      font-size: 18px;
+      border-radius: 10px;
+    }
+
     #statusLine {
       background: rgba(0, 229, 255, 0.25);
       border: 2px solid #00e5ff;
@@ -40,39 +54,52 @@
     .scan-animation { width: 250px; height: 250px; margin: 0 auto; cursor: pointer; }
     #preview { max-width: 80%; display: none; margin: 15px auto; border-radius: 12px; border: 3px solid #fff; }
     #loader { display: none; font-weight: bold; margin-top: 20px; font-size: 24px; color: #ffeb3b; }
-    
-    .ocr-box { 
-      background: rgba(0,0,0,0.8); 
-      border-right: 6px solid #00e5ff; 
-      padding: 15px; 
-      margin: 10px auto; 
-      border-radius: 8px; 
-      width: 90%; 
-      text-align: right; 
+
+    .ocr-box {
+      background: rgba(0,0,0,0.8);
+      border-right: 6px solid #00e5ff;
+      padding: 15px;
+      margin: 10px auto;
+      border-radius: 8px;
+      width: 90%;
+      text-align: right;
     }
-    .delete-btn { 
-      background: #ff5252; 
-      color: white; 
-      border: none; 
-      padding: 8px 12px; 
-      border-radius: 5px; 
-      font-weight: bold;
-    }
-    
-    button { 
-      font-size: 22px; 
-      padding: 12px; 
-      border-radius: 10px; 
-      margin-top: 10px; 
-      width: 90%; 
-      cursor: pointer; 
-      border: none; 
+
+    .delete-btn {
+      background: #ff5252;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 5px;
       font-weight: bold;
     }
 
-    #saveBtn {
-      margin: 0 auto;
+    button {
+      font-size: 20px;
+      padding: 12px;
+      border-radius: 10px;
+      margin-top: 10px;
+      width: 90%;
+      cursor: pointer;
+      border: none;
+      font-weight: bold;
+    }
+
+    #processAllBtn {
+      background-color: #00c853;
+      color: white;
       display: none;
+    }
+
+    #saveBtn {
+      background-color: #ff6d00;
+      color: white;
+      display: none;
+    }
+
+    #backBtn {
+      background-color: #607d8b;
+      color: white;
     }
 
     #totalBox {
@@ -94,6 +121,23 @@
 
   <div id="warehouseInfo"></div>
 
+  <!-- בחירת תת־מחסן (רק למחסן תוצר גמר) -->
+  <div id="subSelectBox">
+    <select id="subWarehouseSelect" onchange="selectSubWarehouse()">
+      <option value="">בחר תת־מחסן</option>
+      <option>תת מחסן 1</option>
+      <option>תת מחסן 2</option>
+      <option>תת מחסן 3</option>
+      <option>תת מחסן 4</option>
+      <option>תת מחסן 5</option>
+      <option>תת מחסן 6</option>
+      <option>תת מחסן 7</option>
+      <option>תת מחסן 8</option>
+      <option>תת מחסן 9</option>
+      <option>תת מחסן 10</option>
+    </select>
+  </div>
+
   <div id="statusLine">זיהוי אחרון: <span id="labelsCount">0</span> תוויות</div>
 
   <lottie-player
@@ -113,9 +157,9 @@
   <div id="ocrList"></div>
   <div id="totalBox"></div>
 
-  <button id="processAllBtn" onclick="sendToAIScan()" style="display:none; background-color: #00c853; color: white;">שלח לסריקת AI</button>
-  <button id="saveBtn" onclick="saveAll()" style="background-color: #ff6d00; color: white;">שגר דווח</button>
-  <button onclick="goBack()" style="background-color: #607d8b; color: white;">חזור לדשבורד</button>
+  <button id="processAllBtn" onclick="sendToAIScan()">שלח לסריקה</button>
+  <button id="saveBtn" onclick="saveAll()">שגר דווח</button>
+  <button id="backBtn" onclick="goBack()">חזור לדשבורד</button>
 
 <script>
   let finishedReports = [];
@@ -127,22 +171,42 @@
   const params = new URLSearchParams(window.location.search);
   const phone = params.get("phone");
   const name = params.get("name");
-  const main = params.get("main") || "";
-  const finished = params.get("finished") || "";
-  const warehouseName = params.get("warehouseName") || "";
+  const category = params.get("category");
 
-  function goBack() { 
-    window.location.href = `dashboard.html?phone=${phone}&name=${name}`; 
+  let main = "";
+  let finished = "";
+
+  // קביעת מחסן לפי קטגוריה
+  if (category === "raw") {
+    main = "מחסן חומרי גלם";
+    finished = "";
+    document.getElementById("warehouseInfo").innerText = main;
   }
 
-  const warehouseInfoDiv = document.getElementById("warehouseInfo");
-  let warehouseText = "";
-  if (warehouseName) warehouseText += "מחסן: " + decodeURIComponent(warehouseName);
-  if (finished) warehouseText += (warehouseText ? " | " : "") + "תת-מחסן: " + finished;
-  warehouseInfoDiv.innerText = warehouseText;
+  if (category === "finished") {
+    main = "מחסן תוצר גמר";
+    document.getElementById("warehouseInfo").innerText = main;
+    document.getElementById("subSelectBox").style.display = "block";
+  }
+
+  function selectSubWarehouse() {
+    finished = document.getElementById("subWarehouseSelect").value;
+    if (finished) {
+      document.getElementById("warehouseInfo").innerText = main + " | תת־מחסן: " + finished;
+      document.getElementById("processAllBtn").style.display = "block";
+    }
+  }
+
+  function goBack() {
+    window.location.href = `dashboard.html?phone=${phone}&name=${name}`;
+  }
 
   function triggerCamera() {
     if (isProcessing) return;
+    if (category === "finished" && !finished) {
+      alert("בחר תת־מחסן לפני צילום");
+      return;
+    }
     document.getElementById("cameraInput").click();
   }
 
@@ -185,18 +249,17 @@
 
   async function sendToGemini(base64) {
     try {
-      // FIXED — ללא headers
       const res = await fetch(API_URL, {
         method: "POST",
-        body: JSON.stringify({ 
-          action: "processImage", 
-          image: base64, 
-          phone: phone 
+        body: JSON.stringify({
+          action: "processImage",
+          image: base64,
+          phone: phone
         })
       });
 
       const data = await res.json();
-      
+
       if (data.error) {
         alert("שגיאת שרת: " + data.error);
         return;
@@ -217,10 +280,11 @@
 
         showList();
         document.getElementById("saveBtn").style.display = "block";
+        document.getElementById("processAllBtn").style.display = "none";
       } else {
-        alert("לא זוהו נתונים בתמונה. וודא שהתווית ברורה וישרה.");
+        alert("לא זוהו נתונים בתמונה.");
       }
-    } catch (e) { 
+    } catch (e) {
       alert("שגיאת תקשורת: " + e.message);
     } finally {
       isProcessing = false;
@@ -273,29 +337,28 @@
     document.getElementById("loader").style.display = "block";
 
     try {
-      // FIXED — ללא headers
       const res = await fetch(API_URL, {
         method: "POST",
-        body: JSON.stringify({ 
-          action: "saveReport", 
+        body: JSON.stringify({
+          action: "saveReport",
           phone,
           name,
-          main: main,
-          finished: finished,
-          reports: finishedReports 
+          main,
+          finished,
+          reports: finishedReports
         })
       });
 
       const data = await res.json();
 
-      if (data.success) { 
-        alert("הדיווח נשלח בהצלחה 🎉"); 
-        goBack(); 
-      } else { 
-        alert("שגיאה בשמירה: " + data.error); 
+      if (data.success) {
+        alert("הדיווח נשלח בהצלחה 🎉");
+        goBack();
+      } else {
+        alert("שגיאה בשמירה: " + data.error);
       }
-    } catch (e) { 
-      alert("שגיאה בחיבור"); 
+    } catch (e) {
+      alert("שגיאה בחיבור");
     } finally {
       document.getElementById("loader").style.display = "none";
       document.getElementById("loader").innerText = "סורק תוויות באמצעות AI...";
@@ -303,5 +366,4 @@
   }
 </script>
 </body>
-
 </html>
