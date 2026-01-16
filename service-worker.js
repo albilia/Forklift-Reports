@@ -6,7 +6,6 @@ const DYNAMIC_CACHE = CACHE_VERSION + "-dynamic";
 // קבצים קבועים לשמירה
 const STATIC_ASSETS = [
   "/",
-  "/index.html",
   "/login.html",
   "/dashboard.html",
   "/report.html",
