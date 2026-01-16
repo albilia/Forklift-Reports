@@ -23,6 +23,7 @@
       position: sticky;
       top: 0;
       z-index: 100;
+      border-bottom: 2px solid #263445;
     }
 
     header h1 {
@@ -54,6 +55,7 @@
       flex-wrap: wrap;
       gap: 8px;
       align-items: center;
+      border: 1px solid #263445;
     }
 
     .filters button {
@@ -86,6 +88,7 @@
       border-radius: 10px;
       overflow: hidden;
       background: #17212b;
+      border: 1px solid #263445;
     }
 
     .accordion-header {
@@ -97,6 +100,7 @@
       align-items: center;
       font-size: 14px;
       font-weight: bold;
+      border-bottom: 1px solid #263445;
     }
 
     .accordion-header .arrow {
@@ -165,6 +169,7 @@
       border-radius: 10px;
       padding: 10px;
       text-align: center;
+      border: 1px solid #263445;
     }
 
     .card-title {
@@ -569,29 +574,4 @@
       }
 
       map[r.worker].reports++;
-      map[r.worker].qty += r.qty;
-      if (r.totalQty !== "") map[r.worker].pallets++;
-    });
-
-    Object.keys(map).forEach(worker => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${worker}</td>
-        <td>${map[worker].reports}</td>
-        <td>${map[worker].pallets}</td>
-        <td>${map[worker].qty}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
-
-  function buildByWarehouse() {
-    const tbody = document.getElementById("tableByWarehouse");
-    tbody.innerHTML = "";
-
-    const map = {};
-
-    filteredRows.forEach(r => {
-      const key = r.warehouse + "||" + r.subWarehouse;
-
-     
+      map[r
