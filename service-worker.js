@@ -19,8 +19,8 @@ const STATIC_ASSETS = [
   "/qr.json",
   "/offline.html",
 
-  // ⭐ האייקון החדש של Nis (מה־GitHub RAW)
-  "https://raw.githubusercontent.com/albilia/Forklift-Reports/main/apple-touch-icon.png"
+  // ⭐ האייקון המקומי החדש של Nis
+  "/icons/apple-touch-icon.png"
 ];
 
 // התקנה — שמירת קבצים קבועים
