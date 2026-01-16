@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>דשבורד מנהל - דו"חות תוויות</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #101820;
+      color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      padding: 15px 20px;
+      background: #1c2833;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    #backBtn {
+      background-color: #607d8b;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    main {
+      padding: 15px;
+    }
+
+    .filters {
+      background: #17212b;
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .filters button {
+      background: #263445;
+      color: #f5f5f5;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .filters button.active {
+      background: #00c853;
+      color: #fff;
+    }
+
+    .filters input[type="date"] {
+      background: #101820;
+      color: #f5f5f5;
+      border: 1px solid #455a64;
+      border-radius: 6px;
+      padding: 4px 6px;
+      font-size: 13px;
+    }
+
+    .accordion-section {
+      margin-bottom: 10px;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #17212b;
+    }
+
+    .accordion-header {
+      padding: 10px 12px;
+      background: #1f2a36;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .accordion-header .arrow {
+      transition: transform 0.2s ease;
+    }
+
+    .accordion-header.open .arrow {
+      transform: rotate(90deg);
+    }
+
+    .accordion-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.25s ease;
+      background: #17212b;
+    }
+
+    .accordion-inner {
+      padding: 8px 10px 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    thead {
+      background: #263445;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+
+    th, td {
+      padding: 6px 4px;
+      text-align: right;
+      border-bottom: 1px solid #263445;
+      white-space: nowrap;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #1f2a36;
+    }
+
+    tbody tr:nth-child(odd) {
+      background: #141c24;
+    }
+
+    .table-wrapper {
+      max-height: 320px;
+      overflow: auto;
+      border-radius: 8px;
+      border: 1px solid #263445;
+    }
+
+    .summary-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .card {
+      background: #17212b;
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .card-title {
+      font-size: 13px;
+      color: #b0bec5;
+      margin-bottom: 4px;
+    }
+
+    .card-value {
+      font-size: 20px;
+      font-weight: bold;
+      color: #ffeb3b;
+    }
+
+    .loader {
+      display: none;
+      text-align: center;
+      margin: 15px 0;
+      font-weight: bold;
+      color: #ffeb3b;
+    }
+
+    .error {
+      color: #ff5252;
+      text-align: center;
+      margin: 10px 0;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>דשבורד מנהל - דו"חות תוויות</h1>
+  <button id="backBtn" onclick="goBack()">חזור</button>
+</header>
+
+<main>
+
+  <!-- סינון -->
+  <div class="filters">
+    <div>
+      <button id="btnToday" onclick="setQuickRange('today')">היום</button>
+      <button id="btnWeek" onclick="setQuickRange('week')">שבוע</button>
+      <button id="btnMonth" onclick="setQuickRange('month')">חודש</button>
+    </div>
+
+    <div>
+      <label>מתאריך:</label>
+      <input type="date" id="fromDate" onchange="applyFilters()">
+      <label>עד תאריך:</label>
+      <input type="date" id="toDate" onchange="applyFilters()">
+    </div>
+
+    <div>
+      <button id="btnShiftMorning" onclick="setShift('morning')">משמרת בוקר</button>
+      <button id="btnShiftEvening" onclick="setShift('evening')">משמרת ערב</button>
+    </div>
+  </div>
+
+  <div class="summary-cards">
+    <div class="card">
+      <div class="card-title">סה"כ דו"חות</div>
+      <div class="card-value" id="totalReports">0</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">סה"כ משטחים</div>
+      <div class="card-value" id="totalPallets">0</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">סה"כ יחידות</div>
+      <div class="card-value" id="totalUnits">0</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">סה"כ עובדים</div>
+      <div class="card-value" id="totalWorkers">0</div>
+    </div>
+  </div>
+
+  <div class="loader" id="loader">טוען נתונים...</div>
+  <div class="error" id="errorMsg"></div>
+
+  <!-- סיכום לפי מק"ט -->
+  <div class="accordion-section">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+      <span>סיכום לפי מק"ט</span>
+      <span class="arrow">▶</span>
+    </div>
+    <div class="accordion-content">
+      <div class="accordion-inner">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>מק"ט</th>
+                <th>מס' משטחים</th>
+                <th>סה"כ יחידות</th>
+                <th>מס' פק"עים שונים</th>
+              </tr>
+            </thead>
+            <tbody id="tableByMakat"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- סיכום לפי עובדים -->
+  <div class="accordion-section">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+      <span>סיכום לפי עובדים</span>
+      <span class="arrow">▶</span>
+    </div>
+    <div class="accordion-content">
+      <div class="accordion-inner">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>עובד</th>
+                <th>דו"חות</th>
+                <th>משטחים</th>
+                <th>סה"כ יחידות</th>
+              </tr>
+            </thead>
+            <tbody id="tableByWorker"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- סיכום לפי מחסן -->
+  <div class="accordion-section">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+      <span>סיכום לפי מחסן</span>
+      <span class="arrow">▶</span>
+    </div>
+    <div class="accordion-content">
+      <div class="accordion-inner">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>מחסן</th>
+                <th>תת־מחסן</th>
+                <th>דו"חות</th>
+                <th>משטחים</th>
+                <th>סה"כ יחידות</th>
+              </tr>
+            </thead>
+            <tbody id="tableByWarehouse"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- דו"חות גולמיים -->
+  <div class="accordion-section">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+      <span>דו"חות גולמיים</span>
+      <span class="arrow">▶</span>
+    </div>
+    <div class="accordion-content">
+      <div class="accordion-inner">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>תאריך</th>
+                <th>שעה</th>
+                <th>עובד</th>
+                <th>מק"ט</th>
+                <th>פק"ע</th>
+                <th>כמות</th>
+                <th>משטח</th>
+                <th>מחסן</th>
+                <th>תת־מחסן</th>
+              </tr>
+            </thead>
+            <tbody id="tableRawReports"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- חריגות -->
+  <div class="accordion-section">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+      <span>חריגות</span>
+      <span class="arrow">▶</span>
+    </div>
+    <div class="accordion-content">
+      <div class="accordion-inner">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>תאריך</th>
+                <th>שעה</th>
+                <th>עובד</th>
+                <th>מק"ט</th>
+                <th>פק"ע</th>
+                <th>כמות</th>
+                <th>משטח</th>
+                <th>מחסן</th>
+                <th>תת־מחסן</th>
+                <th>סיבה</th>
+              </tr>
+            </thead>
+            <tbody id="tableAnomalies"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  const API_URL =
+    "https://script.google.com/macros/s/AKfycbwJX4IaxmTmNx0re1ifoEPxgbsh6rAkFfmaehHDkJKW0LViqLtnkiCCg8uzsaA3PTtJEg/exec";
+
+  let allRows = [];
+  let filteredRows = [];
+  let currentShift = null;
+
+  function goBack() {
+    window.location.href = "dashboard.html";
+  }
+
+  function toggleAccordion(header) {
+    const content = header.nextElementSibling;
+    const isOpen = header.classList.contains("open");
+
+    if (isOpen) {
+      header.classList.remove("open");
+      content.style.maxHeight = 0;
+    } else {
+      header.classList.add("open");
+      content.style.maxHeight = content.scrollHeight + "px";
+    }
+  }
+
+  function setQuickRange(type) {
+    const today = new Date();
+    let from, to;
+
+    if (type === "today") {
+      from = to = today;
+    } else if (type === "week") {
+      to = today;
+      from = new Date(today);
+      from.setDate(from.getDate() - 6);
+    } else if (type === "month") {
+      to = today;
+      from = new Date(today);
+      from.setDate(from.getDate() - 29);
+    }
+
+    document.getElementById("fromDate").value = formatDateInput(from);
+    document.getElementById("toDate").value = formatDateInput(to);
+
+    applyFilters();
+  }
+
+  function setShift(shift) {
+    currentShift = shift;
+    applyFilters();
+  }
+
+  function formatDateInput(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  }
+
+  function parseDate(d) {
+    const parts = d.split("/");
+    return new Date(2000 + Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
+  }
+
+  function parseTime(t) {
+    const [h, m] = t.split(":").map(Number);
+    return h * 60 + m;
+  }
+
+  function isInShift(row) {
+    if (!currentShift) return true;
+
+    const minutes = parseTime(row.time);
+
+    const morningStart = 6 * 60 + 30;
+    const morningEnd = 18 * 60 + 30;
+
+    if (currentShift === "morning") {
+      return minutes >= morningStart && minutes <= morningEnd;
+    }
+
+    if (currentShift === "evening") {
+      return minutes >= morningEnd || minutes <= morningStart;
+    }
+
+    return true;
+  }
+
+  function applyFilters() {
+    const fromVal = document.getElementById("fromDate").value;
+    const toVal = document.getElementById("toDate").value;
+
+    let from = fromVal ? new Date(fromVal) : null;
+    let to = toVal ? new Date(toVal) : null;
+
+    filteredRows = allRows.filter(r => {
+      const d = parseDate(r.date);
+
+      if (from && d < from) return false;
+      if (to && d > to) return false;
+
+      if (!isInShift(r)) return false;
+
+      return true;
+    });
+
+    updateSummary();
+    buildTables();
+  }
+
+  function updateSummary() {
+    document.getElementById("totalReports").innerText = filteredRows.length;
+
+    const pallets = filteredRows.filter(r => r.totalQty !== "").length;
+    document.getElementById("totalPallets").innerText = pallets;
+
+    const units = filteredRows.reduce((s, r) => s + r.qty, 0);
+    document.getElementById("totalUnits").innerText = units;
+
+    const workers = new Set(filteredRows.map(r => r.worker));
+    document.getElementById("totalWorkers").innerText = workers.size;
+  }
+
+  function buildTables() {
+    buildByMakat();
+    buildByWorker();
+    buildByWarehouse();
+    buildRaw();
+    buildAnomalies();
+  }
+
+  function buildByMakat() {
+    const tbody = document.getElementById("tableByMakat");
+    tbody.innerHTML = "";
+
+    const map = {};
+
+    filteredRows.forEach(r => {
+      if (!map[r.makat]) {
+        map[r.makat] = {
+          pallets: new Set(),
+          qty: 0,
+          pka: new Set()
+        };
+      }
+
+      if (r.totalQty !== "") map[r.makat].pallets.add(r.rowIndex);
+      map[r.makat].qty += r.qty;
+      map[r.makat].pka.add(r.pka);
+    });
+
+    Object.keys(map).forEach(makat => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${makat}</td>
+        <td>${map[makat].pallets.size}</td>
+        <td>${map[makat].qty}</td>
+        <td>${map[makat].pka.size}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function buildByWorker() {
+    const tbody = document.getElementById("tableByWorker");
+    tbody.innerHTML = "";
+
+    const map = {};
+
+    filteredRows.forEach(r => {
+      if (!map[r.worker]) {
+        map[r.worker] = {
+          reports: 0,
+          pallets: 0,
+          qty: 0
+        };
+      }
+
+      map[r.worker].reports++;
+      map[r.worker].qty += r.qty;
+      if (r.totalQty !== "") map[r.worker].pallets++;
+    });
+
+    Object.keys(map).forEach(worker => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${worker}</td>
+        <td>${map[worker].reports}</td>
+        <td>${map[worker].pallets}</td>
+        <td>${map[worker].qty}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function buildByWarehouse() {
+    const tbody = document.getElementById("tableByWarehouse");
+    tbody.innerHTML = "";
+
+    const map = {};
+
+    filteredRows.forEach(r => {
+      const key = r.warehouse + "||" + r.subWarehouse;
+
+     
