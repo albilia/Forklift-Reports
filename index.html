@@ -16,8 +16,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="Nis">
 
-  <!-- אייקון למסך הבית + Splash -->
-  <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/albilia/Forklift-Reports/main/apple-touch-icon.png">
+  <!-- אייקון למסך הבית + Splash (מקומי!) -->
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 
   <style>
     html, body {
@@ -73,12 +73,14 @@
 <body>
 
   <div class="splash-container">
-    <!-- משתמשים באותו אייקון כמו במסך הבית -->
-    <img src="https://raw.githubusercontent.com/albilia/Forklift-Reports/main/apple-touch-icon.png" class="logo" alt="Nis Logo" />
+    <img src="icons/apple-touch-icon.png" class="logo" alt="Nis Logo" />
     <div class="loading-text">טוען מערכת...</div>
   </div>
 
   <script>
+    // ⭐ כתובת ה‑API שלך
+    const API_URL = "https://script.google.com/macros/s/AKfycbwJX4IaxmTmNx0re1ifoEPxgbsh6rAkFfmaehHDkJKW0LViqLtnkiCCg8uzsaA3PTtJEg/exec";
+
     // בדיקה אם יש משתמש שמור
     const savedUser = localStorage.getItem("workerPhone");
 
