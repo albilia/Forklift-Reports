@@ -84,13 +84,14 @@
     // בדיקה אם יש משתמש שמור
     const savedUser = localStorage.getItem("workerPhone");
 
+    // ⭐ עיכוב ארוך יותר כדי לאפשר ל‑iOS לקרוא manifest + icon
     setTimeout(() => {
       if (savedUser) {
         window.location.href = "dashboard.html";
       } else {
         window.location.href = "login.html";
       }
-    }, 1500);
+    }, 3500); // 3.5 שניות
 
     // רישום Service Worker
     if ("serviceWorker" in navigator) {
