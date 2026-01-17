@@ -26,7 +26,8 @@
 
     table { width:100%; border-collapse:collapse; font-size:12px; }
     thead { background:#263445; position:sticky; top:0; }
-    th,td { padding:6px 4px; border-bottom:1px solid #263445; white-space:nowrap; }
+    th,td { padding:6px 4px; border-bottom:1px solid #263445; white-space:nowrap; text-align:center; }
+
     tbody tr:nth-child(even){ background:#1f2a36; }
     tbody tr:nth-child(odd){ background:#141c24; }
 
@@ -41,6 +42,30 @@
     .error { color:#ff5252; text-align:center; margin:10px 0; font-weight:bold; }
 
     #chartsSection { margin-top:40px; padding:20px; background:#17212b; border-radius:10px; border:1px solid #263445; }
+
+    /* סיכום טקסטואלי לפי מק"ט מעל הטבלה */
+    #makatSummaryText {
+      font-size:13px;
+      color:#cfd8dc;
+      margin-bottom:8px;
+      line-height:1.6;
+      white-space:nowrap;
+      overflow-x:auto;
+    }
+
+    /* רמז קטן לגרירת עמודות */
+    th.resizable {
+      position:relative;
+    }
+    th.resizable::after {
+      content:"";
+      position:absolute;
+      left:0;
+      top:0;
+      width:4px;
+      height:100%;
+      cursor:col-resize;
+    }
   </style>
 </head>
 
@@ -94,14 +119,21 @@
     </div>
     <div class="accordion-content">
       <div class="accordion-inner">
+        <!-- סיכום טקסטואלי לפי מק"ט -->
+        <div id="makatSummaryText"></div>
+
         <div class="table-wrapper">
           <table>
             <thead>
               <tr>
-                <th>מק"ט</th>
-                <th>מס' משטחים</th>
-                <th>סה"כ יחידות</th>
-                <th>מס' פק"עים שונים</th>
+                <th class="resizable">מק"ט</th>
+                <th class="resizable">תאריך</th>
+                <th class="resizable">שעה</th>
+                <th class="resizable">עובד</th>
+                <th class="resizable">מספר פק"ע</th>
+                <th class="resizable">כמות</th>
+                <th class="resizable">סה"כ כמות</th>
+                <th class="resizable">משטחים</th>
               </tr>
             </thead>
             <tbody id="tableByMakat"></tbody>
@@ -123,10 +155,10 @@
           <table>
             <thead>
               <tr>
-                <th>עובד</th>
-                <th>דווחים</th>
-                <th>משטחים</th>
-                <th>סה"כ יחידות</th>
+                <th class="resizable">עובד</th>
+                <th class="resizable">דווחים</th>
+                <th class="resizable">משטחים</th>
+                <th class="resizable">סה"כ יחידות</th>
               </tr>
             </thead>
             <tbody id="tableByWorker"></tbody>
@@ -148,11 +180,11 @@
           <table>
             <thead>
               <tr>
-                <th>מחסן</th>
-                <th>תת־מחסן</th>
-                <th>דווחים</th>
-                <th>משטחים</th>
-                <th>סה"כ יחידות</th>
+                <th class="resizable">מחסן</th>
+                <th class="resizable">תת־מחסן</th>
+                <th class="resizable">דווחים</th>
+                <th class="resizable">משטחים</th>
+                <th class="resizable">סה"כ יחידות</th>
               </tr>
             </thead>
             <tbody id="tableByWarehouse"></tbody>
@@ -174,49 +206,18 @@
           <table>
             <thead>
               <tr>
-                <th>תאריך</th>
-                <th>שעה</th>
-                <th>עובד</th>
-                <th>מק"ט</th>
-                <th>פק"ע</th>
-                <th>כמות</th>
-                <th>משטח</th>
-                <th>מחסן</th>
-                <th>תת־מחסן</th>
+                <th class="resizable">תאריך</th>
+                <th class="resizable">שעה</th>
+                <th class="resizable">עובד</th>
+                <th class="resizable">מק"ט</th>
+                <th class="resizable">פק"ע</th>
+                <th class="resizable">כמות</th>
+                <th class="resizable">משטח</th>
+                <th class="resizable">מחסן</th>
+                <th class="resizable">תת־מחסן</th>
               </tr>
             </thead>
             <tbody id="tableRawReports"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- אקורדיון: חריגות -->
-  <div class="accordion-section">
-    <div class="accordion-header" onclick="toggleAccordion(this)">
-      <span>חריגות</span>
-      <span class="arrow">▶</span>
-    </div>
-    <div class="accordion-content">
-      <div class="accordion-inner">
-        <div class="table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>תאריך</th>
-                <th>שעה</th>
-                <th>עובד</th>
-                <th>מק"ט</th>
-                <th>פק"ע</th>
-                <th>כמות</th>
-                <th>משטח</th>
-                <th>מחסן</th>
-                <th>תת־מחסן</th>
-                <th>סיבה</th>
-              </tr>
-            </thead>
-            <tbody id="tableAnomalies"></tbody>
           </table>
         </div>
       </div>
@@ -229,7 +230,7 @@
 
 </main>
 
-<script>// חזרה אחורה
+<script>
 function goBack() { 
   window.history.back(); 
 }
@@ -332,7 +333,6 @@ function processData(data){
   fillByWorker(data);
   fillByWarehouse(data);
   fillRawReports(data);
-  fillAnomalies(data);
   drawPieChart(data);
 }
 
@@ -345,7 +345,9 @@ function fillSummary(data){
   let units = 0;
 
   data.forEach(row => {
-    pallets.add(row.pallet);
+    // דווח = תאריך+שעה+עובד+מק"ט
+    const reportKey = `${row.date}|${row.time}|${row.worker}|${row.makat}`;
+    pallets.add(reportKey);
     workers.add(row.worker);
     units += Number(row.qty);
   });
@@ -355,40 +357,148 @@ function fillSummary(data){
   document.getElementById("totalWorkers").textContent = workers.size;
 }
 
-// סיכום לפי מק"ט
+// סיכום לפי מק"ט (לוגיקה החדשה)
 function fillByMakat(data){
   const table = document.getElementById("tableByMakat");
+  const summaryDiv = document.getElementById("makatSummaryText");
+  table.innerHTML = "";
+  summaryDiv.textContent = "";
+
+  if(!data.length) return;
+
+  // קיבוץ לפי מק"ט
+  const byMakat = {};
+  data.forEach(row => {
+    const makat = row.makat || "לא מוגדר";
+    if(!byMakat[makat]) {
+      byMakat[makat] = {
+        rows: [],
+        reports: new Set(),
+        totalQty: 0
+      };
+    }
+    const reportKey = `${row.date}|${row.time}|${row.worker}|${row.makat}`;
+    byMakat[makat].rows.push({
+      date: row.date,
+      time: row.time,
+      worker: row.worker,
+      pka: row.pka,
+      qty: Number(row.qty) || 0,
+      reportKey
+    });
+    byMakat[makat].reports.add(reportKey);
+    byMakat[makat].totalQty += Number(row.qty) || 0;
+  });
+
+  // מיון מק"טים
+  const makats = Object.keys(byMakat).sort();
+
+  // בניית טקסט סיכום מעל הטבלה
+  const summaryLines = [];
+  makats.forEach(makat => {
+    const g = byMakat[makat];
+    const reportsCount = g.reports.size;
+    const totalQty = g.totalQty;
+    const reportsLabel = reportsCount === 1 ? "1 דווח" : `${reportsCount} דווחים`;
+    summaryLines.push(`← מק״ט ${makat} — ${reportsLabel} ← סה״כ כמות: ${totalQty} ← משטחים: ${reportsCount}`);
+  });
+  summaryDiv.innerHTML = summaryLines.join("<br>");
+
+  // בניית הטבלה: שורה ראשונה של כל מק"ט עם סיכומים, השאר בלי
+  makats.forEach(makat => {
+    const g = byMakat[makat];
+
+    // מיון השורות בתוך מק"ט לפי תאריך+שעה
+    g.rows.sort((a,b) => {
+      const da = a.date.split("/").reverse().join("-") + " " + a.time;
+      const db = b.date.split("/").reverse().join("-") + " " + b.time;
+      return da.localeCompare(db);
+    });
+
+    g.rows.forEach((r, index) => {
+      const tr = document.createElement("tr");
+
+      const tdMakat = document.createElement("td");
+      const tdDate = document.createElement("td");
+      const tdTime = document.createElement("td");
+      const tdWorker = document.createElement("td");
+      const tdPka = document.createElement("td");
+      const tdQty = document.createElement("td");
+      const tdTotalQty = document.createElement("td");
+      const tdPallets = document.createElement("td");
+
+      tdMakat.textContent = index === 0 ? makat : "";
+      tdDate.textContent = r.date;
+      tdTime.textContent = r.time;
+      tdWorker.textContent = r.worker;
+      tdPka.textContent = r.pka;
+      tdQty.textContent = r.qty;
+
+      if(index === 0){
+        tdTotalQty.textContent = g.totalQty;
+        tdPallets.textContent = g.reports.size;
+        tdMakat.style.fontWeight = "bold";
+        tdTotalQty.style.fontWeight = "bold";
+        tdPallets.style.fontWeight = "bold";
+      } else {
+        tdTotalQty.textContent = "";
+        tdPallets.textContent = "";
+      }
+
+      tr.appendChild(tdMakat);
+      tr.appendChild(tdDate);
+      tr.appendChild(tdTime);
+      tr.appendChild(tdWorker);
+      tr.appendChild(tdPka);
+      tr.appendChild(tdQty);
+      tr.appendChild(tdTotalQty);
+      tr.appendChild(tdPallets);
+
+      table.appendChild(tr);
+    });
+  });
+
+  makeColumnsResizable();
+}
+
+// סיכום לפי עובדים
+function fillByWorker(data){
+  const table = document.getElementById("tableByWorker");
   table.innerHTML = "";
 
   const grouped = {};
 
   data.forEach(row => {
-    if(!grouped[row.makat]){
-      grouped[row.makat] = {
+    const worker = row.worker || "ללא שם";
+    if(!grouped[worker]){
+      grouped[worker] = {
+        reports: new Set(),
         pallets: new Set(),
-        units: 0,
-        pkaot: new Set()
+        units: 0
       };
     }
-
-    grouped[row.makat].pallets.add(row.pallet);
-    grouped[row.makat].units += Number(row.qty);
-    grouped[row.makat].pkaot.add(row.pka);
+    const reportKey = `${row.date}|${row.time}|${row.worker}|${row.makat}`;
+    grouped[worker].reports.add(reportKey);
+    grouped[worker].pallets.add(reportKey);
+    grouped[worker].units += Number(row.qty) || 0;
   });
 
-  Object.keys(grouped).forEach(makat => {
-    const g = grouped[makat];
-
-    table.innerHTML += `
-      <tr>
-        <td>${makat}</td>
-        <td>${g.pallets.size}</td>
-        <td>${g.units}</td>
-        <td>${g.pkaot.size}</td>
-      </tr>
+  Object.keys(grouped).forEach(worker => {
+    const g = grouped[worker];
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${worker}</td>
+      <td>${g.reports.size}</td>
+      <td>${g.pallets.size}</td>
+      <td>${g.units}</td>
     `;
+    table.appendChild(tr);
   });
-}// סיכום לפי מחסן
+
+  makeColumnsResizable();
+}
+
+// סיכום לפי מחסן
 function fillByWarehouse(data){
   const table = document.getElementById("tableByWarehouse");
   table.innerHTML = "";
@@ -402,28 +512,31 @@ function fillByWarehouse(data){
       grouped[key] = {
         wh: row.wh,
         subwh: row.subwh,
-        reports: 0,
+        reports: new Set(),
         pallets: new Set(),
         units: 0
       };
     }
 
-    grouped[key].reports++;
-    grouped[key].pallets.add(row.pallet);
-    grouped[key].units += Number(row.qty);
+    const reportKey = `${row.date}|${row.time}|${row.worker}|${row.makat}`;
+    grouped[key].reports.add(reportKey);
+    grouped[key].pallets.add(reportKey);
+    grouped[key].units += Number(row.qty) || 0;
   });
 
   Object.values(grouped).forEach(g => {
-    table.innerHTML += `
-      <tr>
-        <td>${g.wh}</td>
-        <td>${g.subwh}</td>
-        <td>${g.reports}</td>
-        <td>${g.pallets.size}</td>
-        <td>${g.units}</td>
-      </tr>
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${g.wh}</td>
+      <td>${g.subwh}</td>
+      <td>${g.reports.size}</td>
+      <td>${g.pallets.size}</td>
+      <td>${g.units}</td>
     `;
+    table.appendChild(tr);
   });
+
+  makeColumnsResizable();
 }
 
 // דווחים גולמיים
@@ -432,43 +545,22 @@ function fillRawReports(data){
   table.innerHTML = "";
 
   data.forEach(row => {
-    table.innerHTML += `
-      <tr>
-        <td>${row.date}</td>
-        <td>${row.time}</td>
-        <td>${row.worker}</td>
-        <td>${row.makat}</td>
-        <td>${row.pka}</td>
-        <td>${row.qty}</td>
-        <td>${row.pallet}</td>
-        <td>${row.wh}</td>
-        <td>${row.subwh}</td>
-      </tr>
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${row.date}</td>
+      <td>${row.time}</td>
+      <td>${row.worker}</td>
+      <td>${row.makat}</td>
+      <td>${row.pka}</td>
+      <td>${row.qty}</td>
+      <td>${row.pallet || ""}</td>
+      <td>${row.wh}</td>
+      <td>${row.subwh}</td>
     `;
+    table.appendChild(tr);
   });
-}
 
-// חריגות
-function fillAnomalies(data){
-  const table = document.getElementById("tableAnomalies");
-  table.innerHTML = "";
-
-  data.filter(row => row.anomaly).forEach(row => {
-    table.innerHTML += `
-      <tr>
-        <td>${row.date}</td>
-        <td>${row.time}</td>
-        <td>${row.worker}</td>
-        <td>${row.makat}</td>
-        <td>${row.pka}</td>
-        <td>${row.qty}</td>
-        <td>${row.pallet}</td>
-        <td>${row.wh}</td>
-        <td>${row.subwh}</td>
-        <td>${row.anomaly}</td>
-      </tr>
-    `;
-  });
+  makeColumnsResizable();
 }
 
 // גרף דונאט
@@ -479,7 +571,8 @@ function drawPieChart(data){
 
   const counts = {};
   data.forEach(row => {
-    counts[row.makat] = (counts[row.makat] || 0) + Number(row.qty);
+    const makat = row.makat || "לא מוגדר";
+    counts[makat] = (counts[makat] || 0) + Number(row.qty);
   });
 
   if(makatChart) makatChart.destroy();
@@ -505,9 +598,38 @@ function drawPieChart(data){
   });
 }
 
+// גרירת רוחב עמודות
+function makeColumnsResizable(){
+  const tables = document.querySelectorAll("table");
+  tables.forEach(table => {
+    const ths = table.querySelectorAll("th.resizable");
+    ths.forEach(th => {
+      th.onmousedown = function(e){
+        if(e.offsetX > 10) return; // רק בקצה
+        const startX = e.pageX;
+        const startWidth = th.offsetWidth;
+
+        function onMouseMove(ev){
+          const newWidth = startWidth + (startX - ev.pageX);
+          if(newWidth > 40){
+            th.style.width = newWidth + "px";
+          }
+        }
+
+        function onMouseUp(){
+          document.removeEventListener("mousemove", onMouseMove);
+          document.removeEventListener("mouseup", onMouseUp);
+        }
+
+        document.addEventListener("mousemove", onMouseMove);
+        document.addEventListener("mouseup", onMouseUp);
+      };
+    });
+  });
+}
+
 // רענון
 document.getElementById("refreshBtn").addEventListener("click", applyFilters);
-
 </script>
 </body>
 </html>
