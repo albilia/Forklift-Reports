@@ -11,8 +11,7 @@
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
-      background: url('background.jpg') no-repeat center center fixed;
-      background-size: cover;
+      background-color: #111; /* ← רקע נקי במקום טפט */
       color: #f5f5f5;
       text-align: center;
       margin: 0;
@@ -75,9 +74,7 @@
       color: #ffeb3b;
     }
 
-    .pallet-items {
-      margin-top: 4px;
-    }
+    .pallet-items { margin-top: 4px; }
 
     .pallet-item {
       border-top: 1px solid rgba(255,255,255,0.1);
@@ -124,9 +121,7 @@
       color: white;
     }
 
-    #palletsContainer {
-      margin-top: 10px;
-    }
+    #palletsContainer { margin-top: 10px; }
 
     #globalTotalBox {
       background: rgba(0,0,0,0.85);
@@ -143,11 +138,10 @@
 </head>
 
 <body>
-  <h2>דיווח תוויות</h2>
+  <h2>סרוק תווית</h2>
 
   <div id="warehouseInfo"></div>
 
-  <!-- בחירת תת־מחסן (רק למחסן תוצר גמר) -->
   <div id="subSelectBox">
     <select id="subWarehouseSelect" onchange="selectSubWarehouse()">
       <option value="">בחר תת־מחסן</option>
@@ -225,7 +219,6 @@
 
   if (category === "raw") {
     main = "מחסן חומרי גלם";
-    finished = "";
     warehouseInfoDiv.innerText = main;
     processAllBtn.style.display = "block";
   }
