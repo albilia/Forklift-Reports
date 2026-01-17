@@ -63,7 +63,6 @@
       background: linear-gradient(135deg, #6a1b9a, #ab47bc);
     }
 
-    /* כפתור מנהל — זהב עם אייקון 🛡️ משני הצדדים */
     .btn-admin {
       background: linear-gradient(135deg, #D4AF37, #C9A227);
       color: #fff;
@@ -95,7 +94,10 @@
 <body>
   <div class="app-container">
 
-    <div class="title">מערכת דיווח משטחים</div>
+    <!-- ⭐ תיבת ברכה ⭐ -->
+    <div id="greetingBox" style="text-align:center; margin-bottom:20px;"></div>
+
+    <div class="title">מערכת Nis Reporter</div>
 
     <button class="menu-btn btn-raw" onclick="goToReport('raw')">
       מחסן חומרי גלם
@@ -109,7 +111,6 @@
       היסטוריית דיווחים
     </button>
 
-    <!-- כפתור דשבורד מנהל — זהב עם אייקון 🛡️ משני הצדדים -->
     <button class="menu-btn btn-admin" onclick="goToAdmin()">
       🛡️ דשבורד מנהל 🛡️
     </button>
@@ -121,6 +122,29 @@
   </div>
 
   <script>
+    // ⭐ ברכה דינמית עם תמונה רק לניסים ⭐
+    const name = localStorage.getItem("workerName") || "";
+    const phone = localStorage.getItem("workerPhone") || "";
+
+    let html = "";
+
+    if (phone === "0542288494") {
+      html += `
+        <img src="https://github.com/albilia/Forklift-Reports/blob/main/me.jpg?raw=1"
+             style="width:70px;height:70px;border-radius:50%;object-fit:cover;margin-bottom:10px;">
+        <div style="font-size:22px;font-weight:700;color:#333;">שלום ${name} 👋</div>
+        <div style="font-size:16px;color:#555;">המשך משמרת נעימה</div>
+      `;
+    } else {
+      html += `
+        <div style="font-size:22px;font-weight:700;color:#333;">שלום ${name} 👋</div>
+        <div style="font-size:16px;color:#555;">משמרת נעימה</div>
+      `;
+    }
+
+    document.getElementById("greetingBox").innerHTML = html;
+
+
     function goToReport(category) {
       const phone = localStorage.getItem("workerPhone");
       const name = localStorage.getItem("workerName");
