@@ -43,7 +43,6 @@
 
     #chartsSection { margin-top:40px; padding:20px; background:#17212b; border-radius:10px; border:1px solid #263445; }
 
-    /* סיכום טקסטואלי לפי מק"ט מעל הטבלה */
     #makatSummaryText {
       font-size:13px;
       color:#cfd8dc;
@@ -53,7 +52,6 @@
       overflow-x:auto;
     }
 
-    /* רמז קטן לגרירת עמודות */
     th.resizable {
       position:relative;
     }
@@ -66,9 +64,18 @@
       height:100%;
       cursor:col-resize;
     }
+
+    /* התאמת גרף למחשב */
+    #chartsSection {
+      display: flex;
+      justify-content: center;
+    }
+
+    #makatPieChart {
+      max-width: 100%;
+    }
   </style>
 </head>
-
 <body>
 
 <header>
@@ -119,7 +126,7 @@
     </div>
     <div class="accordion-content">
       <div class="accordion-inner">
-        <!-- סיכום טקסטואלי לפי מק"ט -->
+
         <div id="makatSummaryText"></div>
 
         <div class="table-wrapper">
@@ -139,6 +146,7 @@
             <tbody id="tableByMakat"></tbody>
           </table>
         </div>
+
       </div>
     </div>
   </div>
@@ -229,8 +237,8 @@
   </section>
 
 </main>
-
 <script>
+
 function goBack() { 
   window.history.back(); 
 }
@@ -304,7 +312,6 @@ async function applyFilters(){
       return;
     }
 
-    // המרת תאריך ישראלי ל־Date
     data.forEach(r => {
       r._dateObj = new Date(r.date.split("/").reverse().join("-"));
     });
@@ -345,7 +352,6 @@ function fillSummary(data){
   let units = 0;
 
   data.forEach(row => {
-    // דווח = תאריך+שעה+עובד+מק"ט
     const reportKey = `${row.date}|${row.time}|${row.worker}|${row.makat}`;
     pallets.add(reportKey);
     workers.add(row.worker);
@@ -357,7 +363,7 @@ function fillSummary(data){
   document.getElementById("totalWorkers").textContent = workers.size;
 }
 
-// סיכום לפי מק"ט (לוגיקה החדשה)
+// סיכום לפי מק"ט
 function fillByMakat(data){
   const table = document.getElementById("tableByMakat");
   const summaryDiv = document.getElementById("makatSummaryText");
@@ -366,7 +372,6 @@ function fillByMakat(data){
 
   if(!data.length) return;
 
-  // קיבוץ לפי מק"ט
   const byMakat = {};
   data.forEach(row => {
     const makat = row.makat || "לא מוגדר";
@@ -390,10 +395,8 @@ function fillByMakat(data){
     byMakat[makat].totalQty += Number(row.qty) || 0;
   });
 
-  // מיון מק"טים
   const makats = Object.keys(byMakat).sort();
 
-  // בניית טקסט סיכום מעל הטבלה
   const summaryLines = [];
   makats.forEach(makat => {
     const g = byMakat[makat];
@@ -404,11 +407,9 @@ function fillByMakat(data){
   });
   summaryDiv.innerHTML = summaryLines.join("<br>");
 
-  // בניית הטבלה: שורה ראשונה של כל מק"ט עם סיכומים, השאר בלי
   makats.forEach(makat => {
     const g = byMakat[makat];
 
-    // מיון השורות בתוך מק"ט לפי תאריך+שעה
     g.rows.sort((a,b) => {
       const da = a.date.split("/").reverse().join("-") + " " + a.time;
       const db = b.date.split("/").reverse().join("-") + " " + b.time;
@@ -440,9 +441,6 @@ function fillByMakat(data){
         tdMakat.style.fontWeight = "bold";
         tdTotalQty.style.fontWeight = "bold";
         tdPallets.style.fontWeight = "bold";
-      } else {
-        tdTotalQty.textContent = "";
-        tdPallets.textContent = "";
       }
 
       tr.appendChild(tdMakat);
@@ -563,11 +561,13 @@ function fillRawReports(data){
   makeColumnsResizable();
 }
 
-// גרף דונאט
+// גרף דונאט — גרסה חדשה מותאמת מחשב
 let makatChart = null;
 
 function drawPieChart(data){
   const ctx = document.getElementById("makatPieChart").getContext("2d");
+
+  const isDesktop = window.innerWidth > 900;
 
   const counts = {};
   data.forEach(row => {
@@ -591,11 +591,24 @@ function drawPieChart(data){
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
+      layout: {
+        padding: isDesktop ? 20 : 0
+      },
       plugins: {
-        legend: { position: "bottom" }
+        legend: {
+          position: "bottom",
+          labels: {
+            boxWidth: isDesktop ? 12 : 20
+          }
+        }
       }
     }
   });
+
+  const canvas = document.getElementById("makatPieChart");
+  canvas.style.height = isDesktop ? "280px" : "420px";
+  canvas.style.width  = isDesktop ? "280px" : "420px";
 }
 
 // גרירת רוחב עמודות
@@ -605,7 +618,7 @@ function makeColumnsResizable(){
     const ths = table.querySelectorAll("th.resizable");
     ths.forEach(th => {
       th.onmousedown = function(e){
-        if(e.offsetX > 10) return; // רק בקצה
+        if(e.offsetX > 10) return;
         const startX = e.pageX;
         const startWidth = th.offsetWidth;
 
@@ -630,6 +643,7 @@ function makeColumnsResizable(){
 
 // רענון
 document.getElementById("refreshBtn").addEventListener("click", applyFilters);
+
 </script>
 </body>
 </html>
