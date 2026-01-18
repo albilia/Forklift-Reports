@@ -8,16 +8,32 @@
   <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 
   <style>
+    /* רקע מודרני ונעים */
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
-      background-color: #111; /* ← רקע נקי במקום טפט */
-      color: #f5f5f5;
-      text-align: center;
       margin: 0;
+      text-align: center;
+      background: linear-gradient(135deg, #1b1b1b 0%, #2a2a2a 100%);
+      color: #f0f0f0;
     }
 
-    h2 { font-size: 32px; margin-bottom: 10px; text-shadow: 0 0 4px rgba(0,0,0,0.5); }
+    /* אפקט זכוכית */
+    .glass-box {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 15px;
+      margin: 10px auto;
+      width: 90%;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    h2 {
+      font-size: 32px;
+      margin-bottom: 10px;
+      text-shadow: 0 0 4px rgba(0,0,0,0.5);
+    }
 
     #warehouseInfo {
       font-size: 18px;
@@ -50,12 +66,34 @@
       width: fit-content;
     }
 
-    .scan-animation { width: 250px; height: 250px; margin: 0 auto; cursor: pointer; }
-    #preview { max-width: 80%; display: none; margin: 15px auto; border-radius: 12px; border: 3px solid #fff; }
-    #loader { display: none; font-weight: bold; margin-top: 20px; font-size: 24px; color: #ffeb3b; }
+    /* אנימציית סריקה */
+    .scan-animation {
+      width: 220px;
+      height: 220px;
+      margin: 0 auto;
+      cursor: pointer;
+    }
 
+    #preview {
+      max-width: 80%;
+      display: none;
+      margin: 15px auto;
+      border-radius: 12px;
+      border: 3px solid #fff;
+    }
+
+    #loader {
+      display: none;
+      font-weight: bold;
+      margin-top: 20px;
+      font-size: 24px;
+      color: #ffeb3b;
+    }
+
+    /* קופסאות משטחים */
     .pallet-box {
-      background: rgba(0,0,0,0.85);
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(8px);
       border-right: 6px solid #00e5ff;
       padding: 12px;
       margin: 10px auto;
@@ -74,8 +112,6 @@
       color: #ffeb3b;
     }
 
-    .pallet-items { margin-top: 4px; }
-
     .pallet-item {
       border-top: 1px solid rgba(255,255,255,0.1);
       padding-top: 4px;
@@ -93,15 +129,18 @@
       font-size: 13px;
     }
 
+    /* כפתורים ממורכזים */
     button {
       font-size: 20px;
       padding: 12px;
       border-radius: 10px;
-      margin-top: 10px;
+      margin: 10px auto;
       width: 90%;
+      max-width: 350px;
       cursor: pointer;
       border: none;
       font-weight: bold;
+      display: block;
     }
 
     #processAllBtn {
@@ -121,10 +160,9 @@
       color: white;
     }
 
-    #palletsContainer { margin-top: 10px; }
-
     #globalTotalBox {
-      background: rgba(0,0,0,0.85);
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(8px);
       border-left: 6px solid #ffeb3b;
       padding: 12px;
       margin: 10px auto 0;
@@ -134,15 +172,28 @@
       font-size: 18px;
       display: none;
     }
+
+    /* התאמה למחשב */
+    @media (min-width: 900px) {
+      .scan-animation {
+        width: 160px;
+        height: 160px;
+      }
+      button {
+        max-width: 300px;
+        font-size: 18px;
+      }
+    }
   </style>
 </head>
 
 <body>
+
   <h2>סרוק תווית</h2>
 
-  <div id="warehouseInfo"></div>
+  <div id="warehouseInfo" class="glass-box"></div>
 
-  <div id="subSelectBox">
+  <div id="subSelectBox" class="glass-box">
     <select id="subWarehouseSelect" onchange="selectSubWarehouse()">
       <option value="">בחר תת־מחסן</option>
       <option>דנידין</option>
@@ -189,13 +240,14 @@
   <div id="loader">סורק תוויות באמצעות AI...</div>
 
   <div id="palletsContainer"></div>
-  <div id="globalTotalBox"></div>
+  <div id="globalTotalBox" class="glass-box"></div>
 
   <button id="processAllBtn" onclick="sendToAIScan()">שלח לסריקה</button>
   <button id="saveBtn" onclick="saveAll()">שגר דווח</button>
   <button id="backBtn" onclick="goBack()">חזור לדשבורד</button>
 
 <script>
+  /* כל ה־JS שלך — ללא שינוי */
   const API_URL = "https://script.google.com/macros/s/AKfycbwJX4IaxmTmNx0re1ifoEPxgbsh6rAkFfmaehHDkJKW0LViqLtnkiCCg8uzsaA3PTtJEg/exec";
 
   const params = new URLSearchParams(window.location.search);
@@ -444,5 +496,6 @@
     }
   }
 </script>
+
 </body>
 </html>
