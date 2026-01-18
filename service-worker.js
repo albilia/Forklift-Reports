@@ -1,5 +1,5 @@
 // גרסת קאש — מתעדכן רק כשאתה משנה מספר
-const CACHE_VERSION = "nis-v1";
+const CACHE_VERSION = "nis-v2";
 const STATIC_CACHE = CACHE_VERSION + "-static";
 
 // קבצים סטטיים שלא משתנים הרבה
