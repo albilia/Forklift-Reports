@@ -1,28 +1,19 @@
-// גרסה דינמית — מתעדכן אוטומטית
-const CACHE_VERSION = "pallet-app-" + self.registration.scope + Date.now();
+// גרסת קאש — מתעדכן רק כשאתה משנה מספר
+const CACHE_VERSION = "nis-v1";
 const STATIC_CACHE = CACHE_VERSION + "-static";
-const DYNAMIC_CACHE = CACHE_VERSION + "-dynamic";
 
-// קבצים קבועים לשמירה
+// קבצים סטטיים שלא משתנים הרבה
 const STATIC_ASSETS = [
-  "/",
-  "/login.html",
-  "/dashboard.html",
-  "/report.html",
-  "/history.html",
-  "/admin.html",
   "/buttons.css",
   "/background.jpg",
   "/logo.png",
   "/manifest.json",
   "/qr.json",
   "/offline.html",
-
-  // ⭐ האייקון המקומי החדש של Nis
   "/icons/apple-touch-icon.png"
 ];
 
-// התקנה — שמירת קבצים קבועים
+// התקנה — שמירת קבצים סטטיים
 self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(STATIC_CACHE).then(cache => cache.addAll(STATIC_ASSETS))
@@ -36,7 +27,7 @@ self.addEventListener("activate", event => {
     caches.keys().then(keys =>
       Promise.all(
         keys
-          .filter(key => key !== STATIC_CACHE && key !== DYNAMIC_CACHE)
+          .filter(key => key !== STATIC_CACHE)
           .map(key => caches.delete(key))
       )
     )
@@ -48,22 +39,16 @@ self.addEventListener("activate", event => {
 self.addEventListener("fetch", event => {
   const url = event.request.url;
 
-  // ❗ לא לגעת בבקשות ל־Apps Script (API)
+  // לא לגעת ב‑API של Apps Script
   if (url.includes("script.google.com/macros")) {
     return;
   }
 
-  // דפי HTML — Network First
+  // HTML תמיד מהשרת — כדי לקבל עדכונים מיידיים
   if (event.request.mode === "navigate") {
     event.respondWith(
       fetch(event.request)
-        .then(res => {
-          cacheDynamic(event.request, res.clone());
-          return res;
-        })
-        .catch(() =>
-          caches.match(event.request).then(c => c || caches.match("/offline.html"))
-        )
+        .catch(() => caches.match("/offline.html"))
     );
     return;
   }
@@ -75,7 +60,12 @@ self.addEventListener("fetch", event => {
         cached ||
         fetch(event.request)
           .then(res => {
-            cacheDynamic(event.request, res.clone());
+            // שמירה בקאש רק לקבצים סטטיים
+            if (res.status === 200 && res.type === "basic") {
+              caches.open(STATIC_CACHE).then(cache =>
+                cache.put(event.request, res.clone())
+              );
+            }
             return res;
           })
           .catch(() => caches.match("/offline.html"))
@@ -84,13 +74,7 @@ self.addEventListener("fetch", event => {
   );
 });
 
-// שמירה בקאש דינמי
-function cacheDynamic(request, response) {
-  if (!response || response.status !== 200 || response.type !== "basic") return;
-  caches.open(DYNAMIC_CACHE).then(cache => cache.put(request, response));
-}
-
-// ⭐ Background Sync — שליחת דיווחים כשאינטרנט חוזר
+// Background Sync — שליחת דיווחים כשאינטרנט חוזר
 self.addEventListener("sync", event => {
   if (event.tag === "send-pending-reports") {
     event.waitUntil(sendPendingReports());
@@ -107,14 +91,14 @@ async function sendPendingReports() {
         body: JSON.stringify(report.body)
       });
     } catch (e) {
-      console.log("עדיין אין אינטרנט, מנסה שוב מאוחר יותר");
+      console.log("אין אינטרנט — מנסה שוב מאוחר יותר");
       return;
     }
   }
   clearPendingReports();
 }
 
-// שמירת דיווחים אופליין
+// IndexedDB — שמירת דיווחים אופליין
 function readPendingReports() {
   return new Promise(resolve => {
     const req = indexedDB.open("pallet-db", 1);
