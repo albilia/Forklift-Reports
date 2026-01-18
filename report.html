@@ -3,499 +3,313 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>צילום תווית</title>
+  <title>מערכת סריקה וביקורת מלאי - Pro OCR</title>
   <link rel="stylesheet" href="buttons.css">
   <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
   <style>
-    /* רקע מודרני ונעים */
     body {
       font-family: Arial, sans-serif;
-      padding: 20px;
-      margin: 0;
-      text-align: center;
+      padding: 20px; margin: 0; text-align: center;
       background: linear-gradient(135deg, #1b1b1b 0%, #2a2a2a 100%);
       color: #f0f0f0;
     }
-
-    /* אפקט זכוכית */
     .glass-box {
-      background: rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(10px);
-      border-radius: 16px;
-      padding: 15px;
-      margin: 10px auto;
-      width: 90%;
+      background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(10px);
+      border-radius: 16px; padding: 15px; margin: 10px auto; width: 92%;
       border: 1px solid rgba(255, 255, 255, 0.15);
     }
-
-    h2 {
-      font-size: 32px;
-      margin-bottom: 10px;
-      text-shadow: 0 0 4px rgba(0,0,0,0.5);
-    }
-
-    #warehouseInfo {
-      font-size: 18px;
-      margin-bottom: 15px;
-      text-shadow: 0 0 4px rgba(0,0,0,0.5);
-    }
-
-    #subSelectBox {
-      margin: 10px auto;
-      width: 90%;
-      display: none;
-    }
-
-    select {
-      width: 100%;
-      padding: 10px;
-      font-size: 18px;
-      border-radius: 10px;
-    }
-
-    #statusLine {
-      background: rgba(0, 229, 255, 0.25);
-      border: 2px solid #00e5ff;
-      border-radius: 50px;
-      padding: 10px 25px;
-      display: none;
-      margin: 15px auto 20px;
-      font-size: 20px;
-      color: #00e5ff;
-      width: fit-content;
-    }
-
-    /* אנימציית סריקה */
-    .scan-animation {
-      width: 220px;
-      height: 220px;
-      margin: 0 auto;
-      cursor: pointer;
-    }
-
-    #preview {
-      max-width: 80%;
-      display: none;
-      margin: 15px auto;
-      border-radius: 12px;
-      border: 3px solid #fff;
-    }
-
-    #loader {
-      display: none;
-      font-weight: bold;
-      margin-top: 20px;
-      font-size: 24px;
-      color: #ffeb3b;
-    }
-
-    /* קופסאות משטחים */
-    .pallet-box {
-      background: rgba(255,255,255,0.08);
-      backdrop-filter: blur(8px);
+    .image-queue { display: flex; overflow-x: auto; gap: 10px; padding: 10px; margin-bottom: 10px; min-height: 80px; }
+    .queued-img { width: 70px; height: 70px; object-fit: cover; border-radius: 8px; border: 2px solid #00e5ff; flex-shrink: 0; }
+    
+    .scan-animation { width: 160px; height: 160px; margin: 0 auto; cursor: pointer; }
+    
+    /* אזור תצוגה מקדימה (Preview) - כמו בגרסה הישנה */
+    .preview-card {
+      background: rgba(0, 229, 255, 0.1);
       border-right: 6px solid #00e5ff;
-      padding: 12px;
-      margin: 10px auto;
-      border-radius: 10px;
-      width: 90%;
+      padding: 12px; margin: 10px auto; border-radius: 10px;
+      text-align: right; font-size: 15px; line-height: 1.6;
+    }
+
+    /* עיצוב כרטיסיות עריכה */
+    .edit-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-right: 5px solid #ffeb3b;
+      margin: 15px 0; padding: 15px; border-radius: 12px;
       text-align: right;
-      font-size: 14px;
     }
-
-    .pallet-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 6px;
-      font-weight: bold;
-      color: #ffeb3b;
+    .edit-card label { display: block; font-size: 12px; color: #aaa; margin-top: 8px; }
+    .edit-card input {
+      width: 100%; background: rgba(0,0,0,0.3); border: 1px solid #444;
+      color: #fff; padding: 10px; border-radius: 6px; font-size: 16px; box-sizing: border-box;
     }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .btn-del { background: #ff5252; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
 
-    .pallet-item {
-      border-top: 1px solid rgba(255,255,255,0.1);
-      padding-top: 4px;
-      margin-top: 4px;
-    }
-
-    .delete-pallet-btn {
-      background: #ff5252;
-      color: white;
-      border: none;
-      padding: 6px 10px;
-      border-radius: 5px;
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 13px;
-    }
-
-    /* כפתורים ממורכזים */
+    #loader { display: none; font-weight: bold; margin: 20px 0; color: #ffeb3b; font-size: 18px; }
+    
     button {
-      font-size: 20px;
-      padding: 12px;
-      border-radius: 10px;
-      margin: 10px auto;
-      width: 90%;
-      max-width: 350px;
-      cursor: pointer;
-      border: none;
-      font-weight: bold;
-      display: block;
+      font-size: 18px; padding: 12px; border-radius: 10px; margin: 10px auto;
+      width: 90%; max-width: 350px; cursor: pointer; border: none; font-weight: bold; display: block;
     }
-
-    #processAllBtn {
-      background-color: #00c853;
-      color: white;
-      display: none;
+    #processAllBtn { background-color: #00e5ff; color: #000; display: none; }
+    #saveBtn { background-color: #00c853; color: white; display: none; }
+    #addLabelBtn { background-color: #607d8b; color: white; display: none; font-size: 14px; width: fit-content; padding: 8px 20px; }
+    
+    #summaryBox {
+      background: rgba(0, 200, 83, 0.2); border: 1px solid #00c853;
+      padding: 10px; border-radius: 10px; margin: 15px auto; display: none;
     }
-
-    #saveBtn {
-      background-color: #ff6d00;
-      color: white;
-      display: none;
-    }
-
-    #backBtn {
-      background-color: #607d8b;
-      color: white;
-    }
-
-    #globalTotalBox {
-      background: rgba(255,255,255,0.08);
-      backdrop-filter: blur(8px);
-      border-left: 6px solid #ffeb3b;
-      padding: 12px;
-      margin: 10px auto 0;
-      border-radius: 8px;
-      width: 90%;
-      text-align: right;
-      font-size: 18px;
-      display: none;
-    }
-
-    /* התאמה למחשב */
-    @media (min-width: 900px) {
-      .scan-animation {
-        width: 160px;
-        height: 160px;
-      }
-      button {
-        max-width: 300px;
-        font-size: 18px;
-      }
-    }
+    canvas { display: none; }
+    select { width: 100%; padding: 12px; border-radius: 8px; background: #333; color: white; border: 1px solid #555; }
+    h3 { border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; margin-bottom: 15px; color: #00e5ff; }
   </style>
 </head>
 
 <body>
+  <h2 id="pageTitle">סריקת מלאי וביקורת</h2>
+  
+  <div id="warehouseInfo" class="glass-box">טוען נתונים...</div>
 
-  <h2>סרוק תווית</h2>
-
-  <div id="warehouseInfo" class="glass-box"></div>
-
-  <div id="subSelectBox" class="glass-box">
+  <div id="subSelectBox" class="glass-box" style="display:none;">
     <select id="subWarehouseSelect" onchange="selectSubWarehouse()">
       <option value="">בחר תת־מחסן</option>
       <option>דנידין</option>
-      <option>דנידין צד שמאל</option>
-      <option>דנידין צד ימין</option>
-      <option>בצק סוכר מעבר</option>
       <option>בצק סוכר ימין</option>
       <option>בצק סוכר שמאל</option>
-      <option>שדרה מרכזית ימין</option>
-      <option>שדרה מרכזית שמאל</option>
-      <option>שדרה מרכזית מדפים</option>
-      <option>שדרה שמאל צד שמאל</option>
-      <option>שדרה מרכזת מעבר</option>
-      <option>שדרה שמאל תחת הגלריה</option>
-      <option>כניסה ימין</option>
-      <option>כניסה שמאל</option>
+      <option>שדרה מרכזית</option>
       <option>מחסן חדש</option>
-      <option>מחסן חדש שמאל</option>
-      <option>מחסן חדש ימין</option>
-      <option>קלוי קלוף טור</option>
-      <option>קלוי קלוף קטן</option>
-      <option>תריסים</option>
-      <option>קיר ווילטון</option>
-      <option>קיר שרינק</option>
       <option>צרפתי</option>
     </select>
   </div>
 
-  <div id="statusLine">זיהוי אחרון: <span id="labelsCount">0</span> תוויות</div>
+  <div class="image-queue" id="imageQueue"></div>
 
-  <lottie-player
-      src="qr.json"
-      background="transparent"
-      speed="1"
-      loop
-      autoplay
-      class="scan-animation"
-      onclick="triggerCamera();">
-  </lottie-player>
+  <lottie-player id="lottie" src="qr.json" background="transparent" speed="1" loop autoplay class="scan-animation" onclick="triggerCamera();"></lottie-player>
 
-  <input id="cameraInput" type="file" accept="image/*" capture="environment" onchange="handleImage(this)" style="display:none;">
+  <input id="cameraInput" type="file" accept="image/*" capture="environment" onchange="addToQueue(this)" style="display:none;">
+  <canvas id="processingCanvas"></canvas>
+  
+  <div id="loader">מעבד תמונות...</div>
 
-  <img id="preview">
-  <div id="loader">סורק...</div>
+  <div id="previewArea" class="glass-box" style="display:none;">
+    <h3>נתונים שזוהו בסריקה (Preview)</h3>
+    <div id="ocrResultsPreview"></div>
+  </div>
 
-  <div id="palletsContainer"></div>
-  <div id="globalTotalBox" class="glass-box"></div>
+  <div id="reviewArea" class="glass-box" style="display:none;">
+    <h3>עריכה ואישור סופי</h3>
+    <div id="summaryBox"></div>
+    <div id="labelsContainer"></div>
+    <button id="addLabelBtn" onclick="addBlankLabel()">+ הוסף תווית ידנית</button>
+  </div>
 
-  <button id="processAllBtn" onclick="sendToAIScan()">שלח לסריקה</button>
-  <button id="saveBtn" onclick="saveAll()">שגר דווח</button>
-  <button id="backBtn" onclick="goBack()">חזור לדשבורד</button>
+  <button id="processAllBtn" onclick="runBatchOCR()">שלח לסריקה (Batch)</button>
+  <button id="saveBtn" onclick="saveAll()">שגר דווח סופי למערכת</button>
+  <button onclick="window.location.href='dashboard.html?phone='+phone+'&name='+name" style="background: transparent; color: #aaa; text-decoration: underline;">ביטול וחזרה</button>
 
 <script>
-  /* כל ה־JS שלך — ללא שינוי */
   const API_URL = "https://script.google.com/macros/s/AKfycbwJX4IaxmTmNx0re1ifoEPxgbsh6rAkFfmaehHDkJKW0LViqLtnkiCCg8uzsaA3PTtJEg/exec";
-
   const params = new URLSearchParams(window.location.search);
-  const phone = params.get("phone");
-  const name = params.get("name");
-  const category = params.get("category");
+  const phone = params.get("phone"), name = params.get("name"), category = params.get("category");
 
-  let main = "";
-  let finished = "";
-  let pallets = [];
-  let pendingFile = null;
-  let isProcessing = false;
-
-  const warehouseInfoDiv = document.getElementById("warehouseInfo");
-  const subSelectBox = document.getElementById("subSelectBox");
-  const subWarehouseSelect = document.getElementById("subWarehouseSelect");
-  const processAllBtn = document.getElementById("processAllBtn");
-  const saveBtn = document.getElementById("saveBtn");
-  const palletsContainer = document.getElementById("palletsContainer");
-  const globalTotalBox = document.getElementById("globalTotalBox");
+  let main = "", finished = "", imageQueue = [], labels = [], isProcessing = false;
 
   if (category === "raw") {
     main = "מחסן חומרי גלם";
-    warehouseInfoDiv.innerText = main;
-    processAllBtn.style.display = "block";
-  }
-
-  if (category === "finished") {
+    document.getElementById("warehouseInfo").innerText = main;
+  } else {
     main = "מחסן תוצר גמר";
-    warehouseInfoDiv.innerText = main;
-    subSelectBox.style.display = "block";
+    document.getElementById("warehouseInfo").innerText = main;
+    document.getElementById("subSelectBox").style.display = "block";
   }
 
-  function selectSubWarehouse() {
-    finished = subWarehouseSelect.value;
-    if (finished) {
-      warehouseInfoDiv.innerText = main + " | תת־מחסן: " + finished;
-      processAllBtn.style.display = "block";
-    } else {
-      processAllBtn.style.display = "none";
-    }
-  }
+  function selectSubWarehouse() { finished = document.getElementById("subWarehouseSelect").value; }
+  function triggerCamera() { if (!isProcessing) document.getElementById("cameraInput").click(); }
 
-  function goBack() {
-    window.location.href = `dashboard.html?phone=${phone}&name=${name}`;
-  }
-
-  function triggerCamera() {
-    if (isProcessing) return;
-    if (category === "finished" && !finished) {
-      alert("בחר תת־מחסן לפני צילום");
-      return;
-    }
-    document.getElementById("cameraInput").click();
-  }
-
-  function handleImage(input) {
+  function addToQueue(input) {
     const file = input.files[0];
     if (!file) return;
-
-    pendingFile = file;
-
     const reader = new FileReader();
-    reader.onload = e => {
-      const img = document.getElementById("preview");
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.getElementById("processingCanvas");
+        const ctx = canvas.getContext("2d");
+        const maxDim = 1500;
+        let w = img.width, h = img.height;
+        const scale = Math.min(maxDim/w, maxDim/h, 1);
+        canvas.width = w*scale; canvas.height = h*scale;
+        ctx.filter = 'grayscale(100%) contrast(1.5) brightness(1.1)';
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        imageQueue.push(canvas.toDataURL("image/png"));
+        updateQueueUI();
+      };
       img.src = e.target.result;
-      img.style.display = "block";
-
-      document.getElementById("statusLine").style.display = "none";
-      document.getElementById("labelsCount").innerText = "0";
-
-      processAllBtn.style.display = "block";
-      processAllBtn.disabled = false;
     };
     reader.readAsDataURL(file);
+    input.value = "";
   }
 
-  async function sendToAIScan() {
-    if (isProcessing || !pendingFile) return;
+  function updateQueueUI() {
+    const container = document.getElementById("imageQueue");
+    container.innerHTML = imageQueue.map(src => `<img src="${src}" class="queued-img">`).join("");
+    document.getElementById("processAllBtn").style.display = imageQueue.length ? "block" : "none";
+  }
 
+  async function runBatchOCR() {
+    if (isProcessing) return;
     isProcessing = true;
     document.getElementById("loader").style.display = "block";
-    processAllBtn.disabled = true;
-
-    const reader = new FileReader();
-    reader.onload = async e => {
-      await sendToGemini(e.target.result);
-    };
-    reader.readAsDataURL(pendingFile);
-  }
-
-  async function sendToGemini(base64) {
-    try {
-      const res = await fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify({
-          action: "processImage",
-          image: base64,
-          phone: phone
-        })
-      });
-
-      const data = await res.json();
-
-      if (data.error) {
-        alert("שגיאת שרת: " + data.error);
-        return;
-      }
-
-      if (data.reports && data.reports.length > 0) {
-        document.getElementById("statusLine").style.display = "inline-block";
-        document.getElementById("labelsCount").innerText = data.reports.length;
-
-        const items = data.reports.map(r => ({
-          makat: r.makat || "---",
-          pka: (r.pka || "").toString().slice(-3),
-          qty: Number(r.qty) || 0,
-          palletId: r.palletId || "---"
-        }));
-
-        const totalQty = items.reduce((sum, r) => sum + (Number(r.qty) || 0), 0);
-
-        pallets.push({ items, totalQty });
-
-        renderPallets();
-        updateGlobalTotal();
-
-        saveBtn.style.display = "block";
-        processAllBtn.style.display = "block";
-      } else {
-        alert("לא זוהו נתונים בתמונה.");
-      }
-    } catch (e) {
-      alert("שגיאת תקשורת: " + e.message);
-    } finally {
-      isProcessing = false;
-      document.getElementById("loader").style.display = "none";
-      pendingFile = null;
+    document.getElementById("lottie").style.display = "none";
+    
+    const worker = await Tesseract.createWorker('eng+heb');
+    for (let i = 0; i < imageQueue.length; i++) {
+      document.getElementById("loader").innerText = `סורק תמונה ${i+1} מתוך ${imageQueue.length}...`;
+      const { data: { text } } = await worker.recognize(imageQueue[i]);
+      parseText(text);
     }
+    await worker.terminate();
+    
+    imageQueue = [];
+    updateQueueUI();
+    isProcessing = false;
+    document.getElementById("loader").style.display = "none";
+    document.getElementById("previewArea").style.display = "block";
+    document.getElementById("reviewArea").style.display = "block";
+    document.getElementById("addLabelBtn").style.display = "block";
+    document.getElementById("saveBtn").style.display = "block";
+    renderReview();
+    renderPreviewDisplay(); // קריאה לפונקציית התצוגה המקדימה
   }
 
-  function renderPallets() {
-    palletsContainer.innerHTML = "";
+  function parseText(text) {
+    const clean = text.replace(/[|\\/_'"]/g, ' ').replace(/\s+/g, ' ');
+    const makatMatches = clean.match(/\b\d{9}\b/g) || [];
+    const usedNumbers = new Set();
 
-    pallets.forEach((pallet, index) => {
-      const div = document.createElement("div");
-      div.className = "pallet-box";
+    makatMatches.forEach(m => {
+      usedNumbers.add(m);
+      const allNumbers = clean.match(/\b\d+\b/g) || [];
 
-      let itemsHtml = pallet.items.map(item => `
-        <div class="pallet-item">
-          <b>מק"ט:</b> ${item.makat}<br>
-          <b>פק"ע:</b> ${item.pka}<br>
-          <b>כמות:</b> ${item.qty}<br>
-          <b>מספר משטח:</b> ${item.palletId}
-        </div>
-      `).join("");
+      let pka = "";
+      const pkaWithAnchor = clean.match(/(?:pka|פקע|פק"ע)[:\s]*(\d+)/i);
+      if (pkaWithAnchor) {
+        pka = pkaWithAnchor[1].slice(-3);
+        usedNumbers.add(pkaWithAnchor[1]);
+      } else {
+        const pkaCandidate = allNumbers.find(n => n.length >= 5 && n !== m && !usedNumbers.has(n));
+        if (pkaCandidate) { pka = pkaCandidate.slice(-3); usedNumbers.add(pkaCandidate); }
+      }
 
-      div.innerHTML = `
-        <div class="pallet-header">
-          <div>משטח ${index + 1} — סה"כ: ${pallet.totalQty} יח'</div>
-          <button class="delete-pallet-btn" onclick="deletePallet(${index})">מחק משטח</button>
-        </div>
-        <div class="pallet-items">
-          ${itemsHtml}
-        </div>
-      `;
+      let palletId = "";
+      const palletWithAnchor = clean.match(/(?:pallet|משטח|id|no|num|#)[:\s]*(\d{6,10})/i);
+      if (palletWithAnchor) {
+        palletId = palletWithAnchor[1];
+        usedNumbers.add(palletId);
+      } else {
+        const palletCandidate = allNumbers.find(n => n.length >= 6 && n.length <= 10 && !usedNumbers.has(n));
+        if (palletCandidate) { palletId = palletCandidate; usedNumbers.add(palletId); }
+      }
 
-      palletsContainer.appendChild(div);
+      let qty = "";
+      const qtyWithAnchor = clean.match(/(?:qty|כמות|units|יח|יחידות)[:\s]*(\d{1,4})\b/i);
+      if (qtyWithAnchor && Number(qtyWithAnchor[1]) <= 5000) {
+        qty = qtyWithAnchor[1];
+        usedNumbers.add(qty);
+      } else {
+        const qtyCandidate = allNumbers.find(n => {
+          const val = Number(n);
+          return val >= 1 && val <= 5000 && !usedNumbers.has(n) && n.length <= 4;
+        });
+        qty = qtyCandidate || "";
+        if (qty) usedNumbers.add(qty);
+      }
+
+      labels.push({ makat: m, pka: pka || "---", qty: qty || "0", palletId: palletId || "---" });
     });
   }
 
-  function deletePallet(index) {
-    pallets.splice(index, 1);
-    renderPallets();
-    updateGlobalTotal();
-
-    if (pallets.length === 0) {
-      saveBtn.style.display = "none";
-    }
+  // פונקציה המציגה את התוצאות הגולמיות בצורה קריאה
+  function renderPreviewDisplay() {
+    const container = document.getElementById("ocrResultsPreview");
+    container.innerHTML = "";
+    labels.forEach((item, index) => {
+      const div = document.createElement("div");
+      div.className = "preview-card";
+      div.innerHTML = `
+        <strong>תווית ${index + 1}:</strong><br>
+        מק"ט: ${item.makat} | פק"ע: ${item.pka} | כמות: ${item.qty} | משטח: ${item.palletId}
+      `;
+      container.appendChild(div);
+    });
   }
 
-  function updateGlobalTotal() {
-    if (!pallets.length) {
-      globalTotalBox.style.display = "none";
-      globalTotalBox.innerHTML = "";
-      return;
-    }
+  function addBlankLabel() {
+    labels.push({ makat: "", pka: "", qty: "", palletId: "" });
+    renderReview();
+    renderPreviewDisplay();
+  }
 
-    const totalPallets = pallets.length;
-    const totalUnits = pallets.reduce((sum, p) => sum + (p.totalQty || 0), 0);
+  function renderReview() {
+    const container = document.getElementById("labelsContainer");
+    container.innerHTML = "";
+    labels.forEach((item, index) => {
+      const card = document.createElement("div");
+      card.className = "edit-card";
+      card.innerHTML = `
+        <div class="card-header">
+          <strong>עריכת תווית ${index + 1}</strong>
+          <button class="btn-del" onclick="deleteLabel(${index})">מחיקה</button>
+        </div>
+        <label>מק"ט (9 ספרות)</label>
+        <input type="number" value="${item.makat}" oninput="updateVal(${index}, 'makat', this.value)">
+        <label>פק"ע (סיומת 3 ספרות)</label>
+        <input type="number" value="${item.pka}" oninput="updateVal(${index}, 'pka', this.value)">
+        <label>כמות (1-5000)</label>
+        <input type="number" value="${item.qty}" oninput="updateVal(${index}, 'qty', this.value); updateSummary();">
+        <label>מספר משטח</label>
+        <input type="text" value="${item.palletId}" oninput="updateVal(${index}, 'palletId', this.value)">
+      `;
+      container.appendChild(card);
+    });
+    updateSummary();
+  }
 
-    globalTotalBox.style.display = "block";
-    globalTotalBox.innerHTML = `
-      <b>סה"כ משטחים:</b> ${totalPallets} | <b>סה"כ יחידות:</b> ${totalUnits}
-    `;
+  function updateVal(index, field, val) { 
+    labels[index][field] = val; 
+    renderPreviewDisplay(); // מעדכן גם את התצוגה המקדימה כשעורכים
+  }
+
+  function deleteLabel(index) {
+    labels.splice(index, 1);
+    renderReview();
+    renderPreviewDisplay();
+  }
+
+  function updateSummary() {
+    const totalQty = labels.reduce((sum, item) => sum + (Number(item.qty) || 0), 0);
+    const sBox = document.getElementById("summaryBox");
+    sBox.style.display = labels.length ? "block" : "none";
+    sBox.innerHTML = `סה"כ יחידות: <strong>${totalQty}</strong> | תוויות: <strong>${labels.length}</strong>`;
   }
 
   async function saveAll() {
-    if (!pallets.length) {
-      alert("אין משטחים לשמירה");
-      return;
-    }
-
-    document.getElementById("loader").innerText = "שומר...";
+    if (category === "finished" && !finished) { alert("חובה לבחור תת-מחסן!"); return; }
+    if (!labels.length) { alert("אין נתונים לשמירה"); return; }
     document.getElementById("loader").style.display = "block";
-
-    const reports = [];
-    pallets.forEach(pallet => {
-      pallet.items.forEach((item, idx) => {
-        reports.push({
-          makat: item.makat,
-          pka: item.pka,
-          qty: item.qty,
-          palletId: item.palletId,
-          totalForPallet: (idx === pallet.items.length - 1) ? pallet.totalQty : ""
-        });
-      });
-    });
-
+    document.getElementById("loader").innerText = "שומר בדאטה-בייס...";
+    const reports = labels.map(l => ({ makat: l.makat, pka: l.pka, qty: Number(l.qty), palletId: l.palletId }));
     try {
-      const res = await fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify({
-          action: "saveReport",
-          phone,
-          name,
-          main,
-          finished,
-          reports
-        })
-      });
-
+      const res = await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "saveReport", phone, name, main, finished, reports }) });
       const data = await res.json();
-
-      if (data.success) {
-        alert("הדיווח נשלח בהצלחה 🎉");
-        goBack();
-      } else {
-        alert("שגיאה בשמירה: " + data.error);
-      }
-    } catch (e) {
-      alert("שגיאה בחיבור");
-    } finally {
-      document.getElementById("loader").style.display = "none";
-      document.getElementById("loader").innerText = "סורק תוויות באמצעות AI...";
-    }
+      if (data.success) { alert("הדווח נשמר בהצלחה!"); window.location.href = `dashboard.html?phone=${phone}&name=${name}`; }
+      else { alert("שגיאה מהשרת: " + data.error); }
+    } catch (e) { alert("שגיאת תקשורת"); }
+    finally { document.getElementById("loader").style.display = "none"; }
   }
 </script>
-
 </body>
 </html>
