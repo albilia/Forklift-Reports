@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>סריקת מלאי וביקורת - OCR מקומי</title>
+
+  <!-- לוטי -->
+  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+
+  <!-- Tesseract.js -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px; margin: 0; text-align: center;
+      background: linear-gradient(135deg, #1b1b1b 0%, #2a2a2a 100%);
+      color: #f0f0f0;
+    }
+
+    .glass-box {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 15px;
+      margin: 10px auto;
+      width: 92%;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .image-queue {
+      display: flex;
+      overflow-x: auto;
+      gap: 10px;
+      padding: 10px;
+      margin-bottom: 10px;
+      min-height: 80px;
+    }
+
+    .queued-img {
+      width: 70px;
+      height: 70px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 2px solid #00e5ff;
+      flex-shrink: 0;
+    }
+
+    .scan-animation {
+      width: 160px;
+      height: 160px;
+      margin: 0 auto;
+      cursor: pointer;
+    }
+
+    .preview-card {
+      background: rgba(0, 229, 255, 0.1);
+      border-right: 6px solid #00e5ff;
+      padding: 12px;
+      margin: 10px auto;
+      border-radius: 10px;
+      text-align: right;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .edit-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-right: 5px solid #ffeb3b;
+      margin: 15px 0;
+      padding: 15px;
+      border-radius: 12px;
+      text-align: right;
+    }
+
+    .edit-card label {
+      display: block;
+      font-size: 12px;
+      color: #aaa;
+      margin-top: 8px;
+    }
+
+    .edit-card input {
+      width: 100%;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid #444;
+      color: #fff;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .btn-del {
+      background: #ff5252;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    #loader {
+      display: none;
+      font-weight: bold;
+      margin: 20px 0;
+      color: #ffeb3b;
+      font-size: 18px;
+    }
+
+    button {
+      font-size: 18px;
+      padding: 12px;
+      border-radius: 10px;
+      margin: 10px auto;
+      width: 90%;
+      max-width: 350px;
+      cursor: pointer;
+      border: none;
+      font-weight: bold;
+      display: block;
+    }
+
+    #processAllBtn {
+      background-color: #00e5ff;
+      color: #000;
+      display: none;
+    }
+
+    #saveBtn {
+      background-color: #00c853;
+      color: white;
+      display: none;
+    }
+
+    #addLabelBtn {
+      background-color: #607d8b;
+      color: white;
+      display: none;
+      font-size: 14px;
+      width: fit-content;
+      padding: 8px 20px;
+    }
+
+    #summaryBox {
+      background: rgba(0, 200, 83, 0.2);
+      border: 1px solid #00c853;
+      padding: 10px;
+      border-radius: 10px;
+      margin: 15px auto;
+      display: none;
+    }
+
+    canvas {
+      display: none;
+    }
+
+    select {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      background: #333;
+      color: white;
+      border: 1px solid #555;
+    }
+
+    h3 {
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 5px;
+      margin-bottom: 15px;
+      color: #00e5ff;
+    }
+  </style>
+</head>
+
+<body>
+  <h2 id="pageTitle">סריקת מלאי וביקורת</h2>
+
+  <div id="warehouseInfo" class="glass-box">טוען נתונים...</div>
+
+  <div id="subSelectBox" class="glass-box" style="display:none;">
+    <select id="subWarehouseSelect" onchange="selectSubWarehouse()">
+      <option value="">בחר תת־מחסן</option>
+      <option>דנידין</option>
+      <option>בצק סוכר ימין</option>
+      <option>בצק סוכר שמאל</option>
+      <option>שדרה מרכזית</option>
+      <option>מחסן חדש</option>
+      <option>צרפתי</option>
+    </select>
+  </div>
+
+  <div class="image-queue" id="imageQueue"></div>
+
+  <lottie-player
+      id="lottie"
+      src="qr.json"
+      background="transparent"
+      speed="1"
+      loop
+      autoplay
+      class="scan-animation"
+      onclick="triggerCamera();">
+  </lottie-player>
+
+  <input id="cameraInput" type="file" accept="image/*" capture="environment" onchange="addToQueue(this)" style="display:none;">
+
+  <canvas id="processingCanvas"></canvas>
+
+  <div id="loader">מעבד תמונות...</div>
+
+  <div id="previewArea" class="glass-box" style="display:none;">
+    <h3>נתונים שזוהו בסריקה (Preview)</h3>
+    <div id="ocrResultsPreview"></div>
+  </div>
+
+  <div id="reviewArea" class="glass-box" style="display:none;">
+    <h3>עריכה ואישור סופי</h3>
+    <div id="summaryBox"></div>
+    <div id="labelsContainer"></div>
+    <button id="addLabelBtn" onclick="addBlankLabel()">+ הוסף תווית ידנית</button>
+  </div>
+
+  <button id="processAllBtn" onclick="runBatchOCR()">שלח לסריקה</button>
+  <button id="saveBtn" onclick="saveAll()">שגר דווח סופי למערכת</button>
+
+  <button onclick="window.location.href='dashboard.html?phone='+phone+'&name='+name"
+          style="background: transparent; color: #aaa; text-decoration: underline;">
+    ביטול וחזרה
+  </button>
+
+  <script>
+
+    /* ============================
+       חלק 2‑A — משתנים + טעינת OCR
+       ============================ */
+
+    const API_URL = "https://script.google.com/macros/s/AKfycbwJX4IaxmTmNx0re1ifoEPxgbsh6rAkFfmaehHDkJKW0LViqLtnkiCCg8uzsaA3PTtJEg/exec";
+
+    const params = new URLSearchParams(window.location.search);
+    const phone = params.get("phone");
+    const name = params.get("name");
+    const category = params.get("category");
+
+    let main = "";
+    let finished = "";
+    let imageQueue = [];
+    let labels = [];
+    let isProcessing = false;
+
+    if (category === "raw") {
+      main = "מחסן חומרי גלם";
+      document.getElementById("warehouseInfo").innerText = main;
+    } else {
+      main = "מחסן תוצר גמר";
+      document.getElementById("warehouseInfo").innerText = main;
+      document.getElementById("subSelectBox").style.display = "block";
+    }
+
+    function selectSubWarehouse() {
+      finished = document.getElementById("subWarehouseSelect").value;
+    }
+
+    async function loadOCR() {
+      const worker = await Tesseract.createWorker("heb+eng");
+      return worker;
+    }
+
+    /* ============================
+       חלק 2‑B — מצלמה + תור + עיבוד תמונה
+       ============================ */
+
+    function triggerCamera() {
+      if (!isProcessing) {
+        document.getElementById("cameraInput").click();
+      }
+    }
+
+    function addToQueue(input) {
+      const file = input.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+
+          const canvas = document.getElementById("processingCanvas");
+          const ctx = canvas.getContext("2d");
+
+          const maxDim = 1500;
+          let w = img.width, h = img.height;
+          const scale = Math.min(maxDim / w, maxDim / h, 1);
+
+          canvas.width = Math.max(w * scale, 300);
+          canvas.height = Math.max(h * scale, 300);
+
+          /* ⭐ שיפור תמונה לפני OCR */
+          ctx.filter = "grayscale(100%) contrast(180%) brightness(110%)";
+
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+          ctx.filter = "none";
+
+          const dataURL = canvas.toDataURL("image/png");
+          imageQueue.push(dataURL);
+
+          updateQueueUI();
+        };
+
+        img.src = e.target.result;
+      };
+
+      reader.readAsDataURL(file);
+      input.value = "";
+    }
+
+    function updateQueueUI() {
+      const container = document.getElementById("imageQueue");
+      container.innerHTML = imageQueue
+        .map(src => `<img src="${src}" class="queued-img">`)
+        .join("");
+
+      document.getElementById("processAllBtn").style.display =
+        imageQueue.length ? "block" : "none";
+    }
+
+    /* ============================
+       חלק 2‑C — OCR + Preview
+       ============================ */
+
+    async function runBatchOCR() {
+      if (isProcessing) return;
+      isProcessing = true;
+
+      document.getElementById("loader").style.display = "block";
+      document.getElementById("lottie").style.display = "none";
+
+      const worker = await loadOCR();
+
+      for (let i = 0; i < imageQueue.length; i++) {
+        const { data: { text } } = await worker.recognize(imageQueue[i]);
+        parseText(text);
+      }
+
+      await worker.terminate();
+
+      imageQueue = [];
+      updateQueueUI();
+
+      isProcessing = false;
+      document.getElementById("loader").style.display = "none";
+
+      document.getElementById("previewArea").style.display = "block";
+      document.getElementById("reviewArea").style.display = "block";
+      document.getElementById("addLabelBtn").style.display = "block";
+      document.getElementById("saveBtn").style.display = "block";
+
+      renderPreviewDisplay();
+      renderReview();
+    }
+
+    /* ============================
+       פענוח טקסט — הגרסה שסיכמנו עליה
+       ============================ */
+
+    function parseText(text) {
+
+      const clean = text
+        .replace(/[|\\/_'"]/g, " ")
+        .replace(/\s+/g, " ");
+
+      const makatMatch = clean.match(/\b\d{9}\b/);
+      const makat = makatMatch ? makatMatch[0] : "";
+
+      const longNum = clean.match(/\d{5,}/);
+      const pka = longNum ? longNum[0].slice(-3) : "";
+
+      const qtyMatch = clean.match(/כמות[:\s]*(\d{1,4})/);
+      const qty = qtyMatch ? qtyMatch[1] : "";
+
+      if (makat || pka || qty) {
+        labels.push({
+          makat: makat || "",
+          pka: pka || "",
+          qty: qty || "",
+          palletId: ""
+        });
+      }
+    }
+
+    function renderPreviewDisplay() {
+      const container = document.getElementById("ocrResultsPreview");
+      container.innerHTML = "";
+
+      labels.forEach((item, index) => {
+        const div = document.createElement("div");
+        div.className = "preview-card";
+        div.innerHTML = `
+          <strong>תווית ${index + 1}:</strong><br>
+          מק"ט: ${item.makat} | פק"ע: ${item.pka} | כמות: ${item.qty} | משטח: ${item.palletId}
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    /* ============================
+       חלק 2‑D — Review + שמירה
+       ============================ */
+
+    function addBlankLabel() {
+      labels.push({ makat: "", pka: "", qty: "", palletId: "" });
+      renderReview();
+      renderPreviewDisplay();
+    }
+
+    function renderReview() {
+      const container = document.getElementById("labelsContainer");
+      container.innerHTML = "";
+
+      labels.forEach((item, index) => {
+        const card = document.createElement("div");
+        card.className = "edit-card";
+
+        card.innerHTML = `
+          <div class="card-header">
+            <strong>עריכת תווית ${index + 1}</strong>
+            <button class="btn-del" onclick="deleteLabel(${index})">מחיקה</button>
+          </div>
+
+          <label>מק"ט (9 ספרות)</label>
+          <input type="number" value="${item.makat || ''}" 
+                 oninput="updateVal(${index}, 'makat', this.value)">
+
+          <label>פק"ע (3 ספרות אחרונות)</label>
+          <input type="number" value="${item.pka || ''}" 
+                 oninput="updateVal(${index}, 'pka', this.value)">
+
+          <label>כמות</label>
+          <input type="number" value="${item.qty || ''}" 
+                 oninput="updateVal(${index}, 'qty', this.value); updateSummary();">
+
+          <label>מספר משטח</label>
+          <input type="text" value="${item.palletId || ''}" 
+                 oninput="updateVal(${index}, 'palletId', this.value)">
+        `;
+
+        container.appendChild(card);
+      });
+
+      updateSummary();
+    }
+
+    function updateVal(index, field, val) {
+      labels[index][field] = val;
+      renderPreviewDisplay();
+    }
+
+    function deleteLabel(index) {
+      labels.splice(index, 1);
+      renderReview();
+      renderPreviewDisplay();
+    }
+
+    function updateSummary() {
+      const totalQty = labels.reduce((sum, item) => sum + (Number(item.qty) || 0), 0);
+      const sBox = document.getElementById("summaryBox");
+
+      sBox.style.display = labels.length ? "block" : "none";
+      sBox.innerHTML = `סה"כ יחידות: <strong>${totalQty}</strong> | תוויות: <strong>${labels.length}</strong>`;
+    }
+
+    async function saveAll() {
+
+      if (category === "finished" && !finished) {
+        alert("חובה לבחור תת-מחסן!");
+        return;
+      }
+
+      if (!labels.length) {
+        alert("אין נתונים לשמירה");
+        return;
+      }
+
+      document.getElementById("loader").style.display = "block";
+      document.getElementById("loader").innerText = "שומר בדאטה-בייס...";
+
+      const reports = labels.map(l => ({
+        makat: l.makat,
+        pka: l.pka,
+        qty: Number(l.qty),
+        palletId: l.palletId
+      }));
+
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            action: "saveReport",
+            phone,
+            name,
+            main,
+            finished,
+            reports
+          })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          alert("הדווח נשמר בהצלחה!");
+          window.location.href = `dashboard.html?phone=${phone}&name=${name}`;
+        } else {
+          alert("שגיאה מהשרת: " + data.error);
+        }
+      } catch (e) {
+        alert("שגיאת תקשורת");
+      } finally {
+        document.getElementById("loader").style.display = "none";
+      }
+    }
+
+  </script>
+</body>
+</html>
