@@ -5,10 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>סריקת מלאי וביקורת - OCR מקומי</title>
 
-  <!-- לוטי -->
   <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 
-  <!-- Tesseract.js -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
   <style>
@@ -219,7 +217,7 @@
   <div id="loader">מעבד תמונות...</div>
 
   <div id="previewArea" class="glass-box" style="display:none;">
-    <h3>נתונים שזוהו בסריקה (Preview)</h3>
+    <h3>נתונים שזוהו בסריקה </h3>
     <div id="ocrResultsPreview"></div>
   </div>
 
@@ -234,15 +232,12 @@
   <button id="saveBtn" onclick="saveAll()">שגר דווח סופי למערכת</button>
 
   <button onclick="window.location.href='dashboard.html?phone='+phone+'&name='+name"
-          style="background: transparent; color: #aaa; text-decoration: underline;">
+          style="background: transparent;
+          color: #aaa; text-decoration: underline;">
     ביטול וחזרה
   </button>
 
   <script>
-
-    /* ============================
-       חלק 2‑A — משתנים + טעינת OCR
-       ============================ */
 
     const API_URL = "https://script.google.com/macros/s/AKfycbwJX4IaxmTmNx0re1ifoEPxgbsh6rAkFfmaehHDkJKW0LViqLtnkiCCg8uzsaA3PTtJEg/exec";
 
@@ -275,10 +270,6 @@
       return worker;
     }
 
-    /* ============================
-       חלק 2‑B — מצלמה + תור + עיבוד תמונה
-       ============================ */
-
     function triggerCamera() {
       if (!isProcessing) {
         document.getElementById("cameraInput").click();
@@ -293,7 +284,6 @@
       reader.onload = (e) => {
         const img = new Image();
         img.onload = () => {
-
           const canvas = document.getElementById("processingCanvas");
           const ctx = canvas.getContext("2d");
 
@@ -304,9 +294,7 @@
           canvas.width = Math.max(w * scale, 300);
           canvas.height = Math.max(h * scale, 300);
 
-          /* ⭐ שיפור תמונה לפני OCR */
           ctx.filter = "grayscale(100%) contrast(180%) brightness(110%)";
-
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
           ctx.filter = "none";
@@ -316,10 +304,8 @@
 
           updateQueueUI();
         };
-
         img.src = e.target.result;
       };
-
       reader.readAsDataURL(file);
       input.value = "";
     }
@@ -329,14 +315,9 @@
       container.innerHTML = imageQueue
         .map(src => `<img src="${src}" class="queued-img">`)
         .join("");
-
       document.getElementById("processAllBtn").style.display =
         imageQueue.length ? "block" : "none";
     }
-
-    /* ============================
-       חלק 2‑C — OCR + Preview
-       ============================ */
 
     async function runBatchOCR() {
       if (isProcessing) return;
@@ -346,7 +327,6 @@
       document.getElementById("lottie").style.display = "none";
 
       const worker = await loadOCR();
-
       for (let i = 0; i < imageQueue.length; i++) {
         const { data: { text } } = await worker.recognize(imageQueue[i]);
         parseText(text);
@@ -359,7 +339,6 @@
 
       isProcessing = false;
       document.getElementById("loader").style.display = "none";
-
       document.getElementById("previewArea").style.display = "block";
       document.getElementById("reviewArea").style.display = "block";
       document.getElementById("addLabelBtn").style.display = "block";
@@ -369,30 +348,51 @@
       renderReview();
     }
 
-    /* ============================
-       פענוח טקסט — הגרסה שסיכמנו עליה
-       ============================ */
-
     function parseText(text) {
+      console.log("--- תחילת פענוח תווית ---");
+      console.log("טקסט גולמי מה-OCR:", text);
 
-      const clean = text
-        .replace(/[|\\/_'"]/g, " ")
-        .replace(/\s+/g, " ");
+      const clean = text.replace(/[|\\/_'"]/g, " ").replace(/\s+/g, " ");
 
-      const makatMatch = clean.match(/\b\d{9}\b/);
-      const makat = makatMatch ? makatMatch[0] : "";
+      // 1. חילוץ מק"ט - עם תיקון אוטומטי אם חסרה הספרה 1
+      let makatMatch = clean.match(/\d{8,10}/);
+      let makat = makatMatch ? makatMatch[0] : "";
+      if (makat.length === 8 && makat.startsWith("2")) {
+          makat = "1" + makat;
+          console.log("תיקון מק\"ט: הוספה ספרה 1 ->", makat);
+      }
 
-      const longNum = clean.match(/\d{5,}/);
-      const pka = longNum ? longNum[0].slice(-3) : "";
+      // 2. חילוץ פק"ע - חיפוש רצף שמתחיל ב-CON/WAF/SUG
+      const pkaMatch = clean.match(/(?:CON|WAF|SUG|פקע|פק"ע)[\s]?(\d+)/i);
+      let pka = "";
+      if (pkaMatch) {
+          pka = pkaMatch[1].slice(-3);
+      } else {
+          const allNumbers = clean.match(/\d{7,10}/g);
+          if (allNumbers) {
+              const secondNum = allNumbers.find(n => !makat.includes(n));
+              if (secondNum) pka = secondNum.slice(-3);
+          }
+      }
 
-      const qtyMatch = clean.match(/כמות[:\s]*(\d{1,4})/);
-      const qty = qtyMatch ? qtyMatch[1] : "";
+      // 3. חילוץ כמות - תמיכה בחיפוש אחרי תאריך לפי הלוג
+      let qtyMatch = clean.match(/(?:כמות|כמו|מות)[:\s]*(\d{1,4})/);
+      let qty = "";
+      if (qtyMatch) {
+          qty = qtyMatch[1];
+      } else {
+          const backupQty = clean.match(/\d{2}\s\d{2}\s\d{2}\s(\d{3})/);
+          if (backupQty) qty = backupQty[1];
+      }
+
+      console.log("תוצאה: מק\"ט:", makat, "פק\"ע:", pka, "כמות:", qty);
+      console.log("--- סוף פענוח ---");
 
       if (makat || pka || qty) {
         labels.push({
-          makat: makat || "",
-          pka: pka || "",
-          qty: qty || "",
+          makat: makat,
+          pka: pka,
+          qty: qty,
           palletId: ""
         });
       }
@@ -401,21 +401,16 @@
     function renderPreviewDisplay() {
       const container = document.getElementById("ocrResultsPreview");
       container.innerHTML = "";
-
       labels.forEach((item, index) => {
         const div = document.createElement("div");
         div.className = "preview-card";
         div.innerHTML = `
           <strong>תווית ${index + 1}:</strong><br>
-          מק"ט: ${item.makat} | פק"ע: ${item.pka} | כמות: ${item.qty} | משטח: ${item.palletId}
+          מק"ט: ${item.makat} | פק"ע: ${item.pka} | כמות: ${item.qty}
         `;
         container.appendChild(div);
       });
     }
-
-    /* ============================
-       חלק 2‑D — Review + שמירה
-       ============================ */
 
     function addBlankLabel() {
       labels.push({ makat: "", pka: "", qty: "", palletId: "" });
@@ -426,37 +421,25 @@
     function renderReview() {
       const container = document.getElementById("labelsContainer");
       container.innerHTML = "";
-
       labels.forEach((item, index) => {
         const card = document.createElement("div");
         card.className = "edit-card";
-
         card.innerHTML = `
           <div class="card-header">
             <strong>עריכת תווית ${index + 1}</strong>
             <button class="btn-del" onclick="deleteLabel(${index})">מחיקה</button>
           </div>
-
           <label>מק"ט (9 ספרות)</label>
-          <input type="number" value="${item.makat || ''}" 
-                 oninput="updateVal(${index}, 'makat', this.value)">
-
+          <input type="number" value="${item.makat || ''}" oninput="updateVal(${index}, 'makat', this.value)">
           <label>פק"ע (3 ספרות אחרונות)</label>
-          <input type="number" value="${item.pka || ''}" 
-                 oninput="updateVal(${index}, 'pka', this.value)">
-
+          <input type="number" value="${item.pka || ''}" oninput="updateVal(${index}, 'pka', this.value)">
           <label>כמות</label>
-          <input type="number" value="${item.qty || ''}" 
-                 oninput="updateVal(${index}, 'qty', this.value); updateSummary();">
-
+          <input type="number" value="${item.qty || ''}" oninput="updateVal(${index}, 'qty', this.value); updateSummary();">
           <label>מספר משטח</label>
-          <input type="text" value="${item.palletId || ''}" 
-                 oninput="updateVal(${index}, 'palletId', this.value)">
+          <input type="text" value="${item.palletId || ''}" oninput="updateVal(${index}, 'palletId', this.value)">
         `;
-
         container.appendChild(card);
       });
-
       updateSummary();
     }
 
@@ -474,48 +457,33 @@
     function updateSummary() {
       const totalQty = labels.reduce((sum, item) => sum + (Number(item.qty) || 0), 0);
       const sBox = document.getElementById("summaryBox");
-
       sBox.style.display = labels.length ? "block" : "none";
       sBox.innerHTML = `סה"כ יחידות: <strong>${totalQty}</strong> | תוויות: <strong>${labels.length}</strong>`;
     }
 
     async function saveAll() {
-
       if (category === "finished" && !finished) {
         alert("חובה לבחור תת-מחסן!");
         return;
       }
-
       if (!labels.length) {
         alert("אין נתונים לשמירה");
         return;
       }
-
       document.getElementById("loader").style.display = "block";
       document.getElementById("loader").innerText = "שומר בדאטה-בייס...";
-
       const reports = labels.map(l => ({
         makat: l.makat,
         pka: l.pka,
         qty: Number(l.qty),
         palletId: l.palletId
       }));
-
       try {
         const res = await fetch(API_URL, {
           method: "POST",
-          body: JSON.stringify({
-            action: "saveReport",
-            phone,
-            name,
-            main,
-            finished,
-            reports
-          })
+          body: JSON.stringify({ action: "saveReport", phone, name, main, finished, reports })
         });
-
         const data = await res.json();
-
         if (data.success) {
           alert("הדווח נשמר בהצלחה!");
           window.location.href = `dashboard.html?phone=${phone}&name=${name}`;
@@ -528,7 +496,6 @@
         document.getElementById("loader").style.display = "none";
       }
     }
-
   </script>
 </body>
 </html>
