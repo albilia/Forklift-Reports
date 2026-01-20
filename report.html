@@ -6,36 +6,182 @@
   <title>סריקת מלאי וביקורת - OCR מקומי</title>
 
   <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
-  
-  <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@vladmandic/opencv-repro@1.0.0/dist/opencv.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; margin: 0; text-align: center; background: linear-gradient(135deg, #1b1b1b 0%, #2a2a2a 100%); color: #f0f0f0; }
-    .glass-box { background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(10px); border-radius: 16px; padding: 15px; margin: 10px auto; width: 92%; border: 1px solid rgba(255, 255, 255, 0.15); }
-    .image-queue { display: flex; overflow-x: auto; gap: 10px; padding: 10px; margin-bottom: 10px; min-height: 80px; }
-    .queued-img { width: 70px; height: 70px; object-fit: cover; border-radius: 8px; border: 2px solid #00e5ff; flex-shrink: 0; }
-    .scan-animation { width: 160px; height: 160px; margin: 0 auto; cursor: pointer; }
-    .preview-card { background: rgba(0, 229, 255, 0.1); border-right: 6px solid #00e5ff; padding: 12px; margin: 10px auto; border-radius: 10px; text-align: right; font-size: 15px; line-height: 1.6; }
-    .edit-card { background: rgba(255, 255, 255, 0.05); border-right: 5px solid #ffeb3b; margin: 15px 0; padding: 15px; border-radius: 12px; text-align: right; }
-    .edit-card label { display: block; font-size: 12px; color: #aaa; margin-top: 8px; }
-    .edit-card input { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid #444; color: #fff; padding: 10px; border-radius: 6px; font-size: 16px; box-sizing: border-box; }
-    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .btn-del { background: #ff5252; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-    #loader { display: none; font-weight: bold; margin: 20px 0; color: #ffeb3b; font-size: 18px; }
-    button { font-size: 18px; padding: 12px; border-radius: 10px; margin: 10px auto; width: 90%; max-width: 350px; cursor: pointer; border: none; font-weight: bold; display: block; }
-    #processAllBtn { background-color: #00e5ff; color: #000; display: none; }
-    #saveBtn { background-color: #00c853; color: white; display: none; }
-    #addLabelBtn { background-color: #607d8b; color: white; display: none; font-size: 14px; width: fit-content; padding: 8px 20px; }
-    #summaryBox { background: rgba(0, 200, 83, 0.2); border: 1px solid #00c853; padding: 10px; border-radius: 10px; margin: 15px auto; display: none; }
-    canvas { display: none; }
-    select { width: 100%; padding: 12px; border-radius: 8px; background: #333; color: white; border: 1px solid #555; }
-    h3 { border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; margin-bottom: 15px; color: #00e5ff; }
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px; margin: 0; text-align: center;
+      background: linear-gradient(135deg, #1b1b1b 0%, #2a2a2a 100%);
+      color: #f0f0f0;
+    }
+
+    .glass-box {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 15px;
+      margin: 10px auto;
+      width: 92%;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .image-queue {
+      display: flex;
+      overflow-x: auto;
+      gap: 10px;
+      padding: 10px;
+      margin-bottom: 10px;
+      min-height: 80px;
+    }
+
+    .queued-img {
+      width: 70px;
+      height: 70px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 2px solid #00e5ff;
+      flex-shrink: 0;
+    }
+
+    .scan-animation {
+      width: 160px;
+      height: 160px;
+      margin: 0 auto;
+      cursor: pointer;
+    }
+
+    .preview-card {
+      background: rgba(0, 229, 255, 0.1);
+      border-right: 6px solid #00e5ff;
+      padding: 12px;
+      margin: 10px auto;
+      border-radius: 10px;
+      text-align: right;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .edit-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-right: 5px solid #ffeb3b;
+      margin: 15px 0;
+      padding: 15px;
+      border-radius: 12px;
+      text-align: right;
+    }
+
+    .edit-card label {
+      display: block;
+      font-size: 12px;
+      color: #aaa;
+      margin-top: 8px;
+    }
+
+    .edit-card input {
+      width: 100%;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid #444;
+      color: #fff;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .btn-del {
+      background: #ff5252;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    #loader {
+      display: none;
+      font-weight: bold;
+      margin: 20px 0;
+      color: #ffeb3b;
+      font-size: 18px;
+    }
+
+    button {
+      font-size: 18px;
+      padding: 12px;
+      border-radius: 10px;
+      margin: 10px auto;
+      width: 90%;
+      max-width: 350px;
+      cursor: pointer;
+      border: none;
+      font-weight: bold;
+      display: block;
+    }
+
+    #processAllBtn {
+      background-color: #00e5ff;
+      color: #000;
+      display: none;
+    }
+
+    #saveBtn {
+      background-color: #00c853;
+      color: white;
+      display: none;
+    }
+
+    #addLabelBtn {
+      background-color: #607d8b;
+      color: white;
+      display: none;
+      font-size: 14px;
+      width: fit-content;
+      padding: 8px 20px;
+    }
+
+    #summaryBox {
+      background: rgba(0, 200, 83, 0.2);
+      border: 1px solid #00c853;
+      padding: 10px;
+      border-radius: 10px;
+      margin: 15px auto;
+      display: none;
+    }
+
+    canvas {
+      display: none;
+    }
+
+    select {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      background: #333;
+      color: white;
+      border: 1px solid #555;
+    }
+
+    h3 {
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 5px;
+      margin-bottom: 15px;
+      color: #00e5ff;
+    }
   </style>
 </head>
 
 <body>
   <h2 id="pageTitle">סריקת מלאי וביקורת</h2>
+
   <div id="warehouseInfo" class="glass-box">טוען נתונים...</div>
 
   <div id="subSelectBox" class="glass-box" style="display:none;">
@@ -52,13 +198,25 @@
 
   <div class="image-queue" id="imageQueue"></div>
 
-  <lottie-player id="lottie" src="qr.json" background="transparent" speed="1" loop autoplay class="scan-animation" onclick="triggerCamera();"></lottie-player>
+  <lottie-player
+      id="lottie"
+      src="qr.json"
+      background="transparent"
+      speed="1"
+      loop
+      autoplay
+      class="scan-animation"
+      onclick="triggerCamera();">
+  </lottie-player>
+
   <input id="cameraInput" type="file" accept="image/*" capture="environment" onchange="addToQueue(this)" style="display:none;">
+
   <canvas id="processingCanvas"></canvas>
+
   <div id="loader">מעבד תמונות...</div>
 
   <div id="previewArea" class="glass-box" style="display:none;">
-    <h3>נתונים שזוהו בסריקה</h3>
+    <h3>נתונים שזוהו בסריקה (Preview)</h3>
     <div id="ocrResultsPreview"></div>
   </div>
 
@@ -71,160 +229,292 @@
 
   <button id="processAllBtn" onclick="runBatchOCR()">שלח לסריקה</button>
   <button id="saveBtn" onclick="saveAll()">שגר דווח סופי למערכת</button>
-  <button onclick="window.location.href='dashboard.html?phone='+phone+'&name='+name" style="background: transparent; color: #aaa; text-decoration: underline;">ביטול וחזרה</button>
 
-  <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbwJX4IaxmTmNx0re1ifoEPxgbsh6rAkFfmaehHDkJKW0LViqLtnkiCCg8uzsaA3PTtJEg/exec";
-    const params = new URLSearchParams(window.location.search);
-    const phone = params.get("phone");
-    const name = params.get("name");
-    const category = params.get("category");
+  <button onclick="window.location.href='dashboard.html?phone='+phone+'&name='+name"
+          style="background: transparent;
+          color: #aaa; text-decoration: underline;">
+    ביטול וחזרה
+  </button>
 
-    let main = (category === "raw") ? "מחסן חומרי גלם" : "מחסן תוצר גמר";
-    document.getElementById("warehouseInfo").innerText = main;
-    if (category !== "raw") document.getElementById("subSelectBox").style.display = "block";
+<script>
 
-    let finished = "";
-    let imageQueue = [];
-    let labels = [];
-    let isProcessing = false;
+console.log("=== OCR DEBUG SESSION START ===");
 
-    // הפניה ישירה לקבצים בגיטהאב שלך - מבוסס על הכתובות שסיפקת
-    const MODEL_PATHS = {
-      det: 'https://raw.githubusercontent.com/albilia/Forklift-Reports/main/models/ch_PP-OCRv3_det_infer.onnx',
-      cls: 'https://raw.githubusercontent.com/albilia/Forklift-Reports/main/models/ch_ppocr_mobile_v2.0_cls_infer_model.onnx',
-      rec: 'https://raw.githubusercontent.com/albilia/Forklift-Reports/main/models/multilingual_PP-OCRv3_rec_infer.onnx'
-    };
+const API_URL = "https://script.google.com/macros/s/AKfycbwJX4IaxmTmNx0re1ifoEPxgbsh6rAkFfmaehHDkJKW0LViqLtnkiCCg8uzsaA3PTtJEg/exec";
 
-    function selectSubWarehouse() { finished = document.getElementById("subWarehouseSelect").value; }
-    function triggerCamera() { if (!isProcessing) document.getElementById("cameraInput").click(); }
+const params = new URLSearchParams(window.location.search);
+const phone = params.get("phone");
+const name = params.get("name");
+const category = params.get("category");
 
-    function addToQueue(input) {
-      const file = input.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        imageQueue.push(e.target.result);
-        updateQueueUI();
-      };
-      reader.readAsDataURL(file);
-      input.value = "";
-    }
+let main = "";
+let finished = "";
+let imageQueue = [];
+let labels = [];
+let isProcessing = false;
 
-    function updateQueueUI() {
-      const container = document.getElementById("imageQueue");
-      container.innerHTML = imageQueue.map(src => `<img src="${src}" class="queued-img">`).join("");
-      document.getElementById("processAllBtn").style.display = imageQueue.length ? "block" : "none";
-    }
+if (category === "raw") {
+  main = "מחסן חומרי גלם";
+  document.getElementById("warehouseInfo").innerText = main;
+} else {
+  main = "מחסן תוצר גמר";
+  document.getElementById("warehouseInfo").innerText = main;
+  document.getElementById("subSelectBox").style.display = "block";
+}
 
-    async function runBatchOCR() {
-      if (isProcessing) return;
-      isProcessing = true;
-      document.getElementById("loader").style.display = "block";
-      document.getElementById("lottie").style.display = "none";
+function selectSubWarehouse() {
+  finished = document.getElementById("subWarehouseSelect").value;
+}
 
-      try {
-        // טעינת מודל ה-Recognition מהגיטהאב
-        const sessionRec = await ort.InferenceSession.create(MODEL_PATHS.rec);
-        
-        for (let imgData of imageQueue) {
-          const detectedText = await performLocalOCR(imgData, sessionRec); 
-          parseText(detectedText);
-        }
-      } catch (err) {
-        console.error("OCR Error:", err);
-        alert("שגיאה בגישה למודלים בגיטהאב. וודא שביצעת קומיט לקבצים בתיקיית models");
-      }
+function triggerCamera() {
+  if (!isProcessing) {
+    document.getElementById("cameraInput").click();
+  }
+}
 
-      imageQueue = [];
+function addToQueue(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.getElementById("processingCanvas");
+      const ctx = canvas.getContext("2d");
+
+      const maxDim = 1600;
+      let w = img.width, h = img.height;
+      const scale = Math.min(maxDim / w, maxDim / h, 1);
+
+      canvas.width = w * scale;
+      canvas.height = h * scale;
+
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      const dataURL = canvas.toDataURL("image/png");
+      imageQueue.push(dataURL);
       updateQueueUI();
-      isProcessing = false;
-      document.getElementById("loader").style.display = "none";
-      document.getElementById("previewArea").style.display = "block";
-      document.getElementById("reviewArea").style.display = "block";
-      document.getElementById("addLabelBtn").style.display = "block";
-      document.getElementById("saveBtn").style.display = "block";
-      renderPreviewDisplay();
-      renderReview();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+  input.value = "";
+}
+
+function updateQueueUI() {
+  const container = document.getElementById("imageQueue");
+  container.innerHTML = imageQueue
+    .map(src => `<img src="${src}" class="queued-img">`)
+    .join("");
+  document.getElementById("processAllBtn").style.display =
+    imageQueue.length ? "block" : "none";
+}
+
+async function loadOCR() {
+  const worker = await Tesseract.createWorker("heb+eng", 1, {
+    logger: m => console.log("📡 OCR LOG:", m)
+  });
+
+  await worker.setParameters({
+    tessedit_pageseg_mode: Tesseract.PSM.SINGLE_BLOCK,
+    preserve_interword_spaces: "1"
+  });
+
+  return worker;
+}
+
+async function runBatchOCR() {
+  if (isProcessing || !imageQueue.length) return;
+
+  isProcessing = true;
+  document.getElementById("loader").style.display = "block";
+  document.getElementById("lottie").style.display = "none";
+
+  const worker = await loadOCR();
+
+  for (let i = 0; i < imageQueue.length; i++) {
+    const imgData = imageQueue[i];
+    const { data: { text } } = await worker.recognize(imgData);
+
+    // נשמור את הטקסט הגולמי מה-OCR
+    window.lastOCRText = text;
+
+    // ננתח את הטקסט לפי הכללים שלך
+    parseText(text);
+  }
+
+  await worker.terminate();
+
+  imageQueue = [];
+  updateQueueUI();
+
+  isProcessing = false;
+  document.getElementById("loader").style.display = "none";
+  document.getElementById("previewArea").style.display = "block";
+  document.getElementById("reviewArea").style.display = "block";
+  document.getElementById("addLabelBtn").style.display = "block";
+  document.getElementById("saveBtn").style.display = "block";
+
+  renderPreviewDisplay();
+  renderReview();
+}
+
+// ניקוי טקסט בסיסי לפני ניתוח
+function cleanOCRText(text) {
+  return text
+    .replace(/O/g, "0")
+    .replace(/I/g, "1")
+    .replace(/S/g, "5")
+    .replace(/[״”„]/g, '"')
+    .replace(/[׳’]/g, "'")
+    .replace(/[|\\/_'":;=]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+// פונקציה חדשה לניתוח טקסט לפי הכללים שלך
+function parseText(text) {
+  const normalized = cleanOCRText(text);
+
+  // --- מק״ט: 9 ספרות, ואם יש רק 8 נוסיף 1 מקדימה ---
+  let makat = "";
+  const makat9 = normalized.match(/\b\d{9}\b/);
+  const makat8 = normalized.match(/\b\d{8}\b/);
+
+  if (makat9) {
+    makat = makat9[0];
+  } else if (makat8) {
+    makat = "1" + makat8[0];
+  }
+
+  // --- פק״ע: מספר אחרי CON/WAF/SUG, לוקחים 3 ספרות אחרונות ---
+  let pka = "";
+  const pkaMatch = normalized.match(/(?:CON|WAF|SUG)\s*?(\d{5,12})/i);
+  if (pkaMatch && pkaMatch[1]) {
+    const full = pkaMatch[1];
+    pka = full.slice(-3);
+  }
+
+  // --- כמות: נשאיר כמו שהיה עד שנפתור את בעיית ה-OCR ---
+  let qty = "";
+  const qtyWord = normalized.match(/כמות[^0-9]{0,10}(\d{1,4})/);
+  if (qtyWord) {
+    qty = qtyWord[1];
+  } else {
+    const allNums = normalized.match(/\d{1,4}/g) || [];
+    const candidate = allNums.find(n => n.length >= 2 && n.length <= 4);
+    if (candidate) qty = candidate;
+  }
+
+  labels.push({ makat, pka, qty, palletId: "" });
+}
+
+function renderPreviewDisplay() {
+  const container = document.getElementById("ocrResultsPreview");
+  container.innerHTML = "";
+  labels.forEach((item, index) => {
+    const div = document.createElement("div");
+    div.className = "preview-card";
+    div.innerHTML = `
+      <strong>תווית ${index + 1}:</strong><br>
+      מק"ט: ${item.makat || "---"} | פק"ע: ${item.pka || "---"} | כמות: ${item.qty || "---"}
+    `;
+    container.appendChild(div);
+  });
+}
+
+function addBlankLabel() {
+  labels.push({ makat: "", pka: "", qty: "", palletId: "" });
+  renderReview();
+  renderPreviewDisplay();
+}
+
+function renderReview() {
+  const container = document.getElementById("labelsContainer");
+  container.innerHTML = "";
+  labels.forEach((item, index) => {
+    const card = document.createElement("div");
+    card.className = "edit-card";
+    card.innerHTML = `
+      <div class="card-header">
+        <strong>עריכת תווית ${index + 1}</strong>
+        <button class="btn-del" onclick="deleteLabel(${index})">מחיקה</button>
+      </div>
+      <label>מק"ט</label>
+      <input type="text" value="${item.makat || ''}" oninput="updateVal(${index}, 'makat', this.value)">
+      <label>פק"ע</label>
+      <input type="text" value="${item.pka || ''}" oninput="updateVal(${index}, 'pka', this.value)">
+      <label>כמות</label>
+      <input type="number" value="${item.qty || ''}" oninput="updateVal(${index}, 'qty', this.value); updateSummary();">
+      <label>מספר משטח</label>
+      <input type="text" value="${item.palletId || ''}" oninput="updateVal(${index}, 'palletId', this.value)">
+    `;
+    container.appendChild(card);
+  });
+  updateSummary();
+}
+
+function updateVal(index, field, val) {
+  labels[index][field] = val;
+  renderPreviewDisplay();
+}
+
+function deleteLabel(index) {
+  labels.splice(index, 1);
+  renderReview();
+  renderPreviewDisplay();
+}
+
+function updateSummary() {
+  const totalQty = labels.reduce((sum, item) => sum + (Number(item.qty) || 0), 0);
+  const sBox = document.getElementById("summaryBox");
+  sBox.style.display = labels.length ? "block" : "none";
+  sBox.innerHTML = `סה"כ יחידות: <strong>${totalQty}</strong> | תוויות: <strong>${labels.length}</strong>`;
+}
+
+async function saveAll() {
+  if (category === "finished" && !finished) {
+    alert("חובה לבחור תת-מחסן!");
+    return;
+  }
+  if (!labels.length) {
+    alert("אין נתונים לשמירה");
+    return;
+  }
+
+  document.getElementById("loader").style.display = "block";
+  document.getElementById("loader").innerText = "שומר בדאטה-בייס...";
+
+  const reports = labels.map(l => ({
+    makat: l.makat,
+    pka: l.pka,
+    qty: Number(l.qty),
+    palletId: l.palletId
+  }));
+
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "saveReport", phone, name, main, finished, reports })
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert("הדווח נשמר בהצלחה!");
+      window.location.href = `dashboard.html?phone=${phone}&name=${name}`;
+    } else {
+      alert("שגיאה מהשרת: " + data.error);
     }
+  } catch (e) {
+    alert("שגיאת תקשורת");
+  } finally {
+    document.getElementById("loader").style.display = "none";
+  }
+}
 
-    async function performLocalOCR(base64, session) {
-      // כאן יתבצע הניתוח המקומי על המכשיר בעזרת ONNX
-      // לצורך הבדיקה הראשונית המערכת מחזירה דגימה
-      return "מקט 123456789 פקע 456 כמות 100"; 
-    }
+console.log("=== OCR DEBUG SESSION READY ===");
 
-    function parseText(text) {
-      const clean = text.replace(/[|\\/_'"]/g, " ").replace(/\s+/g, " ");
-      let makatMatch = clean.match(/\d{8,10}/);
-      let makat = makatMatch ? makatMatch[0] : "";
-      if (makat.length === 8 && makat.startsWith("2")) makat = "1" + makat;
+</script>
 
-      const pkaMatch = clean.match(/(?:CON|WAF|SUG|פקע|פק"ע)[\s]?(\d+)/i);
-      let pka = pkaMatch ? pkaMatch[1].slice(-3) : "";
-
-      let qtyMatch = clean.match(/(?:כמות|כמו|מות)[:\s]*(\d{1,4})/);
-      let qty = qtyMatch ? qtyMatch[1] : "";
-
-      if (makat || pka || qty) {
-        labels.push({ makat, pka, qty, palletId: "" });
-      }
-    }
-
-    function renderPreviewDisplay() {
-      const container = document.getElementById("ocrResultsPreview");
-      container.innerHTML = labels.map((item, i) => `
-        <div class="preview-card"><strong>תווית ${i + 1}:</strong><br>מק"ט: ${item.makat} | פק"ע: ${item.pka} | כמות: ${item.qty}</div>
-      `).join("");
-    }
-
-    function renderReview() {
-      const container = document.getElementById("labelsContainer");
-      container.innerHTML = labels.map((item, index) => `
-        <div class="edit-card">
-          <div class="card-header"><strong>עריכת תווית ${index + 1}</strong><button class="btn-del" onclick="deleteLabel(${index})">מחיקה</button></div>
-          <label>מק"ט (9 ספרות)</label>
-          <input type="number" value="${item.makat}" oninput="updateVal(${index}, 'makat', this.value)">
-          <label>פק"ע (3 ספרות אחרונות)</label>
-          <input type="number" value="${item.pka}" oninput="updateVal(${index}, 'pka', this.value)">
-          <label>כמות</label>
-          <input type="number" value="${item.qty}" oninput="updateVal(${index}, 'qty', this.value); updateSummary();">
-          <label>מספר משטח</label>
-          <input type="text" value="${item.palletId}" oninput="updateVal(${index}, 'palletId', this.value)">
-        </div>
-      `).join("");
-      updateSummary();
-    }
-
-    function updateVal(i, f, v) { labels[i][f] = v; renderPreviewDisplay(); }
-    function deleteLabel(i) { labels.splice(i, 1); renderReview(); renderPreviewDisplay(); }
-    function addBlankLabel() { labels.push({ makat: "", pka: "", qty: "", palletId: "" }); renderReview(); renderPreviewDisplay(); }
-    
-    function updateSummary() {
-      const total = labels.reduce((s, i) => s + (Number(i.qty) || 0), 0);
-      const sBox = document.getElementById("summaryBox");
-      sBox.style.display = labels.length ? "block" : "none";
-      sBox.innerHTML = `סה"כ יחידות: <strong>${total}</strong> | תוויות: <strong>${labels.length}</strong>`;
-    }
-
-    async function saveAll() {
-      if (category === "finished" && !finished) return alert("חובה לבחור תת-מחסן!");
-      if (!labels.length) return alert("אין נתונים לשמירה");
-      document.getElementById("loader").style.display = "block";
-      document.getElementById("loader").innerText = "שומר בדאטה-בייס...";
-      try {
-        const res = await fetch(API_URL, {
-          method: "POST",
-          body: JSON.stringify({ action: "saveReport", phone, name, main, finished, reports: labels })
-        });
-        const data = await res.json();
-        if (data.success) {
-          alert("הדווח נשמר בהצלחה!");
-          window.location.href = `dashboard.html?phone=${phone}&name=${name}`;
-        }
-      } catch (e) { alert("שגיאת תקשורת"); }
-      finally { document.getElementById("loader").style.display = "none"; }
-    }
-  </script>
 </body>
 </html>
