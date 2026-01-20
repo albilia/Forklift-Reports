@@ -177,9 +177,7 @@
       color: #00e5ff;
     }
   </style>
-</head>
-
-<body>
+</head><body>
   <h2 id="pageTitle">סריקת מלאי וביקורת</h2>
 
   <div id="warehouseInfo" class="glass-box">טוען נתונים...</div>
@@ -234,9 +232,7 @@
           style="background: transparent;
           color: #aaa; text-decoration: underline;">
     ביטול וחזרה
-  </button>
-
-<script>
+  </button><script>
 
 console.log("=== OCR DEBUG SESSION START ===");
 
@@ -337,10 +333,8 @@ async function runBatchOCR() {
     const imgData = imageQueue[i];
     const { data: { text } } = await worker.recognize(imgData);
 
-    // נשמור את הטקסט הגולמי מה-OCR
     window.lastOCRText = text;
 
-    // ננתח את הטקסט לפי הכללים שלך
     parseText(text);
   }
 
@@ -360,7 +354,6 @@ async function runBatchOCR() {
   renderReview();
 }
 
-// ניקוי טקסט בסיסי לפני ניתוח
 function cleanOCRText(text) {
   return text
     .replace(/O/g, "0")
@@ -371,9 +364,9 @@ function cleanOCRText(text) {
     .replace(/[|\\/_'":;=]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
-}
-
-// פונקציה חדשה לניתוח טקסט לפי הכללים שלך
+}//
+// ⭐⭐⭐⭐⭐ parseText — גרסה מתוקנת ⭐⭐⭐⭐⭐
+//
 function parseText(text) {
   const normalized = cleanOCRText(text);
 
@@ -388,28 +381,43 @@ function parseText(text) {
     makat = "1" + makat8[0];
   }
 
-  // --- פק״ע: מספר אחרי CON/WAF/SUG, לוקחים 3 ספרות אחרונות ---
+  // --- פק״ע: קודם מחפשים CON/WAF/SUG ---
   let pka = "";
-  const pkaMatch = normalized.match(/(?:CON|WAF|SUG)\s*?(\d{5,12})/i);
+  let pkaMatch = normalized.match(/(?:CON|WAF|SUG)\s*?(\d{5,12})/i);
+
   if (pkaMatch && pkaMatch[1]) {
-    const full = pkaMatch[1];
-    pka = full.slice(-3);
+    pka = pkaMatch[1].slice(-3);
+  } else {
+    // fallback: אם ה‑OCR לא קרא את האותיות — נחפש מספר ארוך
+    const longNums = normalized.match(/\b\d{7,12}\b/g) || [];
+    if (longNums.length) {
+      pka = longNums[0].slice(-3);
+    }
   }
 
-  // --- כמות: נשאיר כמו שהיה עד שנפתור את בעיית ה-OCR ---
+  // --- כמות ---
   let qty = "";
   const qtyWord = normalized.match(/כמות[^0-9]{0,10}(\d{1,4})/);
+
   if (qtyWord) {
     qty = qtyWord[1];
   } else {
-    const allNums = normalized.match(/\d{1,4}/g) || [];
-    const candidate = allNums.find(n => n.length >= 2 && n.length <= 4);
+    const allNums = normalized.match(/\b\d{2,4}\b/g) || [];
+    const candidate = allNums.find(n => {
+      if (n === makat) return false;
+      if (n === pka) return false;
+      if (/^\d{2}$/.test(n) && normalized.includes(`${n}/`)) return false;
+      return true;
+    });
     if (candidate) qty = candidate;
   }
 
   labels.push({ makat, pka, qty, palletId: "" });
 }
 
+//
+// ⭐⭐⭐⭐⭐ תצוגה מקדימה ⭐⭐⭐⭐⭐
+//
 function renderPreviewDisplay() {
   const container = document.getElementById("ocrResultsPreview");
   container.innerHTML = "";
@@ -424,12 +432,18 @@ function renderPreviewDisplay() {
   });
 }
 
+//
+// ⭐⭐⭐⭐⭐ הוספת תווית ידנית ⭐⭐⭐⭐⭐
+//
 function addBlankLabel() {
   labels.push({ makat: "", pka: "", qty: "", palletId: "" });
   renderReview();
   renderPreviewDisplay();
 }
 
+//
+// ⭐⭐⭐⭐⭐ עריכה ואישור ⭐⭐⭐⭐⭐
+//
 function renderReview() {
   const container = document.getElementById("labelsContainer");
   container.innerHTML = "";
@@ -466,6 +480,9 @@ function deleteLabel(index) {
   renderPreviewDisplay();
 }
 
+//
+// ⭐⭐⭐⭐⭐ סיכום כמויות ⭐⭐⭐⭐⭐
+//
 function updateSummary() {
   const totalQty = labels.reduce((sum, item) => sum + (Number(item.qty) || 0), 0);
   const sBox = document.getElementById("summaryBox");
@@ -473,6 +490,9 @@ function updateSummary() {
   sBox.innerHTML = `סה"כ יחידות: <strong>${totalQty}</strong> | תוויות: <strong>${labels.length}</strong>`;
 }
 
+//
+// ⭐⭐⭐⭐⭐ שמירה לשרת ⭐⭐⭐⭐⭐
+//
 async function saveAll() {
   if (category === "finished" && !finished) {
     alert("חובה לבחור תת-מחסן!");
@@ -496,20 +516,31 @@ async function saveAll() {
   try {
     const res = await fetch(API_URL, {
       method: "POST",
-      body: JSON.stringify({ action: "saveReport", phone, name, main, finished, reports })
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "saveReport",
+        phone,
+        name,
+        main,
+        finished,
+        reports
+      })
     });
+
     const data = await res.json();
+
     if (data.success) {
       alert("הדווח נשמר בהצלחה!");
       window.location.href = `dashboard.html?phone=${phone}&name=${name}`;
     } else {
       alert("שגיאה מהשרת: " + data.error);
     }
+
   } catch (e) {
     alert("שגיאת תקשורת");
-  } finally {
-    document.getElementById("loader").style.display = "none";
   }
+
+  document.getElementById("loader").style.display = "none";
 }
 
 console.log("=== OCR DEBUG SESSION READY ===");
